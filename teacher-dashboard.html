@@ -3,98 +3,268 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Click to Survive — Teacher Dashboard</title>
-<link rel="stylesheet" href="css/dashboard.css">
+<title>Teacher Dashboard · Click to Survive</title>
+<script>try{var t=localStorage.getItem('c2s_dash_theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/dashboard.css?v=20261018d">
 </head>
-<body>
-<div id="dash-loading">Loading your dashboard…</div>
-<div class="wrap">
-  <div class="topbar">
-    <div class="brand">Click to <em style="font-style:normal;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Survive</em> — Teacher Dashboard</div>
-    <div class="tb-right">
-      <span id="teacher-name"></span>
-      <button class="logout-btn" onclick="doTeacherLogout()">Logout</button>
+<body data-app="Click to Survive Teacher">
+<a class="skip-link" href="#main">Skip to main content</a>
+<div id="dash-loading" role="status">Loading your dashboard…</div>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"><i class="bi bi-shield-check"></i></span><span class="brand-name">Click to Survive<span class="brand-role">Teacher</span></span></div>
+    <nav aria-label="Dashboard pages">
+      <div class="nav-label" id="nav-l1">Classroom</div>
+      <ul class="nav" aria-labelledby="nav-l1">
+        <li><button class="tab" data-tab="overview" data-title="Overview"><i class="bi bi-grid-1x2" aria-hidden="true"></i>Overview</button></li>
+        <li><button class="tab" data-tab="sessions" data-title="Sessions"><i class="bi bi-broadcast" aria-hidden="true"></i>Sessions<span class="count live" id="tab-live-count" style="display:none"></span></button></li>
+        <li><button class="tab" data-tab="students" data-title="Students"><i class="bi bi-people" aria-hidden="true"></i>Students<span class="count" id="tab-stu-count"><span class="sr-only">count </span>0</span></button></li>
+      </ul>
+      <div class="nav-label" id="nav-l2">Assessment</div>
+      <ul class="nav" aria-labelledby="nav-l2">
+        <li><button class="tab" data-tab="items" data-title="Item Analysis"><i class="bi bi-clipboard-data" aria-hidden="true"></i>Item Analysis</button></li>
+        <li><button class="tab" data-tab="reports" data-title="Reports"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Reports</button></li>
+      </ul>
+    </nav>
+    <div class="side-foot">
+      <div class="who"><span class="avatar" id="avatar" aria-hidden="true">?</span><div class="who-text"><div class="who-name" id="teacher-name"></div><div class="who-sub" id="teacher-user"></div></div></div>
+      <div class="side-actions">
+        <button class="side-btn" id="theme-btn" onclick="toggleTheme()"><i class="bi bi-moon-stars" aria-hidden="true"></i><span>Dark</span></button>
+        <button class="side-btn logout" onclick="doTeacherLogout()"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
+      </div>
     </div>
+  </aside>
+  <div class="scrim" onclick="setNavOpen(false)"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menu-btn" onclick="toggleNav()" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false"><i class="bi bi-list" aria-hidden="true"></i></button>
+      <h1><span class="crumb">Teacher /</span> <span id="page-title">Overview</span></h1>
+      <div class="top-actions">
+        <label class="sr-only" for="my-grade">Grade level</label>
+        <select id="my-grade" onchange="onGradeChange()"></select>
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <div class="notice warn" id="no-assignment-msg" role="alert" style="display:none"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>You have no sections assigned yet. Ask your Super Admin to assign you a grade and section.</span></div>
+
+      <!-- ══ OVERVIEW ══ -->
+      <section class="view" data-view="overview" aria-labelledby="ov-title">
+        <div class="page-head">
+          <div><h2 id="ov-title">Class overview</h2><p>How your classes are doing at a glance. Scores use each student's most recent completed run.</p></div>
+          <button class="btn secondary" onclick="goTab('reports')"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span class="lbl-text">Generate report</span></button>
+        </div>
+        <div class="stat-row" id="ov-stats"></div>
+        <div class="grid g-main">
+          <section class="panel" aria-labelledby="ov-sec-h">
+            <div class="panel-h"><h3 id="ov-sec-h"><i class="bi bi-bar-chart" aria-hidden="true"></i>Performance by section</h3><span class="dim">Mean score · students played</span></div>
+            <div id="ov-sections"></div>
+          </section>
+          <section class="panel" aria-labelledby="ov-mas-h">
+            <div class="panel-h"><h3 id="ov-mas-h"><i class="bi bi-pie-chart" aria-hidden="true"></i>Mastery distribution</h3></div>
+            <p class="panel-hint">Where each student's latest score falls on the DepEd mastery scale.</p>
+            <div id="ov-mastery"></div>
+          </section>
+        </div>
+        <div class="grid g-3">
+          <section class="panel" aria-labelledby="ov-least-h">
+            <div class="panel-h"><h3 id="ov-least-h"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i>Least-learned items</h3><button class="link" onclick="goTab('items')">Full analysis <i class="bi bi-arrow-right" aria-hidden="true"></i></button></div>
+            <div id="ov-least"></div>
+          </section>
+          <section class="panel" aria-labelledby="ov-sup-h">
+            <div class="panel-h"><h3 id="ov-sup-h"><i class="bi bi-person-exclamation" aria-hidden="true"></i>Students needing support</h3><button class="link" onclick="goTab('students')">All students <i class="bi bi-arrow-right" aria-hidden="true"></i></button></div>
+            <div id="ov-support"></div>
+          </section>
+          <section class="panel" aria-labelledby="ov-ses-h">
+            <div class="panel-h"><h3 id="ov-ses-h"><i class="bi bi-broadcast" aria-hidden="true"></i>Sessions</h3><button class="link" onclick="goTab('sessions')">Manage <i class="bi bi-arrow-right" aria-hidden="true"></i></button></div>
+            <div id="ov-sessions"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ══ SESSIONS ══ -->
+      <section class="view" data-view="sessions" aria-labelledby="ses-title">
+        <div class="page-head">
+          <div><h2 id="ses-title">Sessions</h2><p>Students only see “Enter Session” once you start one for their section. Every score is tagged with its session, so you can review each quiz separately.</p></div>
+        </div>
+        <section class="panel panel-highlight" aria-labelledby="start-h">
+          <div class="panel-h"><h3 id="start-h"><i class="bi bi-play-circle" aria-hidden="true"></i>Start a new session</h3></div>
+          <form class="toolbar" style="margin-bottom:0" onsubmit="event.preventDefault();startSession()">
+            <div class="field"><label for="sess-section">Section</label><select id="sess-section" required></select></div>
+            <div class="field" style="flex:1 1 240px"><label for="sess-label">Session label</label><input id="sess-label" type="text" placeholder="e.g. Quiz 1 – Floods" maxlength="60"></div>
+            <button class="btn primary" id="start-btn" type="submit"><i class="bi bi-play-fill" aria-hidden="true"></i>Start session</button>
+          </form>
+          <div class="msg" id="sess-msg" role="status" aria-live="polite"></div>
+        </section>
+        <div class="toolbar">
+          <div class="field"><label for="sess-filter-section">Section</label><select id="sess-filter-section" onchange="renderSessions()"></select></div>
+          <div class="field"><label for="sess-filter-status">Status</label>
+            <select id="sess-filter-status" onchange="renderSessions()"><option value="">Any status</option><option value="active">Active</option><option value="closed">Closed</option></select></div>
+        </div>
+        <div class="panel flush">
+          <div class="table-wrap">
+            <table>
+              <caption class="sr-only">All sessions for this grade</caption>
+              <thead><tr><th scope="col">Session</th><th scope="col">Section</th><th scope="col">Status</th><th scope="col">Started</th><th scope="col" class="num">Played</th><th scope="col" style="min-width:170px">Mean score</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+              <tbody id="sessions-body"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ STUDENTS ══ -->
+      <section class="view" data-view="students" aria-labelledby="stu-title">
+        <div class="page-head">
+          <div><h2 id="stu-title">Students</h2><p>Your class roster. Select a student's name to see every run and how they answered each item.</p></div>
+          <button class="btn secondary" onclick="exportStudents()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>Export CSV</button>
+        </div>
+        <div class="toolbar">
+          <div class="field search"><label for="stu-search">Search</label><div style="position:relative"><i class="bi bi-search" aria-hidden="true" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--txd)"></i><input id="stu-search" type="search" placeholder="Name or Student ID" oninput="renderStudents()" style="width:100%;padding-left:34px"></div></div>
+          <div class="field"><label for="stu-section">Section</label><select id="stu-section" onchange="renderStudents()"></select></div>
+          <div class="field"><label for="stu-mastery">Mastery level</label>
+            <select id="stu-mastery" onchange="renderStudents()">
+              <option value="">Any level</option>
+              <option value="good">Mastered / near mastery (86–100%)</option>
+              <option value="warn">Moving towards mastery (66–85%)</option>
+              <option value="serious">Average (35–65%)</option>
+              <option value="crit">Low (0–34%)</option>
+              <option value="none">Not yet played</option>
+            </select></div>
+          <div class="field"><label for="stu-sort">Sort by</label>
+            <select id="stu-sort" onchange="renderStudents()">
+              <option value="name">Name</option><option value="score-asc">Lowest score</option><option value="score-desc">Highest score</option><option value="recent">Recently played</option>
+            </select></div>
+        </div>
+        <div class="panel flush">
+          <div class="table-wrap tall">
+            <table>
+              <caption class="sr-only">Students</caption>
+              <thead><tr><th scope="col">Student</th><th scope="col">Student ID</th><th scope="col">Section</th><th scope="col" style="min-width:170px">Latest score</th><th scope="col">Mastery</th><th scope="col" class="num">Runs</th><th scope="col">Last played</th></tr></thead>
+              <tbody id="students-body"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="table-foot" id="stu-foot" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- ══ ITEM ANALYSIS ══ -->
+      <section class="view" data-view="items" aria-labelledby="ia-title">
+        <div class="page-head">
+          <div><h2 id="ia-title">Item analysis</h2><p>How much of each item and competency your learners have learned, which items are too hard or too easy, and which wrong answers reveal misconceptions.</p></div>
+          <div class="row">
+            <button class="btn secondary" onclick="exportItems()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>CSV</button>
+            <button class="btn primary" onclick="pdfItems(this)"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Download PDF</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="field"><label for="ia-section">Section</label><select id="ia-section" onchange="onIaSectionChange()"></select></div>
+          <div class="field"><label for="ia-session">Session</label><select id="ia-session" onchange="renderItems()"></select></div>
+          <div class="field"><label for="ia-mode">Runs counted</label>
+            <select id="ia-mode" onchange="renderItems()">
+              <option value="all">All runs</option><option value="first">First run per student</option><option value="latest">Latest run per student</option>
+            </select></div>
+        </div>
+        <div id="ia-out" aria-live="polite"><div class="empty">Loading…</div></div>
+      </section>
+
+      <!-- ══ REPORTS ══ -->
+      <section class="view" data-view="reports" aria-labelledby="rep-title">
+        <div class="page-head">
+          <div><h2 id="rep-title">Reports</h2><p>Download print-ready PDF reports for your records, your school head or parents. Each report uses the latest live data.</p></div>
+        </div>
+        <section class="panel" aria-labelledby="rep-set-h">
+          <div class="panel-h"><h3 id="rep-set-h"><i class="bi bi-building" aria-hidden="true"></i>Report header</h3></div>
+          <div class="toolbar" style="margin-bottom:0">
+            <div class="field" style="flex:1 1 360px"><label for="rep-school">School / division name (printed on every report)</label><input id="rep-school" type="text" maxlength="90" placeholder="e.g. Naga City National High School – SDO Naga City" oninput="saveSchoolName(this.value)"></div>
+          </div>
+        </section>
+        <div class="report-grid">
+          <article class="report-card" aria-labelledby="rc1">
+            <h3 id="rc1"><span class="stat-ico" aria-hidden="true"><i class="bi bi-people"></i></span>Class performance</h3>
+            <p>Participation, mean percentage score, mastery distribution, competencies and every student's latest result.</p>
+            <div class="field"><label for="rep-class-section">Section</label><select id="rep-class-section"></select></div>
+            <button class="btn primary" onclick="pdfClass(this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+          </article>
+          <article class="report-card" aria-labelledby="rc2">
+            <h3 id="rc2"><span class="stat-ico" aria-hidden="true"><i class="bi bi-clipboard-data"></i></span>Item analysis</h3>
+            <p>Difficulty and discrimination per item, learning per competency, answer distributions and misconceptions to re-teach.</p>
+            <div class="field"><label for="rep-ia-section">Section</label><select id="rep-ia-section" onchange="populateReportSessions()"></select></div>
+            <div class="field"><label for="rep-ia-session">Session</label><select id="rep-ia-session"></select></div>
+            <div class="field"><label for="rep-ia-mode">Runs counted</label><select id="rep-ia-mode"><option value="all">All runs</option><option value="first">First run per student</option><option value="latest">Latest run per student</option></select></div>
+            <button class="btn primary" onclick="pdfItemsFromReports(this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+          </article>
+          <article class="report-card" aria-labelledby="rc3">
+            <h3 id="rc3"><span class="stat-ico" aria-hidden="true"><i class="bi bi-broadcast"></i></span>Session results</h3>
+            <p>One quiz session: ranked results, who has not played yet, and item analysis for that session.</p>
+            <div class="field"><label for="rep-session">Session</label><select id="rep-session"></select></div>
+            <button class="btn primary" onclick="pdfSession(document.getElementById('rep-session').value, this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+          </article>
+          <article class="report-card" aria-labelledby="rc4">
+            <h3 id="rc4"><span class="stat-ico" aria-hidden="true"><i class="bi bi-person-badge"></i></span>Student progress</h3>
+            <p>One learner: run history, growth, learning per competency and their answers in the latest run.</p>
+            <div class="field"><label for="rep-student">Student</label><select id="rep-student"></select></div>
+            <button class="btn primary" onclick="pdfStudent(document.getElementById('rep-student').value, this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+          </article>
+        </div>
+      </section>
+    </main>
   </div>
+</div>
 
-  <div class="panel" id="grade-picker-panel">
-    <h2>
-      <span>Grade level you're handling</span>
-      <span class="row"><select id="my-grade" onchange="onGradeChange()"></select></span>
-    </h2>
-    <div class="msg" id="no-assignment-msg" style="display:none">You have no sections assigned yet — ask your Super Admin to assign you a grade and section.</div>
-  </div>
-
-  <div class="stat-row" id="stat-row"></div>
-
-  <div class="panel panel-highlight">
-    <h2>
-      <span>🎮 Sessions (Grade <span id="sess-grade-label">–</span>)</span>
-      <span class="row">
-        <select id="sess-section"></select>
-        <input id="sess-label" type="text" placeholder="Label (e.g. Quiz 1)">
-        <button class="action" onclick="startSession()">▶ Start Session</button>
-      </span>
-    </h2>
-    <p class="panel-hint">Students in a section only see "Enter Session" once you start one for it — this is how you control when they're allowed to play, and how their scores get grouped for reporting.</p>
-    <div class="msg" id="sess-msg"></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Section</th><th>Label</th><th>Status</th><th>Started</th><th>Played</th><th>Avg</th><th></th></tr></thead>
-        <tbody id="sessions-body"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
-      </table>
+<!-- Session detail -->
+<div class="modal-overlay" id="session-modal" style="display:none">
+  <div class="modal-card wide" role="dialog" aria-modal="true" aria-labelledby="sm-title" tabindex="-1">
+    <div class="modal-head">
+      <div><h2 id="sm-title">Session</h2><div class="modal-sub" id="sm-sub"></div></div>
+      <button class="icon-btn" onclick="closeModal('session-modal')" aria-label="Close dialog"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
     </div>
-  </div>
-
-  <div class="panel">
-    <h2><span>My Sections (Grade <span id="sec-grade-label">–</span>)</span></h2>
-    <p class="panel-hint">Assigned to you by your Super Admin — ask them if you need a section added, removed, or created.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Section</th><th>Students</th></tr></thead>
-        <tbody id="sections-body"><tr><td colspan="2" class="empty">Loading…</td></tr></tbody>
-      </table>
+    <div class="stat-row" id="sm-stats"></div>
+    <div class="row" style="margin-bottom:.9rem">
+      <button class="btn secondary" id="sm-ia-btn"><i class="bi bi-clipboard-data" aria-hidden="true"></i>Item analysis</button>
+      <button class="btn secondary" id="sm-csv-btn"><i class="bi bi-filetype-csv" aria-hidden="true"></i>CSV</button>
+      <button class="btn primary" id="sm-pdf-btn"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Download PDF</button>
+      <span class="spacer"></span>
+      <span id="sm-end-wrap"></span>
     </div>
-  </div>
-
-  <div class="panel">
-    <h2>
-      <span>Students</span>
-      <span class="row">
-        <select id="stu-section"><option value="">All my sections</option></select>
-      </span>
-    </h2>
-    <p class="panel-hint">"Latest score" is a student's most recent run overall — to see results for one specific quiz, use View on that session above instead.</p>
-    <div class="table-wrap">
+    <div class="table-wrap tall">
       <table>
-        <thead><tr><th>Name</th><th>Student ID</th><th>Section</th><th>Latest score</th><th>Attempts</th></tr></thead>
-        <tbody id="students-body"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="panel">
-    <h2><span>Item Analysis (Grade <span id="ia-grade-label">–</span>)</span></h2>
-    <p class="panel-hint">Combined across every attempt in this grade's sections. Lower % correct = harder/more-missed question; the answer distribution shows which wrong choice students picked most.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>#</th><th>MELC</th><th>Concept</th><th>Attempts</th><th>% Correct (difficulty)</th><th>Answer distribution</th></tr></thead>
-        <tbody id="ia-body"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+        <caption class="sr-only">Session results</caption>
+        <thead><tr><th scope="col">#</th><th scope="col">Student</th><th scope="col">Student ID</th><th scope="col" style="min-width:160px">Score</th><th scope="col">Mastery</th><th scope="col">Finished</th></tr></thead>
+        <tbody id="sm-body"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="session-results-modal" style="display:none">
-  <div class="modal-card" style="max-width:560px">
-    <h3 id="sr-title">Session Results</h3>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Name</th><th>Student ID</th><th>Score</th></tr></thead>
-        <tbody id="sr-body"></tbody>
-      </table>
+<!-- Student detail -->
+<div class="modal-overlay" id="student-modal" style="display:none">
+  <div class="modal-card wide" role="dialog" aria-modal="true" aria-labelledby="st-title" tabindex="-1">
+    <div class="modal-head">
+      <div class="row"><span class="avatar" id="st-avatar" style="width:44px;height:44px;font-size:1rem" aria-hidden="true">?</span><div><h2 id="st-title">Student</h2><div class="modal-sub" id="st-sub"></div></div></div>
+      <div class="row">
+        <button class="btn primary" id="st-pdf-btn"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Download PDF</button>
+        <button class="icon-btn" onclick="closeModal('student-modal')" aria-label="Close dialog"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+      </div>
     </div>
-    <button class="action" style="width:100%;margin-top:1rem" onclick="document.getElementById('session-results-modal').style.display='none'">Close</button>
+    <div class="stat-row" id="st-stats"></div>
+    <div class="grid g-2">
+      <section aria-labelledby="st-hist-h">
+        <div class="panel-h"><h3 id="st-hist-h"><i class="bi bi-clock-history" aria-hidden="true"></i>Run history</h3></div>
+        <div class="table-wrap"><table style="min-width:0">
+          <thead><tr><th scope="col">Finished</th><th scope="col">Session</th><th scope="col" style="min-width:130px">Score</th></tr></thead>
+          <tbody id="st-history"></tbody>
+        </table></div>
+      </section>
+      <section aria-labelledby="st-items-title">
+        <div class="panel-h"><h3 id="st-items-title">Answers in latest run</h3></div>
+        <div id="st-items" aria-live="polite"></div>
+      </section>
+    </div>
   </div>
 </div>
 
@@ -103,6 +273,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js"></script>
 <script src="js/session.js"></script>
-<script src="js/dashboard.js"></script>
+<script src="js/game-data.js?v=20261018d"></script>
+<script src="js/dash-common.js?v=20261018d"></script>
+<script src="js/report-pdf.js?v=20261018d"></script>
+<script src="js/dashboard.js?v=20261018d"></script>
 </body>
 </html>
