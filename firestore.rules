@@ -1,0 +1,139 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isSuperAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
+    }
+    function isTeacher() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/teachers/$(request.auth.uid));
+    }
+    function teacherDoc() {
+      return get(/databases/$(database)/documents/teachers/$(request.auth.uid)).data;
+    }
+    // Takes the CANDIDATE sectionId already read via a safe .get(field, null) at the
+    // call site (never direct dot-access on resource.data) — a `list` query's rule
+    // evaluation can be applied against documents that don't necessarily carry every
+    // field a differently-shaped doc in the same collection might, and directly
+    // accessing a possibly-absent map key throws rather than returning null.
+    function isAssignedToSection(sectionId) {
+      return isTeacher() && sectionId != null && sectionId in teacherDoc().assignedSectionIds;
+    }
+    function isValidGrade(g) {
+      return g in [7, 8, 9, 10];
+    }
+
+    // ── Bootstrap lock: existence of this doc means a super admin has already been
+    // set up. The setup page only offers "create super admin" while this is absent.
+    match /system/superadminBootstrap {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // ── Super admins: self-created exactly once (see the bootstrap lock above), never
+    // editable afterward. Full read/write access below is granted via isSuperAdmin().
+    match /superadmins/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid
+                    && request.resource.data.name is string && request.resource.data.name.size() > 0
+                    && !exists(/databases/$(database)/documents/system/superadminBootstrap);
+      allow update, delete: if false;
+    }
+
+    // ── Teachers: accounts are provisioned by a super admin (a secondary, isolated
+    // Firebase Auth session creates the Auth user; this Firestore doc is then written
+    // by the super admin's own session, so request.auth here is the ADMIN, not the new
+    // teacher — hence create requires isSuperAdmin(), not a uid self-match).
+    // assignedSectionIds is the whole authorization surface for what a teacher can see.
+    match /teachers/{teacherId} {
+      allow read: if isSignedIn() && (request.auth.uid == teacherId || isSuperAdmin());
+      allow list: if isSuperAdmin();
+      allow create: if isSuperAdmin()
+                    && request.resource.data.name is string && request.resource.data.name.size() > 0
+                    && request.resource.data.assignedSectionIds is list;
+      allow update: if isSuperAdmin();
+      // Deletion is only ever used by the "reissue credentials" flow (there's no direct
+      // Firebase Auth "change another user's password" without Cloud Functions, so a
+      // reset instead creates a fresh Auth account + teacher doc and retires this one).
+      allow delete: if isSuperAdmin();
+    }
+
+    // ── Sections: created only by a super admin now. studentCount is denormalized so
+    // a registering student may bump it; nothing else may change after creation.
+    match /sections/{sectionId} {
+      allow read: if isSignedIn();
+      allow create: if isSuperAdmin()
+                    && isValidGrade(request.resource.data.grade)
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.studentCount == 0;
+      allow update: if isSuperAdmin()
+                    || (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentCount']));
+      allow delete: if isSuperAdmin() && resource.data.studentCount == 0;
+    }
+
+    // ── Students: readable by any signed-in session (registration checks "does this
+    // ID exist", login reads the profile — there is no password, so this mirrors the
+    // app's existing "Student ID is the whole credential" trust model).
+    match /students/{studentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && isValidGrade(request.resource.data.grade)
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && exists(/databases/$(database)/documents/sections/$(request.resource.data.sectionId));
+      allow update: if isSignedIn()
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['latestPercent','latestSolved','latestTotal','latestAt','attemptCount','tutorialDoneAt']);
+      allow delete: if false;
+
+      match /history/{attemptId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update, delete: if false;
+      }
+    }
+
+    // ── Sessions: a teacher opens one for a section they're assigned to, so students
+    // in that section know when to join; only that teacher (or a super admin) can end
+    // it, but the denormalized attemptCount/avgPercent are bumped by whichever student
+    // just finished a run — same "any signed-in session may touch its own denormalized
+    // counters" pattern used on sections.studentCount.
+    match /sessions/{sessionId} {
+      allow read: if isSignedIn();
+      allow create: if isTeacher()
+                    && isAssignedToSection(request.resource.data.sectionId)
+                    && request.resource.data.teacherId == request.auth.uid
+                    && request.resource.data.status == 'active'
+                    && request.resource.data.attemptCount == 0;
+      allow update: if isSuperAdmin()
+                    || (isTeacher() && resource.data.teacherId == request.auth.uid
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','closedAt']))
+                    || (isSignedIn()
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['attemptCount','avgPercent']));
+      allow delete: if false;
+    }
+
+    // ── Full attempt records and per-scenario results: a super admin may browse
+    // everything; a teacher only the sections assigned to them; any signed-in session
+    // may append its own results.
+    match /attempts/{attemptId} {
+      allow read: if isSuperAdmin() || isAssignedToSection(resource.data.get('sectionId', null));
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    match /scenarioResults/{resultId} {
+      allow read: if isSuperAdmin() || isAssignedToSection(resource.data.get('sectionId', null));
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+  }
+}
+
