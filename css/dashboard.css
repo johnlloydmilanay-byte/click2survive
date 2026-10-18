@@ -47,7 +47,12 @@ button,select,input{font-family:inherit;font-size:inherit;color:inherit}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
 
 #dash-loading{position:fixed;inset:0;display:flex;flex-direction:column;gap:.8rem;align-items:center;justify-content:center;color:var(--txm);font-size:.9rem;z-index:500;background:var(--bg)}
-#dash-loading::before{content:"";width:32px;height:32px;border-radius:50%;border:3px solid var(--track);border-top-color:var(--acc);animation:spin 1s linear infinite}
+.dl-mark{width:72px;height:72px;filter:drop-shadow(0 10px 24px rgba(14,165,233,.35));animation:dlIn .6s cubic-bezier(.34,1.56,.64,1) both,dlFloat 2.6s ease-in-out .6s infinite}
+.dl-bar{position:relative;width:140px;height:3px;border-radius:3px;background:var(--track);overflow:hidden;margin:.3rem 0 .1rem}
+.dl-bar::after{content:"";position:absolute;top:0;bottom:0;left:-45%;width:45%;border-radius:3px;background:linear-gradient(90deg,#38bdf8,#818cf8);animation:dlSlide 1.2s cubic-bezier(.65,0,.35,1) infinite}
+@keyframes dlIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes dlFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes dlSlide{to{left:100%}}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── App shell: sidebar + main ─────────────────────────────────────────── */
@@ -55,7 +60,7 @@ button,select,input{font-family:inherit;font-size:inherit;color:inherit}
 .app.ready{visibility:visible}
 .sidebar{position:sticky;top:0;height:100vh;width:var(--side-w);flex-shrink:0;background:var(--side);color:var(--side-tx);display:flex;flex-direction:column;padding:1.1rem .8rem;z-index:60}
 .brand{display:flex;align-items:center;gap:.65rem;padding:.2rem .5rem 1.2rem;color:#fff;text-decoration:none}
-.brand-mark{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;font-size:1.1rem;flex-shrink:0}
+.brand-mark{width:36px;height:36px;display:block;flex-shrink:0}
 .brand-name{font-weight:750;font-size:1rem;letter-spacing:-.01em;line-height:1.15}
 .brand-role{display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--side-tx-2)}
 .nav-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--side-tx-2);padding:.9rem .7rem .4rem}

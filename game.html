@@ -10,9 +10,13 @@
 <meta name="apple-mobile-web-app-title" content="Click2Survive">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap">
 <title>Click to Survive — Disaster Preparedness Simulation</title>
-<link rel="stylesheet" href="css/game.css?v=20261011q">
+<link rel="stylesheet" href="css/game.css?v=20261018logo">
 <style>
 #topbar{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.25rem;pointer-events:none}
 #topbar.hidden{display:none}
@@ -52,11 +56,42 @@
 </div>
 
 <div id="ui">
-  <div id="s-load" class="screen on">
-    <div class="ld-brand">Click to <em>Survive</em></div>
-    <div class="ld-tag">Ultra · Immersive 3D Simulation</div>
+  <div id="s-load" class="screen on" role="status" aria-live="polite" aria-label="Loading Click to Survive">
+    <div class="ld-glow" aria-hidden="true"></div>
+    <div class="ld-float">
+      <svg class="ld-mark" viewBox="0 0 120 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="ld-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#6366f1"/></linearGradient>
+          <linearGradient id="ld-s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+          <clipPath id="ld-c"><path d="M60 8 L104 24 V58 C104 86 84 104 60 112 C36 104 16 86 16 58 V24 Z"/></clipPath>
+        </defs>
+        <g class="ld-shield">
+          <path d="M60 8 L104 24 V58 C104 86 84 104 60 112 C36 104 16 86 16 58 V24 Z" fill="url(#ld-g)"/>
+          <g clip-path="url(#ld-c)">
+            <g class="ld-waves">
+              <path class="ld-w1" d="M-48 84 Q-36 76 -24 84 T0 84 T24 84 T48 84 T72 84 T96 84 T120 84 T144 84 T168 84 V130 H-48 Z" fill="#0a1830" opacity=".55"/>
+              <path class="ld-w2" d="M-48 96 Q-36 88 -24 96 T0 96 T24 96 T48 96 T72 96 T96 96 T120 96 T144 96 T168 96 V130 H-48 Z" fill="#000510" opacity=".75"/>
+            </g>
+            <rect class="ld-sheen" x="-40" y="-10" width="34" height="140" fill="url(#ld-s)"/>
+          </g>
+          <path class="ld-outline" pathLength="1" d="M60 8 L104 24 V58 C104 86 84 104 60 112 C36 104 16 86 16 58 V24 Z" fill="none" stroke="#bae6fd" stroke-width="1.6" stroke-linejoin="round"/>
+        </g>
+        <circle class="ld-ripple" cx="50" cy="32" r="8" fill="none" stroke="#fff" stroke-width="2"/>
+        <g class="ld-cursor">
+          <path d="M50 32 L50 80 L61.5 69 L69.5 86 L77 82.5 L69 66 L85 66 Z" fill="#fff" stroke="#000510" stroke-width="3" stroke-linejoin="round"/>
+        </g>
+        <g class="ld-burst" stroke="#fff" stroke-width="3.5" stroke-linecap="round">
+          <line x1="43" y1="27" x2="37" y2="22"/><line x1="49" y1="23" x2="48" y2="16"/><line x1="41" y1="34" x2="33" y2="34"/>
+        </g>
+      </svg>
+    </div>
+    <div class="ld-word" aria-hidden="true">
+      <span class="ld-click">CLICK <i>to</i></span>
+      <span class="ld-survive">SURVIVE</span>
+    </div>
+    <div class="ld-tag">Disaster Preparedness Simulation</div>
     <div class="ld-bar"><div class="ld-fill" id="ld-fill"></div></div>
-    <div class="ld-tip" id="ld-tip">Initializing rendering engine...</div>
+    <div class="ld-meta"><span class="ld-tip" id="ld-tip">Initializing rendering engine...</span><span class="ld-pct" id="ld-pct">0%</span></div>
     <div class="ld-obj" id="ld-obj">Make survival decisions in floods and typhoons — and test them with real physics.</div>
   </div>
 
@@ -277,7 +312,7 @@
 <script src="js/game-data.js?v=20261011q"></script>
 <script src="js/game-engine.js?v=20261011q"></script>
 <script src="js/grade7-scenes.js?v=20261011q"></script>
-<script src="js/game-logic.js?v=20261011q"></script>
+<script src="js/game-logic.js?v=20261018logo2"></script>
 <script src="js/tutorial.js?v=20261011q"></script>
 <script src="js/app-shell.js?v=20261011q"></script>
 </body>

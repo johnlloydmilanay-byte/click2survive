@@ -3,6 +3,9 @@
 html,body{min-height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--tx)}
 body{background:radial-gradient(ellipse at top,#0a1830,#000510 75%);display:flex;align-items:center;justify-content:center;padding:2rem 1rem;min-height:100vh}
 .card{background:var(--bg-glass2);backdrop-filter:blur(22px);border:1px solid var(--bord);border-radius:24px;padding:2.2rem 2rem;max-width:420px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.brand-logo{display:block;width:76px;height:76px;margin:0 auto .7rem;filter:drop-shadow(0 10px 22px rgba(14,165,233,.35));animation:brandIn .7s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes brandIn{from{opacity:0;transform:scale(.6) rotate(-6deg)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.brand-logo{animation:none}}
 .brand{font-size:1.7rem;font-weight:800;letter-spacing:-.03em;text-align:center;margin-bottom:.2rem}
 .brand em{font-style:normal;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .tag{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--txd);text-align:center;margin-bottom:1.6rem}
@@ -46,7 +49,7 @@ select{color-scheme:dark}
 .card.split .card-brand{display:contents}
 .card.split .card-brand .foot{order:3}
 .card.split .card-form{order:2}
-.card.split .brand, .card.split .tag{order:1}
+.card.split .brand-logo, .card.split .brand, .card.split .tag{order:1}
 body{min-height:100vh;min-height:100dvh}
 
 /* Short landscape screens (phones turned sideways): two columns, compact spacing */
@@ -56,6 +59,7 @@ body{min-height:100vh;min-height:100dvh}
   .card.split{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:0 1.6rem;align-items:center;
     max-width:min(860px,100%);padding:1.1rem 1.4rem;border-radius:20px}
   .card.split .card-brand{display:flex;flex-direction:column;justify-content:center;text-align:center;border-right:1px solid var(--bord);padding-right:1.4rem;align-self:stretch}
+  .card.split .brand-logo{width:56px;height:56px;margin-bottom:.4rem}
   .card.split .brand{font-size:clamp(1.4rem,4.4vw,2rem)}
   .card.split .tag{margin-bottom:0;font-size:.62rem}
   .card.split .card-brand .foot{margin-top:1rem}

@@ -942,9 +942,38 @@ function initControls(){
 }
 
 // ═══ INIT ═══
+const LD_T0 = performance.now();
+let ldPct = 0, ldRaf = 0;
 function setLoad(p, tip){
   document.getElementById('ld-fill').style.width = p+'%';
-  if(tip) document.getElementById('ld-tip').textContent = tip;
+  // Count the percentage up smoothly instead of jumping between steps.
+  const pctEl = document.getElementById('ld-pct'), from = ldPct, t0 = performance.now();
+  ldPct = p;
+  cancelAnimationFrame(ldRaf);
+  const step = now => {
+    // rAF's timestamp can predate t0 (it marks the frame start), so clamp at 0.
+    const k = Math.min(1, Math.max(0, (now - t0) / 650)), e = 1 - Math.pow(1 - k, 3);
+    pctEl.textContent = Math.round(from + (p - from) * e) + '%';
+    if(k < 1) ldRaf = requestAnimationFrame(step);
+  };
+  ldRaf = requestAnimationFrame(step);
+  if(tip){
+    const tipEl = document.getElementById('ld-tip');
+    tipEl.textContent = tip;
+    tipEl.classList.remove('swap'); void tipEl.offsetWidth; tipEl.classList.add('swap');
+  }
+}
+// Let the logo intro finish (≈2s), then cross-fade the loader away over the menu
+// (the menu is shown underneath first, so there is no flash of black in between).
+async function finishLoad(){
+  const wait = 2100 - (performance.now() - LD_T0);
+  if(wait > 0) await new Promise(r=>setTimeout(r, wait));
+  const L = document.getElementById('s-load');
+  showScreen('s-menu');
+  L.classList.add('on');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>L.classList.add('ld-out')));
+  await new Promise(r=>setTimeout(r, 520));
+  L.classList.remove('on','ld-out');
 }
 async function init(){
   STUDENT = await requireStudentSession();
@@ -965,7 +994,7 @@ async function init(){
   loadHistory();
   if(typeof tutCheckRemote==='function') tutCheckRemote();
   watchForActiveSession();
-  transitionTo(()=>showScreen('s-menu'));
+  await finishLoad();
 }
 init();
 
