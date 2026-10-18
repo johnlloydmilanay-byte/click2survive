@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Click to Survive — Teacher Dashboard</title>
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+<div id="dash-loading">Loading your dashboard…</div>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">Click to <em style="font-style:normal;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Survive</em> — Teacher Dashboard</div>
+    <div class="tb-right">
+      <span id="teacher-name"></span>
+      <button class="logout-btn" onclick="doTeacherLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="panel" id="grade-picker-panel">
+    <h2>
+      <span>Grade level you're handling</span>
+      <span class="row"><select id="my-grade" onchange="onGradeChange()"></select></span>
+    </h2>
+    <div class="msg" id="no-assignment-msg" style="display:none">You have no sections assigned yet — ask your Super Admin to assign you a grade and section.</div>
+  </div>
+
+  <div class="stat-row" id="stat-row"></div>
+
+  <div class="panel panel-highlight">
+    <h2>
+      <span>🎮 Sessions (Grade <span id="sess-grade-label">–</span>)</span>
+      <span class="row">
+        <select id="sess-section"></select>
+        <input id="sess-label" type="text" placeholder="Label (e.g. Quiz 1)">
+        <button class="action" onclick="startSession()">▶ Start Session</button>
+      </span>
+    </h2>
+    <p class="panel-hint">Students in a section only see "Enter Session" once you start one for it — this is how you control when they're allowed to play, and how their scores get grouped for reporting.</p>
+    <div class="msg" id="sess-msg"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Section</th><th>Label</th><th>Status</th><th>Started</th><th>Played</th><th>Avg</th><th></th></tr></thead>
+        <tbody id="sessions-body"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><span>My Sections (Grade <span id="sec-grade-label">–</span>)</span></h2>
+    <p class="panel-hint">Assigned to you by your Super Admin — ask them if you need a section added, removed, or created.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Section</th><th>Students</th></tr></thead>
+        <tbody id="sections-body"><tr><td colspan="2" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>
+      <span>Students</span>
+      <span class="row">
+        <select id="stu-section"><option value="">All my sections</option></select>
+      </span>
+    </h2>
+    <p class="panel-hint">"Latest score" is a student's most recent run overall — to see results for one specific quiz, use View on that session above instead.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Student ID</th><th>Section</th><th>Latest score</th><th>Attempts</th></tr></thead>
+        <tbody id="students-body"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><span>Item Analysis (Grade <span id="ia-grade-label">–</span>)</span></h2>
+    <p class="panel-hint">Combined across every attempt in this grade's sections. Lower % correct = harder/more-missed question; the answer distribution shows which wrong choice students picked most.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>MELC</th><th>Concept</th><th>Attempts</th><th>% Correct (difficulty)</th><th>Answer distribution</th></tr></thead>
+        <tbody id="ia-body"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="session-results-modal" style="display:none">
+  <div class="modal-card" style="max-width:560px">
+    <h3 id="sr-title">Session Results</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Student ID</th><th>Score</th></tr></thead>
+        <tbody id="sr-body"></tbody>
+      </table>
+    </div>
+    <button class="action" style="width:100%;margin-top:1rem" onclick="document.getElementById('session-results-modal').style.display='none'">Close</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/session.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

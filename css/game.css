@@ -1,0 +1,742 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--acc:#38bdf8;--safe:#22c55e;--risky:#f59e0b;--unsafe:#ef4444;
+--bg-glass:rgba(8,15,30,.72);--bg-glass2:rgba(15,25,45,.88);
+--bord:rgba(255,255,255,.13);--bord2:rgba(255,255,255,.24);
+--tx:#fff;--txm:rgba(255,255,255,.55);--txd:rgba(255,255,255,.32)}
+html,body{height:100%;overflow:hidden;background:#000;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--tx);user-select:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+/* Clean vignette only. There used to be an SVG feTurbulence film-grain layer blended
+   over the whole canvas here — on a high-DPI screen that grain is drawn at CSS-pixel
+   size, so it reads as exactly the speckly "pixelated" artefact it was meant to
+   stylise. A soft edge falloff alone gives the depth without dirtying the image. */
+#vignette{
+  position:fixed;inset:0;pointer-events:none;z-index:3;
+  background:radial-gradient(ellipse at center,transparent 46%,rgba(0,0,0,.38) 100%);
+}
+
+/* Cinematic color grading per lighting mood — set as a data attribute on <body> from
+   setupLighting() so a stormy scene reads cold/desaturated and a sunny one warm/punchy,
+   instead of every mood sharing the same flat color response. Canvas-only, so UI text/
+   panels stay unaffected and fully legible regardless of scene mood. */
+#c{transition:filter .8s ease}
+body[data-mood="sunny"] #c{filter:saturate(1.14) contrast(1.06) brightness(1.03)}
+body[data-mood="overcast"] #c{filter:saturate(.86) contrast(.97) brightness(.97)}
+body[data-mood="storm"] #c{filter:saturate(.7) contrast(1.12) brightness(.8) hue-rotate(-4deg)}
+body[data-mood="twilight"] #c{filter:saturate(1.18) contrast(1.05) brightness(.95) sepia(.14)}
+/* Grade 7 scenes: still moody, but keep colour and contrast so objects stay easy to tell apart */
+body[data-mood="overcast-g7"] #c{filter:saturate(1.1) contrast(1.07)}
+body[data-mood="storm-g7"] #c{filter:saturate(.95) contrast(1.1) brightness(.94) hue-rotate(-3deg)}
+#ui{position:fixed;inset:0;pointer-events:none;z-index:10}
+.screen{position:absolute;inset:0;display:none;pointer-events:none}
+.screen.on{display:flex;pointer-events:all}
+
+/* LOADING */
+#s-load{background:radial-gradient(ellipse at center,#0a1830,#000510 75%);flex-direction:column;align-items:center;justify-content:center;z-index:999}
+.ld-brand{font-size:clamp(2rem,5.5vw,3.6rem);font-weight:800;letter-spacing:-0.035em;text-align:center}
+.ld-brand em{font-style:normal;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ld-tag{font-size:.75rem;color:var(--txd);margin:.6rem 0 2.4rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500}
+.ld-bar{width:260px;height:2px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,#38bdf8,#818cf8,#c084fc);width:0%;transition:width .3s;border-radius:2px}
+.ld-tip{font-size:.7rem;color:var(--txd);margin-top:1.4rem;font-family:monospace}
+.ld-spec{display:flex;gap:1.4rem;margin-top:2rem;font-size:.6rem;color:var(--txd);letter-spacing:.1em;text-transform:uppercase;flex-wrap:wrap;justify-content:center}
+.ld-spec span{display:flex;align-items:center;gap:5px}
+.ld-spec span::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--acc)}
+.ld-obj{margin-top:1.8rem;max-width:340px;text-align:center;font-size:.82rem;color:var(--txm);line-height:1.55}
+/* Reduced motion: kill decorative animation for vestibular safety */
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:.01s !important;animation-iteration-count:1 !important;transition-duration:.01s !important} }
+/* Lab panel (buoyancy laboratory) */
+.lab-panel{background:var(--bg-glass2);backdrop-filter:blur(22px);border:1px solid var(--bord);border-radius:18px;padding:1rem 1.2rem;max-width:560px;width:100%;pointer-events:all;text-align:center}
+.lab-prompt{font-size:.85rem;font-weight:600;margin-bottom:.7rem;line-height:1.4}
+.lab-step{display:inline-flex;align-items:center;gap:14px;margin-bottom:.7rem}
+.lab-step button{width:46px;height:46px;border-radius:12px;border:1.5px solid var(--bord2);background:rgba(255,255,255,.08);color:#fff;font-size:1.3rem;font-weight:700;cursor:pointer;font-family:inherit}
+.lab-step button:disabled{opacity:.3;pointer-events:none}
+.lab-num{font-size:1.9rem;font-weight:800;min-width:56px}
+.lab-go{display:block;width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.3rem}
+.lab-go:disabled{opacity:.35;pointer-events:none}
+.gauge{margin:.5rem 0 .2rem;text-align:left}
+.gauge-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:.68rem}
+.gauge-lbl{width:118px;color:var(--txm);font-family:monospace}
+.gauge-bw{flex:1;height:9px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden}
+.gauge-b{height:100%;border-radius:5px;transition:width .3s}
+.gauge-val{width:72px;text-align:right;font-family:monospace;font-size:.68rem}
+.lab-hint{font-size:.72rem;color:#fbbf24;margin-top:.5rem;line-height:1.45;display:none}
+.lab-attempt{font-size:.62rem;color:var(--txd);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.4rem}
+
+/* MENU — a single scrollless "mobile game" home screen: everything the student needs
+   (title, their assigned grade card, session-join state, recent history) stacks in one
+   flex column sized to fit the viewport, never a scrolling page. */
+#s-menu{flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(5,15,35,.42),rgba(2,8,20,.68));overflow:hidden;padding:1.2rem 1rem}
+.menu-wrap{text-align:center;max-width:520px;width:100%;max-height:100%;display:flex;flex-direction:column;align-items:center;gap:.85rem;overflow:hidden}
+.menu-eyebrow{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--acc);font-weight:600}
+.menu-h1{font-size:clamp(1.6rem,5vw,3.4rem);font-weight:800;letter-spacing:-0.04em;line-height:.95}
+.menu-h1 em{font-style:normal;background:linear-gradient(135deg,#38bdf8,#818cf8,#c084fc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.menu-sub{font-size:.8rem;color:var(--txm);max-width:460px;line-height:1.4}
+
+.start-card{position:relative;width:100%;background:rgba(255,255,255,.045);backdrop-filter:blur(24px);border:1px solid var(--bord);border-radius:20px;padding:1.1rem 1.3rem;overflow:hidden}
+.start-card::before{content:'';position:absolute;inset:0;opacity:.16;background:linear-gradient(135deg,var(--cc,#38bdf8),transparent 70%);pointer-events:none}
+.start-card>*{position:relative}
+.start-num{font-size:2.3rem;font-weight:800;line-height:1;color:var(--cc,#38bdf8)}
+.start-topic{font-size:1rem;font-weight:700;margin-top:.15rem}
+.start-code{font-size:.64rem;color:var(--txd);font-family:monospace;margin-top:.25rem;margin-bottom:.8rem}
+
+.session-wait{display:flex;flex-direction:column;align-items:center;gap:.55rem;padding-top:.2rem}
+.session-wait-spinner{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(255,255,255,.15);border-top-color:var(--acc);animation:menuSpin 1s linear infinite}
+@keyframes menuSpin{to{transform:rotate(360deg)}}
+.session-wait-text{font-size:.7rem;color:var(--txm);line-height:1.45;max-width:320px}
+.session-wait-text strong{color:#fff}
+
+.session-ready-badge{display:inline-flex;align-items:center;gap:6px;font-size:.64rem;letter-spacing:.04em;color:#4ade80;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);padding:5px 12px;border-radius:20px;margin-bottom:.7rem}
+.start-btn{display:block;width:100%;padding:12px;border-radius:14px;border:none;background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(56,189,248,.3)}
+.start-btn:hover{filter:brightness(1.08)}
+
+.history-box{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--bord);border-radius:14px;padding:.7rem .9rem}
+.history-title{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--txd);margin-bottom:.4rem;text-align:left}
+.history-row{display:flex;justify-content:space-between;gap:.6rem;font-size:.7rem;color:var(--txm);padding:3px 0;border-top:1px solid rgba(255,255,255,.06)}
+.history-row:first-child{border-top:none}
+
+.menu-foot{font-size:.58rem;color:var(--txd);text-align:center;line-height:1.4;max-width:520px}
+
+/* HUD — one consolidated header row: back button + grade/topic on the left, score on
+   the right. Nothing else is absolutely positioned into this corner, so nothing overlaps. */
+#hud-top{position:absolute;top:0;left:0;right:0;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;flex-wrap:wrap;pointer-events:none;z-index:5}
+.hud-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;pointer-events:none}
+.hud-pill{background:var(--bg-glass);backdrop-filter:blur(16px);border:1px solid var(--bord);border-radius:22px;padding:6px 13px;font-size:.72rem;font-weight:500;display:inline-flex;align-items:center;gap:8px;pointer-events:all}
+.hud-pill .dot-i{width:11px;height:11px;border-radius:50%;background:var(--acc)}
+.hud-topic-pill{font-size:.66rem;color:var(--txm)}
+.hud-score{background:var(--bg-glass);backdrop-filter:blur(16px);border:1px solid var(--bord);border-radius:14px;padding:8px 15px;text-align:center;min-width:88px;pointer-events:all}
+.hs-num{font-size:1.4rem;font-weight:800;line-height:1}
+.hs-of{font-size:.75rem;color:var(--txm);font-weight:600}
+.hs-lbl{font-size:.52rem;color:var(--txd);letter-spacing:.2em;text-transform:uppercase;margin-top:3px;font-weight:600}
+#back-btn{background:var(--bg-glass);backdrop-filter:blur(16px);border:1px solid var(--bord);color:#fff;padding:7px 13px;border-radius:22px;font-size:.72rem;font-weight:500;cursor:pointer;pointer-events:all;transition:all .15s;font-family:inherit}
+#back-btn:hover{background:rgba(255,255,255,.15)}
+.observe-btn{cursor:pointer;border:1px solid var(--bord);font-family:inherit;transition:all .15s}
+.observe-btn:hover{background:rgba(255,255,255,.15)}
+.observe-btn.active{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.5);color:#7dd3fc}
+.mute-btn{cursor:pointer;border:1px solid var(--bord);font-family:inherit;transition:all .15s}
+.mute-btn:hover{background:rgba(255,255,255,.15)}
+.mute-btn.muted{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.4);color:#fca5a5}
+
+/* ═══ STORY / NARRATION OVERLAY ═══
+   A movie-style intro for each scenario: black letterbox bars top+bottom, the
+   situation text narrated as a subtitle-style caption (English, plus Bikol dialect in
+   italics underneath when the scenario has it) over the live 3D scene. Auto-advances
+   after a few seconds (see the JS timing) or the student can tap Skip. This IS what
+   gates the question panel now — .panel-hidden on #side-panel stays applied for as
+   long as this overlay is showing. */
+#story-overlay{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:space-between;opacity:0;pointer-events:none;transition:opacity .5s ease}
+#story-overlay.on{opacity:1;pointer-events:all}
+.story-bar{background:#000;height:15%;flex-shrink:0}
+.story-caption{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:.6rem 1.2rem;
+  background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,0) 22%,rgba(0,0,0,0) 78%,rgba(0,0,0,.35))}   /* blends into the letterbox bars */
+/* Oblong caption plate: a black elliptical gradient — solid behind the words, feathering
+   out to nothing at the edges — so the text is readable over bright sky, water or
+   labels without a hard box cutting into the cinematic frame. */
+.story-box{position:relative;display:flex;flex-direction:column;align-items:center;max-width:min(980px,90vw);padding:1.3rem 3rem 1.45rem;
+  border-radius:56px;
+  background:radial-gradient(ellipse at 50% 50%, rgba(2,6,16,.9) 0%, rgba(4,10,24,.8) 70%, rgba(6,14,30,.74) 100%);
+  box-shadow:0 0 40px 28px rgba(4,10,24,.72)}   /* the wide soft shadow feathers the oblong's edge into the scene */
+.story-box::before{content:'';position:absolute;left:18%;right:18%;top:.55rem;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(56,189,248,.55),transparent)}   /* faint cyan accent, echoes the HUD */
+.story-num{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--acc);margin-bottom:.9rem;opacity:0;animation:storyFadeIn .6s ease forwards}
+.story-en{font-size:1.15rem;font-weight:600;line-height:1.55;max-width:720px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.85);opacity:0;animation:storyFadeIn .7s ease .15s forwards}
+.story-bi{font-size:.95rem;font-style:italic;line-height:1.5;max-width:680px;color:rgba(255,255,255,.72);margin-top:.7rem;text-shadow:0 2px 12px rgba(0,0,0,.85);opacity:0;animation:storyFadeIn .7s ease .35s forwards}
+.story-bi:empty{display:none}
+@keyframes storyFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.story-bar-bottom{display:flex;align-items:center;justify-content:flex-end;padding:0 1.5rem}
+.story-skip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);color:#fff;padding:7px 16px;border-radius:20px;font-size:.75rem;font-weight:600;cursor:pointer;pointer-events:all;font-family:inherit;backdrop-filter:blur(8px);transition:all .15s}
+.story-skip:hover{background:rgba(255,255,255,.22)}
+
+/* Bikol-dialect line under an English scenario/question/choice — used across the
+   scenario card and choice buttons whenever a scenario supplies *_bi text. */
+.bikol-text{display:block;font-style:italic;opacity:.68;font-size:.8em;line-height:1.3;margin-top:2px;font-weight:400}
+
+/* SIDE PANEL — everything the student needs to read/answer: PAGASA alert, live
+   conditions/thresholds, the scenario question, progress dots and choices. Docked to
+   one side so it never covers the 3D scene/character in the middle. Fades/slides in
+   a beat after the scenario loads (see .panel-hidden), and becomes a bottom sheet on
+   narrow screens (see the responsive block further down). */
+#side-panel{position:absolute;top:70px;right:1rem;bottom:140px;width:380px;max-width:92vw;overflow-y:auto;pointer-events:none;z-index:4;transition:opacity .5s ease,transform .5s ease}
+#side-panel.panel-hidden{opacity:0;transform:translateX(28px);pointer-events:none!important}
+/* Its children opt back in with pointer-events:all (below), which would otherwise keep an
+   invisible panel catching taps — most visibly over the joystick once the full-screen
+   question is hidden. A hidden panel must not catch anything. */
+#side-panel.panel-hidden *{pointer-events:none!important}
+/* Separate from #side-panel itself so JS can shrink just this wrapper (via `zoom`) to
+   guarantee a no-scrollbar fit for unusually long content, without fighting the
+   panel's own position/size/fade-transition rules. */
+#side-panel-inner{display:flex;flex-direction:column;gap:.5rem}
+#side-panel-inner > *{pointer-events:all}
+
+#pagasa-alert{background:var(--bg-glass2);backdrop-filter:blur(16px);border:1.5px solid transparent;border-radius:13px;padding:7px 16px;font-size:.75rem;font-weight:700;text-align:center;display:none;animation:aPulse 2.5s ease-in-out infinite}
+@keyframes aPulse{0%,100%{opacity:1}50%{opacity:.8}}
+#params-panel{background:var(--bg-glass);backdrop-filter:blur(18px);border:1px solid var(--bord);border-radius:17px;padding:.7rem .85rem}
+.pp-title{font-size:.56rem;text-transform:uppercase;letter-spacing:.18em;color:var(--txd);margin-bottom:.5rem;font-weight:600}
+.pp-row{margin-bottom:.4rem}
+.pp-row:last-child{margin-bottom:0}
+.pp-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.pp-label{font-size:.67rem;color:var(--txm)}
+.pp-val{font-size:.82rem;font-weight:700}
+.pp-bw{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.pp-b{height:100%;border-radius:2px;transition:width .8s}
+.pp-st{font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:1px 6px;border-radius:7px;display:inline-block;margin-top:3px}
+.c-safe{color:#4ade80}.c-risky{color:#fbbf24}.c-unsafe{color:#f87171}
+.st-safe{background:rgba(34,197,94,.12);color:#4ade80}.st-risky{background:rgba(245,158,11,.12);color:#fbbf24}.st-unsafe{background:rgba(239,68,68,.15);color:#f87171}
+.b-safe{background:linear-gradient(90deg,#16a34a,#22c55e)}
+.b-risky{background:linear-gradient(90deg,#d97706,#f59e0b)}
+.b-unsafe{background:linear-gradient(90deg,#dc2626,#ef4444);box-shadow:0 0 8px rgba(239,68,68,.5)}
+
+/* SCENARIO + CHOICES — normal-flow children of #side-panel now, not individually
+   positioned, so they stack cleanly in one readable column. */
+#scen-card{background:var(--bg-glass2);backdrop-filter:blur(26px);border:1px solid var(--bord);border-radius:20px;padding:.85rem 1.1rem;text-align:center;animation:sUp .5s cubic-bezier(.4,0,.2,1)}
+@keyframes sUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.sc-num{font-size:.58rem;text-transform:uppercase;letter-spacing:.22em;color:var(--txd);margin-bottom:.35rem;font-weight:600}
+.sc-sit{font-size:.84rem;line-height:1.4;margin-bottom:.35rem;color:rgba(255,255,255,.92)}
+.sc-q{font-size:.73rem;font-weight:600;color:var(--txm)}
+#dots{display:flex;gap:6px;justify-content:center}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .3s}
+.dot.done{background:#22c55e}.dot.cur{background:#fff;transform:scale(1.35);box-shadow:0 0 8px rgba(255,255,255,.6)}
+#choices{display:flex;flex-direction:column;gap:.4rem}
+.ch-btn{width:100%;padding:9px 14px;border-radius:14px;border:1.5px solid var(--bord2);background:var(--bg-glass);backdrop-filter:blur(16px);color:#fff;font-size:.76rem;font-weight:500;cursor:pointer;transition:all .2s;text-align:left;line-height:1.28;font-family:inherit}
+.ch-btn{display:flex;align-items:flex-start;gap:8px}
+.ch-letter{flex:0 0 auto;min-width:1.6em;height:1.6em;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.14);font-weight:800;font-size:.95em}
+.ch-body{flex:1;min-width:0}
+.ch-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5);transform:translateY(-2px);box-shadow:0 8px 26px rgba(0,0,0,.35)}
+.ch-btn.correct{background:rgba(34,197,94,.28);border-color:#22c55e;pointer-events:none;box-shadow:0 0 22px rgba(34,197,94,.4)}
+.ch-btn.wrong{background:rgba(239,68,68,.22);border-color:#ef4444;pointer-events:none}
+.ch-btn.disabled{pointer-events:none;opacity:.35}
+
+/* JOYSTICK */
+#joy-zone{position:absolute;left:1.4rem;bottom:2.4rem;width:132px;height:132px;pointer-events:all;z-index:6;touch-action:none}
+.joy-base{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(80,90,110,.5),rgba(18,26,40,.88));border:2px solid rgba(255,255,255,.18);box-shadow:0 8px 30px rgba(0,0,0,.5),inset 0 2px 8px rgba(255,255,255,.1),inset 0 -3px 12px rgba(0,0,0,.4);backdrop-filter:blur(14px)}
+.joy-ring{position:absolute;inset:9px;border-radius:50%;border:1px dashed rgba(255,255,255,.14)}
+.joy-stick{position:absolute;top:50%;left:50%;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#a8b5cc,#54607a 50%,#1e2638);border:2px solid rgba(0,0,0,.4);box-shadow:0 4px 15px rgba(0,0,0,.6),inset 0 -3px 8px rgba(0,0,0,.5),inset 0 2px 4px rgba(255,255,255,.3);transform:translate(-50%,-50%);cursor:grab;transition:box-shadow .2s}
+.joy-stick:active{cursor:grabbing}
+.joy-stick::after{content:'';position:absolute;top:50%;left:50%;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle,#38bdf8,#1e40af);transform:translate(-50%,-50%);box-shadow:0 0 12px rgba(56,189,248,.6)}
+.joy-label{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--txd);font-weight:600;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.hled{position:absolute;width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;transition:all .25s}
+.hled.l1{top:-2px;left:50%;transform:translateX(-50%)}
+.hled.l2{bottom:-2px;left:50%;transform:translateX(-50%)}
+.hled.l3{left:-2px;top:50%;transform:translateY(-50%)}
+.hled.l4{right:-2px;top:50%;transform:translateY(-50%)}
+.hled.danger{background:#ef4444;box-shadow:0 0 9px #ef4444;animation:hPulse .35s infinite}
+.hled.risky{background:#f59e0b;box-shadow:0 0 8px #f59e0b;animation:hPulse .8s infinite}
+@keyframes hPulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ACTION PAD */
+#act-pad{position:absolute;right:1.4rem;bottom:2.4rem;display:flex;flex-direction:column;gap:9px;pointer-events:all;z-index:6}
+.act-btn{width:58px;height:58px;border-radius:50%;background:linear-gradient(145deg,rgba(50,60,80,.85),rgba(20,30,50,.95));backdrop-filter:blur(14px);border:2px solid rgba(255,255,255,.18);box-shadow:0 6px 18px rgba(0,0,0,.5),inset 0 2px 4px rgba(255,255,255,.15),inset 0 -3px 8px rgba(0,0,0,.4);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:inherit;touch-action:manipulation}
+.act-btn:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.4)}
+.act-btn:active{transform:translateY(1px) scale(.94)}
+
+/* GATEWAY PROMPT */
+#gate-prompt{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);background:rgba(8,15,30,.78);backdrop-filter:blur(20px);border:1.5px solid rgba(56,189,248,.5);border-radius:17px;padding:1rem 1.6rem;display:none;pointer-events:none;z-index:5;text-align:center;animation:gGlow 2s ease-in-out infinite}
+@keyframes gGlow{0%,100%{box-shadow:0 0 28px rgba(56,189,248,.4)}50%{box-shadow:0 0 56px rgba(56,189,248,.7)}}
+.gp-title{font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:var(--acc);margin-bottom:.35rem;font-weight:700}
+.gp-text{font-size:.9rem;font-weight:600}
+.gp-hint{font-size:.65rem;color:var(--txm);margin-top:.35rem;font-family:monospace}
+
+/* FEEDBACK */
+#fb-wrap{position:absolute;inset:0;background:rgba(0,5,15,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;pointer-events:all;z-index:50;animation:fIn .25s}
+@keyframes fIn{from{opacity:0}to{opacity:1}}
+#fb-wrap.on{display:flex}
+.fb-card{background:linear-gradient(180deg,rgba(15,25,45,.96),rgba(8,15,30,.98));border:1px solid var(--bord);border-radius:24px;padding:1.8rem 1.9rem 1.4rem;max-width:560px;width:92%;animation:fbUp .4s cubic-bezier(.4,0,.2,1);box-shadow:0 20px 70px rgba(0,0,0,.6);max-height:88vh;overflow-y:auto}
+@keyframes fbUp{from{transform:translateY(26px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.fbv-row{display:flex;align-items:center;gap:13px;margin-bottom:.4rem}
+.fbv-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;flex-shrink:0}
+.fbv-ico.ok{background:linear-gradient(135deg,#16a34a,#22c55e);box-shadow:0 4px 14px rgba(34,197,94,.4)}
+.fbv-ico.no{background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 4px 14px rgba(239,68,68,.4)}
+.fbv-t{font-size:1.3rem;font-weight:800;line-height:1.1}
+.fb-out{display:inline-block;padding:4px 12px;border-radius:18px;font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;border:1px solid}
+.fo-safe{background:rgba(34,197,94,.15);color:#4ade80;border-color:#22c55e}
+.fo-risky{background:rgba(245,158,11,.15);color:#fbbf24;border-color:#f59e0b}
+.fo-unsafe{background:rgba(239,68,68,.15);color:#f87171;border-color:#ef4444}
+.fb-txt{font-size:.85rem;line-height:1.6;color:rgba(255,255,255,.82);margin-bottom:.8rem}
+.fb-phys{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.06));border:1px solid rgba(139,92,246,.25);border-radius:13px;padding:.8rem 1rem;margin-bottom:1rem}
+.fbp-h{font-size:.58rem;color:#a5b4fc;text-transform:uppercase;letter-spacing:.18em;font-weight:700;margin-bottom:4px}
+.fbp-t{font-size:.78rem;color:rgba(255,255,255,.78);line-height:1.55;font-family:monospace}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:7px;margin-bottom:1.1rem}
+.chip{background:rgba(255,255,255,.04);border:1px solid var(--bord);border-radius:11px;padding:8px;text-align:center}
+.chip-l{font-size:.54rem;color:var(--txd);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:2px}
+.chip-v{font-size:.88rem;font-weight:700;line-height:1}
+.chip-s{font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.next-btn{width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,#0ea5e9,#6366f1,#8b5cf6);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 6px 18px rgba(14,165,233,.4)}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(14,165,233,.55)}
+
+/* RESULTS */
+#s-res{flex-direction:column;align-items:center;justify-content:center;background:rgba(0,5,20,.85);backdrop-filter:blur(18px)}
+.res-card{background:linear-gradient(180deg,rgba(20,30,50,.88),rgba(10,20,40,.94));border:1px solid var(--bord);border-radius:26px;padding:2.3rem 2rem 1.8rem;max-width:500px;width:92%;text-align:center;box-shadow:0 22px 70px rgba(0,0,0,.6)}
+.res-ico{width:76px;height:76px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:2.4rem;background:linear-gradient(135deg,#1e293b,#334155);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+.res-h{font-size:1.55rem;font-weight:800;margin-bottom:.25rem}
+.res-g{font-size:.74rem;color:var(--txd);margin-bottom:1.8rem;font-weight:500}
+.res-big{font-size:4.2rem;font-weight:800;line-height:1;margin-bottom:.25rem;background:linear-gradient(135deg,#fff,#94a3b8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.res-int{font-size:.9rem;color:var(--txm);margin-bottom:1.7rem;font-weight:500}
+.res-bd{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:9px;margin-bottom:1.7rem}
+.rbd{background:rgba(255,255,255,.04);border:1px solid var(--bord);border-radius:13px;padding:12px 8px}
+.rbd-n{font-size:1.25rem;font-weight:800;line-height:1}
+.rbd-l{font-size:.56rem;color:var(--txd);margin-top:4px;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.res-btns{display:flex;gap:.65rem}
+.res-btn{flex:1;padding:12px;border-radius:12px;border:1px solid var(--bord2);background:rgba(255,255,255,.06);color:#fff;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.res-btn:hover{background:rgba(255,255,255,.14)}
+.res-btn.primary{background:linear-gradient(135deg,#0ea5e9,#6366f1);border:none;box-shadow:0 4px 12px rgba(14,165,233,.35)}
+
+/* MISSION BANNER (control phase) */
+/* Mission chip. Compact by default: one short line in the gap at the top of the screen
+   between the Menu pills and the score, so the scene in the middle stays visible while
+   steering. .expanded shows the full instruction (first seconds, warnings, on tap). */
+#mission{position:absolute;top:calc(1rem + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);
+  background:rgba(8,15,30,.82);border:1.5px solid rgba(56,189,248,.45);border-radius:999px;padding:.38rem 1rem;display:none;
+  pointer-events:all;cursor:pointer;z-index:6;text-align:center;max-width:min(40vw,520px);white-space:nowrap;
+  transition:max-width .3s ease, border-radius .3s ease, padding .3s ease;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+#mission .m-eyebrow, #mission .m-text, #mission .m-hint{display:none}
+#mission.expanded{max-width:min(64vw,640px);border-radius:16px;padding:.55rem 1.1rem;white-space:normal}
+#mission.expanded .m-text, #mission.warn .m-text, #mission.passed .m-text{display:block}
+#mission.warn, #mission.passed{max-width:min(64vw,640px);border-radius:16px;white-space:normal}
+#mission.expanded .m-hint{display:inline}
+.m-eyebrow{font-size:.56rem;letter-spacing:.25em;text-transform:uppercase;color:var(--acc);margin-bottom:.3rem;font-weight:700}
+.m-text{font-size:.88rem;font-weight:600;line-height:1.4}
+.m-dist{font-size:.85rem;color:#e2e8f0;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.m-dist b{color:#7dd3fc;font-variant-numeric:tabular-nums}
+#mission.expanded .m-dist{margin-top:.3rem;font-size:.75rem;color:var(--txm)}
+#mission.passed{border-color:rgba(34,197,94,.6);box-shadow:0 0 30px rgba(34,197,94,.5)}
+#mission.warn{border-color:rgba(239,68,68,.75);box-shadow:0 0 30px rgba(239,68,68,.45)}
+#mission.warn .m-text{color:#fca5a5}
+#trans{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:990;transition:opacity .4s}
+#tutorial{position:absolute;left:1.4rem;bottom:calc(2.4rem + 148px);background:var(--bg-glass2);backdrop-filter:blur(14px);border:1px solid var(--bord);border-radius:13px;padding:9px 15px;font-size:.74rem;color:var(--txm);pointer-events:none;display:none;z-index:5;animation:tFade 3s ease-in-out infinite;max-width:220px}
+@keyframes tFade{0%,100%{opacity:.7}50%{opacity:1}}
+
+/* ═══ ROTATE-DEVICE LOCK ═══
+   The game only really works in landscape (the side panel, joystick and action pad
+   need horizontal room). Below tablet-ish size, portrait shows a full-screen prompt
+   instead of the game; this is a pure CSS media query so it reacts instantly to a
+   physical rotation, no JS/orientation-API polling needed. */
+#rotate-prompt{display:none}
+@media (orientation:portrait) and (max-width:900px){
+  #rotate-prompt{
+    display:flex;position:fixed;inset:0;z-index:9999;background:#000510;
+    flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:2rem;pointer-events:all;
+  }
+}
+.rp-icon{font-size:3.2rem;margin-bottom:1.2rem;animation:rpSpin 1.8s ease-in-out infinite}
+@keyframes rpSpin{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
+.rp-title{font-size:1.15rem;font-weight:700;margin-bottom:.5rem}
+.rp-text{font-size:.85rem;color:var(--txm);max-width:280px;line-height:1.5}
+
+/* ═══ COMPACT LANDSCAPE (phones) ═══
+   Once portrait is ruled out (see the rotate lock above), every mobile size the game
+   actually runs at is landscape — so the panel stays a narrow RIGHT-DOCKED column here
+   too, never a full-width sheet: a sheet spanning the whole width reads as "covering
+   the screen" and squeezes the 3D view into a sliver. Instead this column dodges the
+   action pad HORIZONTALLY (stops short of it) rather than vertically, which frees up
+   almost the full height — top to bottom — for its own content, so it fits without
+   scrolling instead of needing a shrunken height budget. Width scales with the
+   viewport via min(), and env(safe-area-inset-*) keeps clear of notches/rounded
+   corners on devices that report them (falls back to 0 elsewhere). */
+@media (max-width:900px), (max-height:500px){
+  #hud-top{padding:.5rem calc(.6rem + env(safe-area-inset-right,0px)) .5rem calc(.6rem + env(safe-area-inset-left,0px))}
+  .hud-pill{padding:4px 9px;font-size:.62rem;gap:5px}
+  .hud-score{padding:5px 10px;min-width:56px}
+  .hs-num{font-size:1rem}
+  .hs-lbl{font-size:.44rem}
+  #back-btn{padding:5px 10px;font-size:.62rem}
+
+  #side-panel{
+    top:48px; left:auto;
+    right:calc(.6rem + env(safe-area-inset-right,0px) + 42px + .6rem);
+    bottom:calc(.5rem + env(safe-area-inset-bottom,0px));
+    width:min(380px,48vw); max-width:none; max-height:none;
+    padding:0;
+  }
+  #side-panel-inner{gap:.32rem}
+  #side-panel.panel-hidden{transform:translateX(20px)}
+
+  #pagasa-alert{padding:2px 8px;font-size:.5rem}
+  #params-panel{padding:.26rem .42rem}
+  .pp-title{font-size:.42rem;margin-bottom:.18rem}
+  .pp-row{margin-bottom:.12rem}
+  .pp-row:last-child{margin-bottom:0}
+  .pp-head{margin-bottom:1px}
+  .pp-label{font-size:.54rem}
+  .pp-val{font-size:.62rem}
+  .pp-bw{height:3px}
+  .pp-st{font-size:.42rem;padding:0 5px;margin-top:1px}
+
+  #scen-card{padding:.28rem .42rem}
+  .sc-num{font-size:.4rem;margin-bottom:.12rem}
+  .sc-sit{font-size:.56rem;line-height:1.2;margin-bottom:.12rem}
+  .sc-q{font-size:.5rem}
+  #dots{gap:4px}
+  .dot{width:5px;height:5px}
+  #choices{gap:.1rem}
+  .ch-btn{font-size:.5rem;padding:2px 5px;border-radius:9px;line-height:1.12}
+
+  /* Grade 9 buoyancy lab controls live inside #choices too, and its own bespoke
+     stepper/gauge UI has real height even before the (now-doubled) bilingual scen-card
+     content above it — compact it as aggressively as the rest of this tier. */
+  .lab-panel{padding:.4rem .55rem}
+  .lab-attempt{font-size:.5rem;margin-bottom:.2rem}
+  .lab-prompt{font-size:.56rem;margin-bottom:.22rem;line-height:1.18}
+  .lab-step{gap:8px;margin-bottom:.22rem}
+  .lab-step button{width:32px;height:32px;font-size:1rem}
+  .lab-num{font-size:1.2rem;min-width:36px}
+  .lab-go{padding:8px;font-size:.68rem;margin-top:.15rem}
+  .lab-note{display:none} /* helper copy is the least essential thing once space is this tight */
+  .gauge{margin:.3rem 0 .1rem}
+  .gauge-row{gap:6px;margin-bottom:3px;font-size:.56rem}
+  .gauge-lbl{width:90px}
+  .gauge-val{width:56px;font-size:.56rem}
+  .lab-hint{font-size:.58rem;margin-top:.3rem;line-height:1.3}
+
+  #joy-zone{width:84px;height:84px;left:calc(.7rem + env(safe-area-inset-left,0px));bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))}
+  .joy-stick{width:38px;height:38px}
+  #act-pad{right:calc(.7rem + env(safe-area-inset-right,0px));bottom:calc(1.5rem + env(safe-area-inset-bottom,0px));gap:5px}
+  .act-btn{width:38px;height:38px;font-size:.9rem}
+  #tutorial{display:none} /* no room for it in the compact layout */
+  .story-bar{height:12%}
+  .story-caption{padding:.8rem 1.6rem}
+  .story-num{font-size:.54rem;margin-bottom:.5rem}
+  .story-en{font-size:.86rem;line-height:1.4}
+  .story-bi{font-size:.74rem;margin-top:.4rem}
+  .story-skip{padding:5px 12px;font-size:.68rem}
+  #mission{top:calc(.5rem + env(safe-area-inset-top,0px));padding:.3rem .8rem;max-width:min(38vw,420px)}
+  #mission.expanded{max-width:min(58vw,520px);padding:.45rem .9rem}
+  .m-text{font-size:.74rem}
+  .m-dist{font-size:.74rem}
+  #gate-prompt{padding:.7rem 1.1rem}
+  .gp-text{font-size:.78rem}
+
+  .fb-card{padding:1rem .95rem .85rem;max-height:88vh;overflow-y:auto}
+  .fbv-t{font-size:1rem}
+  .fb-txt{font-size:.78rem}
+
+  /* Home screen — landscape phones are short, not narrow, so this squeezes vertical
+     rhythm (not width) to guarantee everything fits with zero scrolling. */
+  #s-menu{padding:.6rem 1rem}
+  .menu-wrap{gap:.5rem}
+  .menu-eyebrow{font-size:.52rem}
+  .menu-h1{font-size:clamp(1.3rem,4.2vh,2rem);margin-bottom:0}
+  .menu-sub{font-size:.68rem;line-height:1.3}
+  .start-card{padding:.7rem 1rem}
+  .start-num{font-size:1.6rem}
+  .start-topic{font-size:.82rem}
+  .start-code{font-size:.58rem;margin-bottom:.5rem}
+  .session-wait-text{font-size:.64rem}
+  .session-wait-spinner{width:16px;height:16px}
+  .start-btn{padding:9px;font-size:.78rem}
+  .history-box{padding:.5rem .7rem}
+  .history-row{font-size:.64rem}
+  .menu-foot{display:none} /* footnote/help text is the least essential thing on a short screen */
+}
+
+/* Very short viewports (small-phone landscape, e.g. iPhone SE-class ~375px tall) */
+@media (max-height:400px){
+  .menu-eyebrow, .menu-sub{display:none} /* branding/blurb — grade card + action button matter more here */
+  .menu-h1{font-size:1.1rem}
+  .history-box{display:none} /* recent-attempts history is a nice-to-have; drop it before anything scrolls */
+  #side-panel{top:44px}
+  #side-panel-inner{gap:.3rem}
+  .pp-title, .sc-num{display:none} /* trim non-essential labels first, not the content itself */
+  .hud-topic-pill{display:none} /* header is getting crowded (menu/grade/topic/observe) — topic is the least essential */
+  .story-bar{height:10%}
+  .story-en{font-size:.76rem}
+  .story-bi{font-size:.66rem}
+  #params-panel{padding:.35rem .5rem}
+  .pp-row{margin-bottom:.16rem}
+  #scen-card{padding:.4rem .55rem}
+  .sc-sit{font-size:.6rem;line-height:1.22;margin-bottom:.14rem}
+  .sc-q{font-size:.54rem}
+  #dots{display:none} /* progress is implied by the situation text changing; not essential */
+  #choices{gap:.2rem}
+  .ch-btn{padding:4px 7px;font-size:.58rem;line-height:1.2}
+  #joy-zone{width:72px;height:72px}
+  .joy-stick{width:32px;height:32px}
+  #act-pad{gap:4px}
+  .act-btn{width:34px;height:34px;font-size:.8rem}
+}
+
+/* ═══ FULL-SCREEN QUESTION (Grade 7 trial: narration → watch → question) ═══
+   The question takes the whole screen so the text can be as large as possible, with
+   no scrollbars: fitCenterQ() in game-logic.js picks the largest font size at which
+   everything fits on that device (every size below is in em of that one font size),
+   and the choices then stretch to fill their column. "Hide question" returns to the
+   3D scene. Placed last so it overrides the compact right-docked rules above. */
+#q-head{display:none}
+#q-left{display:contents}
+#side-panel.q-center{
+  position:fixed; z-index:9; transform:none;
+  top:calc(.5rem + env(safe-area-inset-top,0px)); bottom:calc(.5rem + env(safe-area-inset-bottom,0px));
+  left:calc(.5rem + env(safe-area-inset-left,0px)); right:calc(.5rem + env(safe-area-inset-right,0px));
+  width:auto; max-width:none; max-height:none; overflow:hidden;
+  transition:opacity .4s ease, transform .4s ease;
+}
+#side-panel.q-center.panel-hidden{transform:scale(.97);visibility:hidden;transition:opacity .4s ease, transform .4s ease, visibility 0s linear .4s}
+#side-panel.q-center #side-panel-inner{
+  zoom:1!important; height:100%; box-sizing:border-box; overflow:hidden;
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); grid-template-rows:auto minmax(0,1fr);
+  gap:.7em 1.1em; padding:.75em 1em .9em; font-size:18px;
+  background:linear-gradient(180deg,rgba(14,24,44,.96),rgba(7,13,28,.96));
+  border:1px solid rgba(125,211,252,.28); border-radius:22px; box-shadow:0 20px 70px rgba(0,0,0,.55);
+}
+/* header sits over the LEFT column only, so the choices can use the full height */
+#side-panel.q-center #q-head{display:flex;grid-column:1;grid-row:1;align-items:center;justify-content:space-between;gap:.8em;
+  padding-bottom:.45em;border-bottom:1px solid rgba(255,255,255,.1)}
+.qh-title{font-size:.8em;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7dd3fc}
+.qh-hide{flex:0 0 auto;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.32);color:#fff;border-radius:999px;
+  padding:.4em .9em;font-size:.8em;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;white-space:nowrap}
+.qh-hide:hover{background:rgba(255,255,255,.2)}
+/* columns: never scroll (no scrollbars, ever); a hidden-scrollbar overflow stays only as
+   a last-resort safety net if a screen is too small even at the minimum size */
+#side-panel.q-center #q-left, #side-panel.q-center #choices{min-height:0;overflow:auto;scrollbar-width:none}
+#side-panel.q-center #q-left::-webkit-scrollbar, #side-panel.q-center #choices::-webkit-scrollbar{display:none}
+#side-panel.q-center #q-left{display:flex;flex-direction:column;gap:.6em;grid-column:1;grid-row:2}
+#side-panel.q-center #choices{display:flex;flex-direction:column;gap:.5em;grid-column:2;grid-row:1 / span 2}
+#side-panel.q-center.measuring *{transition:none!important;animation:none!important}   /* measure final sizes, not mid-animation */
+#side-panel.q-center .ch-btn{flex:0 0 auto}                  /* natural height while fitCenterQ() measures */
+#side-panel.q-center.fitted .ch-btn{flex:1 0 auto}           /* then spread over the full column height (grow, never shrink) */
+#side-panel.q-center #dots, #side-panel.q-center .sc-num{display:none}
+#side-panel.q-center #scen-card{background:none;border:none;backdrop-filter:none;padding:0;text-align:left;animation:none;flex:0 0 auto}
+#side-panel.q-center .sc-sit{font-size:1em;line-height:1.42;margin:0 0 .65em;color:#fff}
+#side-panel.q-center .sc-q{font-size:1.12em;line-height:1.35;font-weight:800;color:#fde68a}
+#side-panel.q-center .bikol-text{display:block;font-size:.84em;font-weight:500;font-style:italic;color:rgba(255,255,255,.68);margin-top:.3em;line-height:1.38}
+#side-panel.q-center .sc-q .bikol-text{color:rgba(253,230,138,.75)}
+#side-panel.q-center #pagasa-alert{font-size:.72em;padding:.35em .8em;text-align:left;flex:0 0 auto}
+#side-panel.q-center #params-panel{padding:.5em .75em;flex:0 0 auto;border-radius:14px}
+#side-panel.q-center .pp-title{font-size:.6em;margin-bottom:.35em}
+#side-panel.q-center .pp-row{margin-bottom:.2em}
+#side-panel.q-center .pp-label{font-size:.78em}
+#side-panel.q-center .pp-val{font-size:.84em}
+#side-panel.q-center .pp-bw, #side-panel.q-center .pp-st{display:none}
+#side-panel.q-center .ch-btn{font-size:1em;line-height:1.32;padding:.5em .75em;border-radius:14px;gap:.6em;align-items:center}
+#side-panel.q-center .ch-letter{min-width:1.8em;height:1.8em;font-size:1em;border-radius:10px}
+#side-panel.q-center .ch-btn:hover{transform:none}
+/* Short screens (landscape phones): drop the two non-essential boxes so the words get the room */
+@media (max-height:500px){
+  #side-panel.q-center #params-panel, #side-panel.q-center #pagasa-alert{display:none!important}
+  #side-panel.q-center{top:calc(.3rem + env(safe-area-inset-top,0px));bottom:calc(.3rem + env(safe-area-inset-bottom,0px));
+    left:calc(.3rem + env(safe-area-inset-left,0px));right:calc(.3rem + env(safe-area-inset-right,0px))}
+  #side-panel.q-center #side-panel-inner{border-radius:16px;padding:.5em .7em .6em;gap:.45em .8em;grid-template-columns:minmax(0,.82fr) minmax(0,1.3fr)}
+  #side-panel.q-center .ch-btn{padding:.42em .65em}
+  #side-panel.q-center .bikol-text{font-size:.82em;margin-top:.2em}
+}
+/* While the question is open the joystick / zoom pad aren't needed */
+body.q-open #joy-zone, body.q-open #act-pad, body.q-open #tutorial{opacity:0;pointer-events:none}
+
+/* Watch-phase banner and the big "View question" button */
+#q-watch{position:absolute;top:4.4rem;left:50%;transform:translate(-50%,-10px);display:flex;align-items:center;gap:.8rem;
+  background:rgba(8,15,30,.9);border:1.5px solid rgba(56,189,248,.5);border-radius:999px;padding:.55rem .6rem .55rem 1.1rem;
+  font-size:1.05rem;font-weight:600;color:#fff;z-index:7;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;max-width:94vw}
+#q-watch.on{opacity:1;transform:translate(-50%,0);pointer-events:all}
+.qw-count{color:#7dd3fc;margin-left:.3rem;white-space:nowrap}
+.qw-count b{display:inline-block;min-width:1.3em;text-align:center;font-size:1.2em}
+.qw-now{background:linear-gradient(135deg,#0ea5e9,#6366f1);border:none;color:#fff;border-radius:999px;padding:.6rem 1.1rem;font-size:.95rem;
+  font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;min-height:44px}
+#q-show{position:absolute;left:50%;bottom:calc(1.4rem + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);z-index:7;
+  background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;border:none;border-radius:999px;padding:.95rem 2rem;font-size:1.2rem;
+  font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 10px 34px rgba(14,165,233,.45);opacity:0;pointer-events:none;
+  transition:opacity .35s,transform .35s}
+#q-show.on{opacity:1;transform:translate(-50%,0);pointer-events:all}
+
+/* Bigger narration caption for scenarios using this flow */
+#story-overlay.big .story-num{font-size:.85rem}
+#story-overlay.big .story-en{font-size:1.6rem;max-width:900px}
+#story-overlay.big .story-bi{font-size:1.25rem;max-width:860px}
+#story-overlay.big .story-skip{font-size:.95rem;padding:9px 20px}
+@media (max-width:900px), (max-height:500px){
+  #q-watch{top:3.1rem;font-size:.92rem;padding:.4rem .45rem .4rem .9rem;gap:.55rem}
+  .qw-now{font-size:.85rem;padding:.45rem .9rem}
+  #q-show{font-size:1.05rem;padding:.75rem 1.6rem;bottom:calc(.9rem + env(safe-area-inset-bottom,0px))}
+  .story-box{padding:.8rem 1.6rem .9rem;border-radius:36px;box-shadow:0 0 26px 18px rgba(4,10,24,.72);max-width:86vw}
+  .story-box::before{top:.35rem}
+  #story-overlay.big .story-en{font-size:1.15rem;line-height:1.45}
+  #story-overlay.big .story-bi{font-size:.98rem}
+}
+
+/* ═══ RESULT CARD — full-screen, game-style, never scrolls ═══
+   Two columns sized to the screen; fitFeedback() in game-logic.js picks the largest
+   font size at which both columns fit (all sizes below are em of that size). */
+#fb-wrap{padding:calc(.5rem + env(safe-area-inset-top,0px)) calc(.5rem + env(safe-area-inset-right,0px))
+  calc(.5rem + env(safe-area-inset-bottom,0px)) calc(.5rem + env(safe-area-inset-left,0px));box-sizing:border-box}
+#fb-wrap .fb-card{
+  width:min(1180px,100%); height:min(760px,100%); max-width:none; max-height:none; box-sizing:border-box;
+  display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:1em 1.4em;
+  padding:1.1em 1.3em; font-size:18px; overflow:hidden; border-radius:22px;
+}
+#fb-wrap .fb-col{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#fb-wrap .fb-col-b{gap:.8em}
+#fb-wrap .fbv-row{gap:.7em;margin-bottom:.6em;flex:0 0 auto}
+#fb-wrap .fbv-ico{width:2.6em;height:2.6em;border-radius:.7em;font-size:1em}
+#fb-wrap .fbv-ico{font-size:1.25em}
+#fb-wrap .fbv-t{font-size:1.45em}
+#fb-wrap .fb-out{font-size:.72em;padding:.3em .9em;margin:.3em 0 0;letter-spacing:.1em}
+#fb-wrap .chips{grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:.45em;margin:0 0 .75em;flex:0 0 auto}
+#fb-wrap .chip{padding:.5em .4em;border-radius:.7em}
+#fb-wrap .chip-l{font-size:.62em;margin-bottom:.2em}
+#fb-wrap .chip-v{font-size:.95em;line-height:1.15}
+#fb-wrap .chip-s{font-size:.62em;margin-top:.25em}
+#fb-wrap .fb-txt{font-size:1em;line-height:1.45;margin:0;flex:0 0 auto}
+#fb-wrap .fb-txt .bikol-text{font-size:.84em;margin-top:.35em;line-height:1.38}
+#fb-wrap .fb-phys{flex:1 1 auto;min-height:0;margin:0;padding:.8em 1em;border-radius:.8em;display:flex;flex-direction:column}
+#fb-wrap .fbp-h{font-size:.68em;margin-bottom:.45em}
+#fb-wrap .fbp-t{font-size:.9em;line-height:1.5}
+#fb-wrap .next-btn{flex:0 0 auto;font-size:1.05em;padding:.9em 1em;border-radius:.8em;min-height:48px}
+#fb-wrap.measuring .fb-card *{transition:none!important}   /* measure final sizes (the card's own fade-in is left alone) */
+/* Short landscape phones: edge-to-edge, tighter spacing */
+@media (max-height:500px){
+  #fb-wrap{padding:calc(.3rem + env(safe-area-inset-top,0px)) calc(.3rem + env(safe-area-inset-right,0px))
+    calc(.3rem + env(safe-area-inset-bottom,0px)) calc(.3rem + env(safe-area-inset-left,0px))}
+  #fb-wrap .fb-card{padding:.7em .9em;gap:.6em 1em;border-radius:16px}
+  #fb-wrap .fbv-row{margin-bottom:.4em}
+  #fb-wrap .chips{margin-bottom:.5em}
+}
+
+/* ═══ FIRST-TIME TUTORIAL (js/tutorial.js) ═══ */
+#tut-layer{position:fixed;inset:0;z-index:90;pointer-events:none;font-family:inherit}
+#tut-ring{position:fixed;border-radius:18px;border:3px solid #facc15;box-shadow:0 0 0 4px rgba(250,204,21,.25),0 0 26px rgba(250,204,21,.65);
+  opacity:0;transition:opacity .25s, left .2s, top .2s, width .2s, height .2s;animation:tutPulse 1.2s ease-in-out infinite}
+#tut-ring.on{opacity:1}
+@keyframes tutPulse{0%,100%{box-shadow:0 0 0 4px rgba(250,204,21,.25),0 0 22px rgba(250,204,21,.55)}50%{box-shadow:0 0 0 9px rgba(250,204,21,.12),0 0 34px rgba(250,204,21,.8)}}
+#tut-bubble{position:fixed;width:min(330px,calc(100vw - 20px));background:linear-gradient(180deg,#fffbeb,#fef3c7);color:#1f2937;
+  border-radius:18px;padding:.85rem 1rem .9rem;box-shadow:0 14px 40px rgba(0,0,0,.55);border:2px solid #facc15;pointer-events:all;
+  opacity:0;visibility:hidden;transition:opacity .25s, left .25s, top .25s}
+#tut-bubble.on{opacity:1;visibility:visible}
+#tut-bubble.pop{animation:tutPop .35s cubic-bezier(.3,1.5,.5,1)}
+@keyframes tutPop{from{transform:scale(.85)}to{transform:scale(1)}}
+.tb-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-bottom:.35rem}
+.tb-step{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#b45309}
+.tb-tools{display:flex;align-items:center;gap:.15rem}
+.tut-ico{background:rgba(0,0,0,.07);border:none;border-radius:999px;width:36px;height:36px;font-size:1rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.tut-ico:hover{background:rgba(0,0,0,.14)}
+.tc-tools{display:flex;justify-content:flex-end;gap:.3rem;margin:-.4rem -.4rem .2rem 0}
+#tut-card .tut-ico{background:rgba(255,255,255,.1);color:#fff}
+.tb-skip{background:none;border:none;color:#78716c;font-size:.78rem;font-weight:600;text-decoration:underline;cursor:pointer;font-family:inherit;padding:.3rem .2rem;min-height:32px}
+.tb-text{font-size:1.02rem;line-height:1.45;font-weight:500}
+.tb-text b{color:#92400e}
+.tb-wait{margin-top:.5rem;font-size:.78rem;font-weight:700;color:#0369a1;display:flex;align-items:center;gap:.4rem}
+.tb-wait::before{content:'';width:9px;height:9px;border-radius:50%;background:#0ea5e9;animation:tutBlink 1s ease-in-out infinite}
+@keyframes tutBlink{50%{opacity:.25}}
+.tb-actions{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end;margin-top:.6rem}
+.tb-actions:empty{display:none}
+.tb-confirm{flex:1 1 100%;font-size:.88rem;line-height:1.35;color:#44403c}
+.tut-btn{border:none;border-radius:999px;padding:.6rem 1.2rem;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit;min-height:44px}
+.tut-btn.primary{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;box-shadow:0 6px 18px rgba(14,165,233,.4)}
+.tut-btn.ghost{background:rgba(0,0,0,.06);color:#44403c}
+#tut-card .tut-btn.ghost{background:rgba(255,255,255,.1);color:#e2e8f0}
+/* animated pointer for gestures */
+#tut-hand{position:fixed;font-size:2.2rem;opacity:0;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));transition:opacity .3s}
+#tut-hand.on{opacity:1}
+#tut-hand.drag{animation:tutDrag 1.8s ease-in-out infinite}
+#tut-hand.up{animation:tutUp 1.4s ease-in-out infinite}
+@keyframes tutDrag{0%,100%{transform:translate(0,0)}25%{transform:translate(28px,-6px)}50%{transform:translate(0,-26px)}75%{transform:translate(-28px,-6px)}}
+@keyframes tutUp{0%{transform:translate(0,10px);opacity:.3}40%{opacity:1}100%{transform:translate(0,-34px);opacity:0}}
+/* welcome / finish cards */
+#tut-card{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,6,16,.72);pointer-events:all;
+  padding:calc(.8rem + env(safe-area-inset-top,0px)) 1rem calc(.8rem + env(safe-area-inset-bottom,0px))}
+#tut-card.on{display:flex;animation:fIn .3s}
+.tc-box{width:min(560px,100%);max-height:100%;background:linear-gradient(180deg,#13233f,#0a1428);border:1.5px solid rgba(125,211,252,.4);
+  border-radius:24px;padding:1.5rem 1.6rem;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.6);color:#fff;overflow:auto}
+.tc-title{font-size:1.55rem;font-weight:800;margin-bottom:.6rem}
+.tc-text{font-size:1.05rem;line-height:1.5;color:rgba(255,255,255,.85)}
+.tc-text b{color:#7dd3fc}
+.tc-actions{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem}
+#tut-card .tut-btn{font-size:1.05rem;padding:.8rem 1.6rem}
+@media (max-height:500px){
+  .tc-box{padding:1rem 1.2rem}
+  .tc-title{font-size:1.25rem;margin-bottom:.4rem}
+  .tc-text{font-size:.95rem}
+  .tc-actions{margin-top:.8rem}
+  #tut-bubble{width:min(300px,calc(100vw - 20px));padding:.65rem .8rem .7rem}
+  .tb-text{font-size:.92rem}
+}
+body.tut-on #tutorial{display:none!important}   /* the old one-line hint; the tutorial covers it */
+/* menu "How to play" button */
+.howto-btn{margin:.4rem auto 0;display:block;background:rgba(56,189,248,.12);border:1.5px solid rgba(56,189,248,.45);color:#7dd3fc;border-radius:999px;
+  padding:.55rem 1.2rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;pointer-events:all;min-height:40px}
+.howto-btn:hover{background:rgba(56,189,248,.22)}
+
+/* ═══ HOME MENU on landscape phones/tablets — two columns, nothing ever clipped ═══
+   Left: title, blurb, tutorial button, help line. Right: the session card (its Enter
+   button is always fully on screen) and recent attempts, trimmed to the rows that fit.
+   Portrait and desktop keep the single centred column (wrappers are display:contents). */
+.menu-left, .menu-right{display:contents}
+@media (orientation:landscape) and (max-height:700px){
+  #s-menu{justify-content:center;
+    padding:calc(4rem + env(safe-area-inset-top,0px)) calc(1.2rem + env(safe-area-inset-right,0px))
+            calc(.8rem + env(safe-area-inset-bottom,0px)) calc(1.2rem + env(safe-area-inset-left,0px))}
+  .menu-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:1fr auto auto 1fr;
+    column-gap:clamp(1rem,3vw,2.4rem);row-gap:.6rem;max-width:min(1040px,100%);width:100%;height:100%;max-height:100%;
+    align-items:center;overflow:visible}
+  .menu-left, .menu-right{display:flex;flex-direction:column;min-height:0}
+  .menu-left{grid-column:1;grid-row:2;align-items:flex-start;text-align:left;gap:.45rem}
+  .menu-left-b{grid-column:1;grid-row:3;align-items:flex-start;text-align:left;gap:.5rem}
+  .menu-right{grid-column:2;grid-row:1 / -1;gap:.6rem;justify-content:safe center;align-self:stretch;max-height:100%;overflow:hidden}
+  .history-box.hist-off{display:none!important}
+  .menu-eyebrow{display:block;font-size:.6rem}
+  .menu-h1{font-size:clamp(1.7rem,7.5vh,3rem);text-align:left}
+  .menu-sub{display:block;font-size:.76rem;line-height:1.4;text-align:left;max-width:none}
+  .howto-btn{margin:0;font-size:.82rem}
+  .menu-foot{display:block;text-align:left;font-size:.6rem}
+  .start-card{flex:0 0 auto;overflow:visible;padding:.85rem 1.1rem;text-align:left}
+  .start-num{font-size:1.8rem}
+  .start-topic{font-size:.95rem}
+  .start-code{margin-bottom:.55rem}
+  .session-wait{flex-direction:row;align-items:center;gap:.6rem;text-align:left}
+  .session-wait-text{font-size:.74rem;max-width:none}
+  .session-ready-badge{margin-bottom:.55rem}
+  .start-btn{padding:12px;font-size:.95rem;min-height:46px}
+  .history-box{flex:0 1 auto;min-height:0;overflow:hidden;padding:.55rem .8rem}
+  .history-row{font-size:.68rem}
+}
+/* shorter landscape phones: trim the least essential pieces first */
+@media (orientation:landscape) and (max-height:430px){
+  #s-menu{padding-top:calc(3.7rem + env(safe-area-inset-top,0px));padding-bottom:calc(.5rem + env(safe-area-inset-bottom,0px))}
+  .menu-sub{font-size:.68rem}
+  .menu-foot{display:none}
+  .start-card{padding:.65rem .95rem}
+  .start-num{font-size:1.4rem}
+  .start-topic{font-size:.88rem}
+  .start-btn{padding:10px;min-height:44px}
+  .start-code{margin-bottom:.4rem}
+}
+@media (orientation:landscape) and (max-height:370px){
+  .menu-sub{display:none}
+  .menu-h1{font-size:1.5rem}
+  .history-box{display:none!important}
+}
+
+/* ═══ Typeset formulas (from the teacher's Word documents) ═══ */
+.mth{font-family:"Cambria Math","STIX Two Math","Latin Modern Math","Times New Roman",serif;white-space:nowrap;font-size:1.06em;letter-spacing:.01em}
+.mth i{font-style:italic}
+.mth sub,.mth sup{font-size:.68em;line-height:0}
+.mf{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .12em;line-height:1.05;font-size:.92em}
+.mfn{border-bottom:1px solid currentColor;padding:0 .2em .06em}
+.mfd{padding:.06em .2em 0}
+/* rich physics explanation on the result card */
+.fbp-t.fbp-rich{font-family:inherit}
+.fbp-rich .fbp-title{font-weight:800;color:#c4b5fd;margin-bottom:.3em}
+.fbp-rich .fbp-en{color:rgba(255,255,255,.9);line-height:1.5}
+.fbp-rich .fbp-bi{margin-top:.45em;font-style:italic;color:rgba(255,255,255,.66);line-height:1.45;font-size:.92em}
+.fbp-rich .fbp-bi .mth i{font-style:italic}
+/* Physics Reference (formula matrix) */
+.pr-title{font-size:1.25rem;font-weight:800;margin-bottom:.15rem}
+.pr-sub{font-size:.82rem;color:#7dd3fc;font-weight:700;margin-bottom:.5rem}
+.pr-p{font-size:.8rem;color:var(--txm);line-height:1.55;margin-bottom:.9rem}
+.pr-h{font-size:.95rem;font-weight:800;color:#e2e8f0;margin:1.1rem 0 .5rem}
+.pr-wrap{overflow-x:auto;border:1px solid var(--bord);border-radius:12px}
+.pr-table{width:100%;border-collapse:collapse;font-size:.8rem;line-height:1.45;min-width:560px}
+.pr-table th{background:rgba(56,189,248,.12);color:#bae6fd;text-align:left;padding:.55rem .65rem;font-weight:700;border-bottom:1px solid var(--bord)}
+.pr-table td{padding:.55rem .65rem;border-top:1px solid rgba(255,255,255,.07);vertical-align:top;color:rgba(255,255,255,.85)}
+.pr-table td .pr-line+.pr-line{margin-top:.3rem}
+.pr-table tr.pr-g7 td{background:rgba(56,189,248,.06)}
+.pr-table td:first-child{white-space:nowrap;font-weight:700;color:#fff}
+
+/* ═══ Optional read-aloud buttons ═══ */
+.story-bar-bottom{justify-content:space-between}
+.story-bar-bottom .story-skip{margin-left:auto}
+.narr-btn{background:linear-gradient(135deg,#0ea5e9,#6366f1);border:none;color:#fff;border-radius:999px;font-weight:800;cursor:pointer;font-family:inherit;
+  box-shadow:0 6px 18px rgba(14,165,233,.35);pointer-events:all}
+.narr-btn.playing{background:linear-gradient(135deg,#f97316,#ef4444);box-shadow:0 6px 18px rgba(239,68,68,.35);animation:narrPulse 1.2s ease-in-out infinite}
+@keyframes narrPulse{50%{filter:brightness(1.18)}}
+.story-listen{padding:9px 18px;font-size:.95rem;min-height:40px}
+.qh-tools{display:flex;align-items:center;gap:.5em;flex:0 0 auto}
+.qh-listen{padding:.4em .9em;font-size:.8em;min-height:40px;white-space:nowrap}
+@media (max-width:900px), (max-height:500px){ .story-listen{padding:6px 14px;font-size:.82rem;min-height:36px} }

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000510">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Click2Survive">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>Click to Survive — Student Login</title>
+<link rel="stylesheet" href="css/auth.css?v=20261011f">
+</head>
+<body>
+<!-- .split: on short landscape phones the card becomes two columns (brand | form) so
+     the whole page fits on one screen without scrolling. -->
+<div class="card split">
+  <div class="card-brand">
+    <div class="brand">Click to <em>Survive</em></div>
+    <div class="tag">DepEd · Disaster Risk Education</div>
+    <div class="foot">Are you a teacher? <a href="teacher-login.html">Teacher Login →</a></div>
+  </div>
+
+  <div class="card-form">
+    <div class="tabs">
+      <div class="tab active" id="tab-login" onclick="switchTab('login')">Log In</div>
+      <div class="tab" id="tab-register" onclick="switchTab('register')">Register</div>
+    </div>
+
+    <div class="panel active" id="panel-login">
+      <label for="login-id">Student ID</label>
+      <input id="login-id" type="text" placeholder="e.g. 2026-00123" autocomplete="username">
+      <button class="btn" id="login-btn" onclick="doLogin()">Log In</button>
+      <div class="msg" id="login-msg"></div>
+    </div>
+
+    <div class="panel" id="panel-register">
+      <div class="fields">
+        <div class="field">
+          <label for="reg-id">Student ID</label>
+          <input id="reg-id" type="text" placeholder="e.g. 2026-00123">
+        </div>
+        <div class="field">
+          <label for="reg-name">Full Name</label>
+          <input id="reg-name" type="text" placeholder="Juan Dela Cruz">
+        </div>
+        <div class="field">
+          <label for="reg-grade">Grade Level</label>
+          <select id="reg-grade" onchange="loadSections()">
+            <option value="">Select grade…</option>
+            <option value="7">Grade 7</option>
+            <option value="8">Grade 8</option>
+            <option value="9">Grade 9</option>
+            <option value="10">Grade 10</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="reg-section">Section</label>
+          <select id="reg-section" disabled><option value="">Select grade first…</option></select>
+        </div>
+      </div>
+      <button class="btn" id="reg-btn" onclick="doRegister()">Register</button>
+      <div class="msg" id="reg-msg"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/session.js"></script>
+<script src="js/auth-page.js"></script>
+<script src="js/app-shell.js?v=20261011e"></script>
+</body>
+</html>

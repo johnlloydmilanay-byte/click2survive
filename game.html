@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000510">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Click2Survive">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>Click to Survive — Disaster Preparedness Simulation</title>
+<link rel="stylesheet" href="css/game.css?v=20261011q">
+<style>
+#topbar{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.25rem;pointer-events:none}
+#topbar.hidden{display:none}
+.tb-pill{background:var(--bg-glass);backdrop-filter:blur(16px);border:1px solid var(--bord);border-radius:22px;padding:7px 14px;font-size:.72rem;font-weight:500;pointer-events:all}
+.tb-logout{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.4);color:#fca5a5;border-radius:22px;padding:7px 14px;font-size:.72rem;font-weight:600;cursor:pointer;pointer-events:all;font-family:inherit}
+.tb-logout:hover{background:rgba(239,68,68,.28)}
+.start-card{position:relative;background:rgba(255,255,255,.045);backdrop-filter:blur(24px);border:1px solid var(--bord);border-radius:24px;padding:2rem 1.8rem;max-width:460px;width:100%;margin:0 auto 1.6rem;text-align:left;overflow:hidden}
+.start-card::before{content:'';position:absolute;inset:0;opacity:.14;background:linear-gradient(135deg,var(--cc,#38bdf8),transparent 70%);pointer-events:none}
+.start-num{font-size:2.6rem;font-weight:800;line-height:1;color:var(--cc,#38bdf8)}
+.start-topic{font-size:1.1rem;font-weight:700;margin:.6rem 0 .2rem}
+.start-code{font-size:.68rem;color:var(--txd);font-family:monospace;margin-bottom:1rem}
+.start-btn{display:block;width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#6366f1,#8b5cf6);color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(14,165,233,.4)}
+.session-wait{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid var(--bord);border-radius:14px;padding:14px 16px}
+.session-wait-spinner{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:var(--acc);flex-shrink:0;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.session-wait-text{font-size:.82rem;color:var(--txm);line-height:1.5}
+.session-ready-badge{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:#4ade80;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.4);border-radius:20px;padding:5px 13px;margin-bottom:.8rem;animation:sessReadyPulse 2s ease-in-out infinite}
+@keyframes sessReadyPulse{0%,100%{opacity:1}50%{opacity:.75}}
+.history-box{max-width:460px;margin:0 auto;text-align:left}
+.history-row{display:flex;justify-content:space-between;font-size:.74rem;color:var(--txm);padding:6px 2px;border-bottom:1px solid var(--bord)}
+.history-title{font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;color:var(--txd);margin-bottom:.5rem}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vignette"></div>
+
+<div id="rotate-prompt">
+  <div class="rp-icon">📱</div>
+  <div class="rp-title">Please rotate your device</div>
+  <div class="rp-text">Click to Survive works best in landscape — turn your phone or tablet sideways to continue.</div>
+</div>
+
+<div id="topbar">
+  <span class="tb-pill" id="tb-profile">Loading…</span>
+  <button class="tb-logout" onclick="doLogout()">Logout</button>
+</div>
+
+<div id="ui">
+  <div id="s-load" class="screen on">
+    <div class="ld-brand">Click to <em>Survive</em></div>
+    <div class="ld-tag">Ultra · Immersive 3D Simulation</div>
+    <div class="ld-bar"><div class="ld-fill" id="ld-fill"></div></div>
+    <div class="ld-tip" id="ld-tip">Initializing rendering engine...</div>
+    <div class="ld-obj" id="ld-obj">Make survival decisions in floods and typhoons — and test them with real physics.</div>
+  </div>
+
+  <div id="s-menu" class="screen">
+    <div class="menu-wrap">
+      <!-- .menu-left / .menu-right are layout-neutral (display:contents) except on
+           landscape phones, where the menu becomes two columns so the session card and
+           its Enter button are never pushed off-screen. -->
+      <div class="menu-left">
+      <div class="menu-eyebrow">DepEd · Disaster Risk Education</div>
+      <h1 class="menu-h1">Click to <em>Survive</em></h1>
+      <p class="menu-sub">An immersive 3D physics simulation. Apply forces, motion, buoyancy and fluid dynamics to real flood and typhoon survival decisions.</p>
+
+      </div>
+      <div class="menu-right">
+      <div class="start-card" id="start-card">
+        <div class="start-num" id="start-num">7</div>
+        <div class="start-topic" id="start-topic">Loading your mission…</div>
+        <div class="start-code" id="start-code"></div>
+
+        <div id="session-waiting" class="session-wait">
+          <div class="session-wait-spinner"></div>
+          <div class="session-wait-text">Waiting for your teacher to start a session for <strong id="wait-section-name">your section</strong>…</div>
+        </div>
+
+        <div id="session-ready" style="display:none">
+          <div class="session-ready-badge">● Session active — <span id="ready-session-label">Quiz</span></div>
+          <button class="start-btn" onclick="enterSession()">▶ Enter Session</button>
+        </div>
+      </div>
+
+      <div class="history-box" id="history-box" style="display:none">
+        <div class="history-title">Your recent attempts</div>
+        <div id="history-rows"></div>
+      </div>
+
+      </div>
+      <div class="menu-left menu-left-b">
+      <button class="howto-btn" onclick="startTutorial()">❓ How to play (tutorial)</button>
+      <div class="menu-foot">Drag the joystick to look around · Answer with the buttons or keys 1/2/3 · Hazard guidance follows PAGASA / FEMA / UNDRR advisories · <a href="#" onclick="showPhysics();return false" style="color:var(--acc)">Physics equations published here</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="s-game" class="screen">
+    <div id="hud-top">
+      <div class="hud-left">
+        <button id="back-btn" onclick="goMenu()" aria-label="Back to menu">← Menu</button>
+        <div class="hud-pill"><span class="dot-i" id="hud-ico"></span><span id="hud-grade">Grade 7</span></div>
+        <div class="hud-pill hud-topic-pill" id="hud-topic">Forces &amp; Motion</div>
+        <button id="observe-btn" class="hud-pill observe-btn" onclick="toggleObserve()" aria-label="Toggle observe mode — hide the question to look around">👁 Observe</button>
+        <button id="mute-btn" class="hud-pill mute-btn" onclick="toggleMuteAudio()" aria-label="Mute or unmute sound">🔊</button>
+      </div>
+      <div class="hud-score">
+        <div><span class="hs-num" id="score-n">0</span><span class="hs-of">/<span id="score-t">10</span></span></div>
+        <div class="hs-lbl">Score</div>
+      </div>
+    </div>
+
+    <!-- Movie-style intro for each scenario: letterboxed bars + narrated situation text
+         (English, with Bikol dialect in italics below when available) over the live 3D
+         scene, before the question panel appears. Skippable; auto-advances otherwise. -->
+    <div id="story-overlay">
+      <div class="story-bar story-bar-top"></div>
+      <div class="story-caption">
+        <!-- soft black oval behind the caption so it reads over any part of the scene -->
+        <div class="story-box">
+          <div class="story-num" id="story-num">Scenario 1 of 10</div>
+          <div class="story-en" id="story-en"></div>
+          <div class="story-bi" id="story-bi"></div>
+        </div>
+      </div>
+      <div class="story-bar story-bar-bottom">
+        <!-- optional read-aloud (English, then Bikol) — shown only for scenarios with recordings -->
+        <button class="story-listen narr-btn" id="story-listen" onclick="listenStory()" aria-label="Listen to the story read aloud in English, then Bikol">🔊 Listen</button>
+        <button class="story-skip" onclick="skipNarration()">Skip ▶</button>
+      </div>
+    </div>
+
+    <!-- Mission chip: a slim pill at the top while steering, so the middle of the screen
+         stays clear. Expands (full instruction) for the first few seconds, on a warning,
+         or when tapped. -->
+    <div id="mission" onclick="missionExpand(5000)" role="status">
+      <div class="m-eyebrow">🎮 Simulation Control Active</div>
+      <div class="m-text" id="m-text">Steer to the gateway</div>
+      <div class="m-dist"><span class="m-ico">🎯</span> <b id="m-dist">–</b> to gateway<span class="m-hint"> · use the joystick to move</span></div>
+    </div>
+
+    <div id="gate-prompt">
+      <div class="gp-title">⬡ Level Gateway ⬡</div>
+      <div class="gp-text" id="gp-text">Answer correctly to unlock</div>
+      <div class="gp-hint" id="gp-hint">Pass the simulation to proceed</div>
+    </div>
+
+    <!-- Everything the student needs to read/answer lives in this one side panel,
+         so it never overlaps the 3D scene itself. It fades in a beat after the
+         scenario loads, so students see the environment before the question. -->
+    <div id="side-panel" class="panel-hidden">
+      <div id="side-panel-inner">
+        <!-- Header row of the centred question popup (only shown in .q-center mode) -->
+        <div id="q-head">
+          <div class="qh-title" id="qh-title">Scenario 1</div>
+          <span class="qh-tools">
+            <button class="qh-listen narr-btn" id="qh-listen" onclick="listenQuestion()" aria-label="Listen to the question and choices read aloud in English, then Bikol">🔊 Listen</button>
+            <button class="qh-hide" onclick="toggleObserve()" aria-label="Hide the question to look at the scene">🙈 Hide question</button>
+          </span>
+        </div>
+        <!-- #q-left is layout-neutral (display:contents) in the normal side panel; in the
+             centred popup it becomes the scrollable left column. -->
+        <div id="q-left">
+        <div id="pagasa-alert"></div>
+        <div id="params-panel" style="display:none"></div>
+        <div id="scen-card">
+          <div class="sc-num" id="sc-num">Scenario 1 of 10</div>
+          <div class="sc-sit" id="sc-sit">Loading...</div>
+          <div class="sc-q" id="sc-q">What should you do?</div>
+        </div>
+        </div>
+        <div id="dots"></div>
+        <div id="choices"></div>
+      </div>
+    </div>
+
+    <!-- Watch phase between the narration and the centred question popup -->
+    <div id="q-watch" aria-live="polite">
+      <span class="qw-eye">👀</span>
+      <span class="qw-text">Watch what is happening… <span class="qw-count">Question in <b id="qw-n">10</b></span></span>
+      <button class="qw-now" onclick="revealQuestion()">Show question now</button>
+    </div>
+    <button id="q-show" onclick="toggleObserve()" aria-label="Show the question again">📋 View question</button>
+
+    <div id="tutorial">⟵ Drag joystick to look · Buttons to zoom</div>
+
+    <div id="joy-zone" role="application" aria-label="Virtual joystick: drag to look around, or to move during simulation control. Keyboard: WASD or arrow keys.">
+      <div class="joy-base">
+        <div class="joy-ring"></div>
+        <div class="joy-stick" id="joy-stick">
+          <div class="hled l1"></div><div class="hled l2"></div>
+          <div class="hled l3"></div><div class="hled l4"></div>
+        </div>
+      </div>
+      <div class="joy-label">⟁ Navigate</div>
+    </div>
+
+    <div id="act-pad">
+      <button class="act-btn" id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+      <button class="act-btn" id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+      <button class="act-btn" id="cam-reset" title="Reset view" aria-label="Reset camera view">⌂</button>
+      <button class="act-btn" id="q-btn" title="Graphics quality" aria-label="Cycle graphics quality" style="font-size:.68rem;font-weight:700">HD</button>
+    </div>
+
+    <div id="fb-wrap">
+      <!-- Full-screen, game-style result card: verdict + conditions + explanation on the
+           left, physics + the big action button on the right. fitFeedback() sizes the
+           text to the screen so nothing ever needs scrolling. -->
+      <div class="fb-card">
+        <div class="fb-col fb-col-a">
+          <div class="fbv-row">
+            <div class="fbv-ico ok" id="fb-ico">✓</div>
+            <div>
+              <div class="fbv-t" id="fb-verdict">Correct!</div>
+              <div class="fb-out fo-safe" id="fb-outcome">SAFE</div>
+            </div>
+          </div>
+          <div id="fb-chips" class="chips"></div>
+          <div class="fb-txt" id="fb-text"></div>
+        </div>
+        <div class="fb-col fb-col-b">
+          <div class="fb-phys">
+            <div class="fbp-h">⚛ Physics Explanation</div>
+            <div class="fbp-t" id="fb-physics"></div>
+          </div>
+          <button class="next-btn" id="next-btn" onclick="nextScenario()">Steer through Gateway →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="phys-modal" style="display:none;position:fixed;inset:0;background:rgba(0,5,15,.85);backdrop-filter:blur(10px);z-index:60;overflow-y:auto;padding:2rem 1rem" onclick="if(event.target===this)this.style.display='none'">
+      <div style="max-width:860px;margin:0 auto;background:linear-gradient(180deg,rgba(15,25,45,.97),rgba(8,15,30,.98));border:1px solid var(--bord);border-radius:20px;padding:1.8rem">
+        <!-- Content: the teacher's "Correct Physics Formula Matrix" (formulas.docx), formulas typeset exactly -->
+        <h2 class="pr-title">Correct Physics Formula Matrix</h2>
+        <div class="pr-sub">Curriculum Aligned Equations for Grade Level Scenario Based Decision Items</div>
+        <p class="pr-p"><b>Purpose. </b>This matrix presents the physics formulas corresponding to the competency areas used in the study. The formulas are editable text and may be copied directly into the manuscript or appendices.</p>
+        <div class="pr-wrap"><table class="pr-table"><thead><tr><th>Grade Level</th><th>Competency Area</th><th>Correct Formula or Formulas</th><th>Meaning or Condition</th></tr></thead><tbody><tr class="pr-g7"><td><div class="pr-line"><b>Grade 7</b></div></td><td><div class="pr-line">Balanced and unbalanced forces</div></td><td><div class="pr-line"><span class="mth"><i>F</i><sub>net</sub> = ∑<i>F</i><sub>i</sub></span></div><div class="pr-line">Balanced: <span class="mth">∑<i>F</i><sub>i</sub> = 0</span></div><div class="pr-line">Unbalanced: <span class="mth">∑<i>F</i><sub>i</sub> ≠ 0</span></div></td><td><div class="pr-line">Net force is the vector sum of all forces acting on an object.</div></td></tr><tr class="pr-g7"><td><div class="pr-line"><b>Grade 7</b></div></td><td><div class="pr-line">Distance, displacement, speed, and velocity</div></td><td><div class="pr-line"><span class="mth"><i>v</i><sub>avg</sub> = <span class="mf"><span class="mfn"><i>d</i><sub>total</sub></span><span class="mfd">Δ<i>t</i></span></span></span></div><div class="pr-line"><span class="mth"><i>v</i><sub>avg</sub> = <span class="mf"><span class="mfn">Δ<i>x</i></span><span class="mfd">Δ<i>t</i></span></span></span></div><div class="pr-line"><span class="mth">Δ<i>x</i> = <i>x</i><sub>f</sub> - <i>x</i><sub>i</sub></span></div></td><td><div class="pr-line">Speed uses distance, while velocity uses displacement.</div></td></tr><tr><td><div class="pr-line"><b>Grade 8</b></div></td><td><div class="pr-line">Acceleration</div></td><td><div class="pr-line"><span class="mth"><i>a</i><sub>avg</sub> = <span class="mf"><span class="mfn">Δ<i>v</i></span><span class="mfd">Δ<i>t</i></span></span></span></div></td><td><div class="pr-line">Acceleration is the change in velocity per unit time.</div></td></tr><tr><td><div class="pr-line"><b>Grade 8</b></div></td><td><div class="pr-line">Kinetic and potential energy</div></td><td><div class="pr-line"><span class="mth"><i>K</i> = <span class="mf"><span class="mfn">1</span><span class="mfd">2</span></span><i>m</i><i>v</i><sup>2</sup></span></div><div class="pr-line"><span class="mth"><i>U</i><sub>g</sub> = <i>mgh</i></span></div></td><td><div class="pr-line">K is kinetic energy; U is gravitational potential energy.</div></td></tr><tr><td><div class="pr-line"><b>Grade 8</b></div></td><td><div class="pr-line">Work and mechanical energy</div></td><td><div class="pr-line"><span class="mth"><i>W</i> = <i>Fd</i> cos θ</span></div><div class="pr-line"><span class="mth"><i>E</i><sub>mech</sub> = <i>K</i> + <i>U</i><sub>g</sub></span></div></td><td><div class="pr-line">θ is the angle between the force and the displacement.</div></td></tr><tr><td><div class="pr-line"><b>Grade 9</b></div></td><td><div class="pr-line">Inertia</div></td><td><div class="pr-line"><span class="mth">∑<i>F</i> = 0  ⇒  <i>v</i> = constant</span></div></td><td><div class="pr-line">An object remains at rest or moves with constant velocity when the net force is zero.</div></td></tr><tr><td><div class="pr-line"><b>Grade 9</b></div></td><td><div class="pr-line">Force, mass, and acceleration</div></td><td><div class="pr-line"><span class="mth">∑<i>F</i> = <i>ma</i></span></div></td><td><div class="pr-line">Newton’s second law relates net force, mass, and acceleration.</div></td></tr><tr><td><div class="pr-line"><b>Grade 9</b></div></td><td><div class="pr-line">Action–reaction forces</div></td><td><div class="pr-line"><span class="mth"><i>F</i><sub>A→B</sub> = -<i>F</i><sub>B→A</sub></span></div></td><td><div class="pr-line">The two forces are equal in magnitude, opposite in direction, and act on different objects.</div></td></tr><tr><td><div class="pr-line"><b>Grade 10</b></div></td><td><div class="pr-line">Projectile motion</div></td><td><div class="pr-line"><span class="mth"><i>x</i>(<i>t</i>) = <i>x</i><sub>0</sub> + (<i>v</i><sub>0</sub> cos θ)<i>t</i></span></div><div class="pr-line"><span class="mth"><i>y</i>(<i>t</i>) = <i>y</i><sub>0</sub> + (<i>v</i><sub>0</sub> sin θ)<i>t</i> - <span class="mf"><span class="mfn">1</span><span class="mfd">2</span></span><i>g</i><i>t</i><sup>2</sup></span></div></td><td><div class="pr-line">These equations assume constant gravitational acceleration and negligible air resistance.</div></td></tr><tr><td><div class="pr-line"><b>Grade 10</b></div></td><td><div class="pr-line">Momentum and impulse</div></td><td><div class="pr-line"><span class="mth"><i>p</i> = <i>mv</i></span></div><div class="pr-line"><span class="mth"><i>J</i> = <i>F</i><sub>avg</sub> Δ<i>t</i> = Δ<i>p</i></span></div></td><td><div class="pr-line">Momentum is mass times velocity; impulse equals the change in momentum.</div></td></tr><tr><td><div class="pr-line"><b>Grade 10</b></div></td><td><div class="pr-line">Collisions</div></td><td><div class="pr-line"><span class="mth">∑<i>p</i><sub>before</sub> = ∑<i>p</i><sub>after</sub></span></div></td><td><div class="pr-line">Total momentum is conserved when the net external impulse is negligible.</div></td></tr><tr><td><div class="pr-line"><b>Grade 11</b></div></td><td><div class="pr-line">Translational and rotational motion</div></td><td><div class="pr-line"><span class="mth"><i>v</i><sub>cm</sub> = <span class="mf"><span class="mfn">Δ<i>x</i><sub>cm</sub></span><span class="mfd">Δ<i>t</i></span></span></span></div><div class="pr-line"><span class="mth">ω = <span class="mf"><span class="mfn">Δθ</span><span class="mfd">Δ<i>t</i></span></span></span></div><div class="pr-line"><span class="mth"><i>v</i><sub>cm</sub> = <i>r</i>ω</span></div></td><td><div class="pr-line">The last equation applies to rolling without slipping.</div></td></tr><tr><td><div class="pr-line"><b>Grade 11</b></div></td><td><div class="pr-line">Simple and compound machines</div></td><td><div class="pr-line"><span class="mth"><i>MA</i> = <span class="mf"><span class="mfn"><i>F</i><sub>out</sub></span><span class="mfd"><i>F</i><sub>in</sub></span></span></span></div><div class="pr-line"><span class="mth">τ = <i>rF</i> sin θ</span></div></td><td><div class="pr-line">MA is mechanical advantage, and τ is torque.</div></td></tr><tr><td><div class="pr-line"><b>Grade 11</b></div></td><td><div class="pr-line">Physics of fluids</div></td><td><div class="pr-line"><span class="mth"><i>F</i><sub>b</sub> = ρ<sub>fluid</sub><i>g</i><i>V</i><sub>displaced</sub></span></div><div class="pr-line"><span class="mth"><i>W</i><sub>total</sub> = <i>m</i><sub>total</sub><i>g</i></span></div><div class="pr-line">Floating equilibrium: <span class="mth"><i>F</i><sub>b</sub> = <i>W</i><sub>total</sub></span></div></td><td><div class="pr-line">Buoyant force equals the total weight when the object or loaded boat floats in equilibrium.</div></td></tr><tr><td><div class="pr-line"><b>Grade 11</b></div></td><td><div class="pr-line">Loaded boat condition</div></td><td><div class="pr-line"><span class="mth"><i>m</i><sub>total</sub> = <i>m</i><sub>hull</sub> + <i>m</i><sub>passengers</sub> + <i>m</i><sub>cargo</sub></span></div><div class="pr-line"><span class="mth"><i>V</i><sub>required</sub> = <span class="mf"><span class="mfn"><i>m</i><sub>total</sub></span><span class="mfd">ρ<sub>fluid</sub></span></span></span></div><div class="pr-line"><span class="mth"><i>V</i><sub>required</sub> ≤ <i>V</i><sub>available</sub></span></div></td><td><div class="pr-line">This is a simplified flotation condition. It is not a substitute for the boat’s rated capacity or freeboard requirement.</div></td></tr><tr><td><div class="pr-line"><b>Grade 12</b></div></td><td><div class="pr-line">Newton’s laws of motion</div></td><td><div class="pr-line"><span class="mth">∑<i>F</i> = <i>ma</i></span></div></td><td><div class="pr-line">A nonzero net force produces acceleration.</div></td></tr><tr><td><div class="pr-line"><b>Grade 12</b></div></td><td><div class="pr-line">Work and energy</div></td><td><div class="pr-line"><span class="mth"><i>W</i> = <i>Fd</i> cos θ</span></div><div class="pr-line"><span class="mth"><i>W</i><sub>net</sub> = Δ<i>K</i></span></div><div class="pr-line"><span class="mth"><i>E</i><sub>mech</sub> = <i>K</i> + <i>U</i><sub>g</sub></span></div></td><td><div class="pr-line">These represent work, the work–energy theorem, and mechanical energy.</div></td></tr><tr><td><div class="pr-line"><b>Grade 12</b></div></td><td><div class="pr-line">Momentum and impulse</div></td><td><div class="pr-line"><span class="mth"><i>p</i> = <i>mv</i></span></div><div class="pr-line"><span class="mth"><i>J</i> = <i>F</i><sub>avg</sub> Δ<i>t</i> = Δ<i>p</i></span></div></td><td><div class="pr-line">Impulse equals the change in momentum.</div></td></tr></tbody></table></div>
+        <div class="pr-h">Constants and Conditions</div>
+        <div class="pr-wrap"><table class="pr-table"><thead><tr><th>Quantity or Condition</th><th>Correct Presentation</th></tr></thead><tbody><tr><td><div class="pr-line"><b>Acceleration due to gravity</b></div></td><td><div class="pr-line"><span class="mth"><i>g</i> = 9.81 <span class="mf"><span class="mfn">m</span><span class="mfd">s<sup>2</sup></span></span></span></div></td></tr><tr><td><div class="pr-line"><b>Approximate density of freshwater</b></div></td><td><div class="pr-line"><span class="mth">ρ<sub>water</sub> ≈ 1000 <span class="mf"><span class="mfn">kg</span><span class="mfd">m<sup>3</sup></span></span></span></div></td></tr><tr><td><div class="pr-line"><b>Buoyancy assumption</b></div></td><td><div class="pr-line">The fluid is treated as incompressible.</div></td></tr><tr><td><div class="pr-line"><b>Projectile-motion assumption</b></div></td><td><div class="pr-line">Air resistance is neglected.</div></td></tr><tr><td><div class="pr-line"><b>Rolling assumption</b></div></td><td><div class="pr-line">The rolling relation applies only when the object rolls without slipping.</div></td></tr><tr><td><div class="pr-line"><b>Momentum-conservation condition</b></div></td><td><div class="pr-line">The net external impulse is negligible.</div></td></tr></tbody></table></div>
+        <button class="res-btn primary" style="margin-top:1.2rem;width:100%" onclick="document.getElementById('phys-modal').style.display='none'">Close</button>
+      </div>
+    </div>
+    <div id="s-res" class="screen">
+    <div class="res-card">
+      <div class="res-ico" id="res-icon">🎯</div>
+      <div class="res-h">Simulation Complete!</div>
+      <div class="res-g" id="res-grade">Grade 7 · Forces &amp; Motion in Floods and Typhoons</div>
+      <div class="res-big" id="res-big">0.00</div>
+      <div class="res-int" id="res-interp">Mean Score</div>
+      <div class="res-bd" id="res-breakdown"></div>
+      <div class="res-btns">
+        <button class="res-btn" onclick="replayGrade()">↺ Replay</button>
+        <button class="res-btn primary" onclick="goMenu()">Back to Menu</button>
+      </div>
+      <div class="res-btns" style="margin-top:.6rem">
+        <div id="submit-status" style="font-size:.7rem;color:var(--txd);text-align:center;width:100%">Saving your score…</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="trans"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js?v=20261011q"></script>
+<script src="js/session.js?v=20261011q"></script>
+<script src="js/audio-sys.js?v=20261011q"></script>
+<script src="js/game-data.js?v=20261011q"></script>
+<script src="js/game-engine.js?v=20261011q"></script>
+<script src="js/grade7-scenes.js?v=20261011q"></script>
+<script src="js/game-logic.js?v=20261011q"></script>
+<script src="js/tutorial.js?v=20261011q"></script>
+<script src="js/app-shell.js?v=20261011q"></script>
+</body>
+</html>

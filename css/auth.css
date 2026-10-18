@@ -1,0 +1,75 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--acc:#38bdf8;--bg-glass2:rgba(15,25,45,.9);--bord:rgba(255,255,255,.13);--tx:#fff;--txm:rgba(255,255,255,.6);--txd:rgba(255,255,255,.35)}
+html,body{min-height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--tx)}
+body{background:radial-gradient(ellipse at top,#0a1830,#000510 75%);display:flex;align-items:center;justify-content:center;padding:2rem 1rem;min-height:100vh}
+.card{background:var(--bg-glass2);backdrop-filter:blur(22px);border:1px solid var(--bord);border-radius:24px;padding:2.2rem 2rem;max-width:420px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.brand{font-size:1.7rem;font-weight:800;letter-spacing:-.03em;text-align:center;margin-bottom:.2rem}
+.brand em{font-style:normal;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.tag{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--txd);text-align:center;margin-bottom:1.6rem}
+.tabs{display:flex;background:rgba(255,255,255,.05);border-radius:14px;padding:4px;margin-bottom:1.4rem}
+.tab{flex:1;text-align:center;padding:9px;border-radius:11px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--txm);transition:all .2s}
+.tab.active{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff}
+.panel{display:none}
+.panel.active{display:block}
+label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--txd);margin:.9rem 0 .35rem}
+label:first-child{margin-top:0}
+input,select{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--bord);background:rgba(255,255,255,.06);color:#fff;font-size:16px;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:var(--acc)}
+select{color-scheme:dark}
+
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:44px}
+.pw-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txm);cursor:pointer;font-size:1rem;padding:8px 9px;line-height:1;border-radius:8px}
+.pw-toggle:hover{background:rgba(255,255,255,.08)}
+
+@media(max-width:480px){
+  body{padding:1rem .7rem}
+  .card{padding:1.6rem 1.3rem;border-radius:20px}
+}
+.btn{display:block;width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,#0ea5e9,#6366f1,#8b5cf6);color:#fff;font-size:.92rem;font-weight:700;cursor:pointer;margin-top:1.3rem;font-family:inherit;box-shadow:0 8px 22px rgba(14,165,233,.4)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
+.msg{margin-top:.9rem;font-size:.78rem;text-align:center;min-height:1.1em}
+.msg.err{color:#f87171}
+.msg.ok{color:#4ade80}
+.foot{margin-top:1.6rem;text-align:center;font-size:.72rem;color:var(--txd)}
+.foot a{color:var(--acc);text-decoration:none}
+.foot a:hover{text-decoration:underline}
+
+/* ═══ Student login (.card.split) — fits one screen on any device, no scrolling ═══ */
+.card.split .field{margin:0}
+.card.split .field label{margin-top:.9rem}
+.card.split .fields .field:first-child label{margin-top:0}
+.card.split .card-brand .foot{margin-top:1.6rem}
+/* Portrait/desktop: original stacked look — brand on top, teacher link at the very bottom */
+.card.split{display:flex;flex-direction:column}
+.card.split .card-brand{display:contents}
+.card.split .card-brand .foot{order:3}
+.card.split .card-form{order:2}
+.card.split .brand, .card.split .tag{order:1}
+body{min-height:100vh;min-height:100dvh}
+
+/* Short landscape screens (phones turned sideways): two columns, compact spacing */
+@media (orientation:landscape) and (max-height:560px){
+  body{padding:calc(.5rem + env(safe-area-inset-top,0px)) calc(.75rem + env(safe-area-inset-right,0px))
+    calc(.5rem + env(safe-area-inset-bottom,0px)) calc(.75rem + env(safe-area-inset-left,0px))}
+  .card.split{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:0 1.6rem;align-items:center;
+    max-width:min(860px,100%);padding:1.1rem 1.4rem;border-radius:20px}
+  .card.split .card-brand{display:flex;flex-direction:column;justify-content:center;text-align:center;border-right:1px solid var(--bord);padding-right:1.4rem;align-self:stretch}
+  .card.split .brand{font-size:clamp(1.4rem,4.4vw,2rem)}
+  .card.split .tag{margin-bottom:0;font-size:.62rem}
+  .card.split .card-brand .foot{margin-top:1rem}
+  .card.split .tabs{margin-bottom:.7rem}
+  .card.split .tab{padding:7px}
+  .card.split label{margin:.45rem 0 .2rem;font-size:.62rem}
+  .card.split .field label, .card.split .fields .field:first-child label{margin-top:0}
+  .card.split input, .card.split select{padding:8px 11px}
+  .card.split .fields{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .7rem}
+  .card.split .btn{margin-top:.75rem;padding:11px}
+  .card.split .msg{margin-top:.45rem;min-height:1em}
+}
+@media (orientation:landscape) and (max-height:380px){
+  .card.split{padding:.8rem 1.1rem}
+  .card.split .tabs{margin-bottom:.5rem}
+  .card.split .btn{margin-top:.55rem;padding:10px}
+}

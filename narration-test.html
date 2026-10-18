@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Narration check — Scenario 1</title>
+<style>
+  :root{--bg:#07101f;--card:#0f1b30;--bd:rgba(255,255,255,.12);--tx:#e8eef7;--mut:#9fb0c6;--acc:#38bdf8}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px}
+  main{max-width:760px;margin:0 auto}
+  h1{font-size:1.35rem;margin:.2rem 0 .3rem}
+  p.lead{color:var(--mut);margin:0 0 1.2rem}
+  section{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px 16px;margin-bottom:14px}
+  h2{font-size:1rem;margin:0 0 .5rem;color:var(--acc)}
+  .row{display:grid;gap:6px;margin:.6rem 0}
+  .row b{font-size:.92rem}
+  .row small{color:var(--mut)}
+  audio{width:100%}
+  blockquote{margin:.4rem 0 .2rem;padding:.5rem .8rem;border-left:3px solid var(--bd);color:var(--mut);font-style:italic;font-size:.9rem}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(56,189,248,.15);color:#7dd3fc;margin-left:6px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Narration check — Grade 7, Scenario 1</h1>
+  <p class="lead">Free voices (no ElevenLabs). Listen to both Bikol options and tell us which pronunciation is better. The game currently uses <b>Option A</b>.</p>
+
+  <section>
+    <h2>English</h2>
+    <div class="row"><b>Story</b><small>Microsoft Edge neural voice “Rosa” (Philippine English)</small>
+      <audio controls preload="none" src="audio/narr/g7s1-sit-en.mp3?v=2"></audio></div>
+    <div class="row"><b>Question and choices</b>
+      <audio controls preload="none" src="audio/narr/g7s1-q-en.mp3?v=2"></audio></div>
+  </section>
+
+  <section>
+    <h2>Bikol — Option A <span class="tag">in the game now</span></h2>
+    <small>Microsoft Edge neural voice “Blessica” (Filipino) reading the Bikol text — very natural voice, Filipino-style pronunciation.</small>
+    <div class="row"><b>Story</b><audio controls preload="none" src="audio/narr/g7s1-sit-bi.mp3?v=2"></audio></div>
+    <div class="row"><b>Question and choices</b><audio controls preload="none" src="audio/narr/g7s1-q-bi.mp3?v=2"></audio></div>
+  </section>
+
+  <section>
+    <h2>Bikol — Option B</h2>
+    <small>Meta MMS model trained on Central Bikol speech — follows Bikol pronunciation, but the voice sounds less polished.</small>
+    <div class="row"><b>Story</b><audio controls preload="none" src="audio/narr/alt/mms-sit-bi.m4a"></audio></div>
+    <div class="row"><b>Question and choices</b><audio controls preload="none" src="audio/narr/alt/mms-q-bi.m4a"></audio></div>
+  </section>
+
+  <section>
+    <h2>Text being read (Bikol)</h2>
+    <blockquote>Pagkatapos nin sunod-sunod na uran, an bulos kan nag-aagos na baha nagpuon na matulod paagos an basurahan pasiring sa dalan na paduman sa pigpaparadahan kan baroto.</blockquote>
+    <blockquote>Ano an pinapahiling kan paghiro kan basurahan, asin ano an dapat gibuhon kan estudyante? A. Balanse an mga puwersa… B. An dai balanseng puwersa… C. Naghihiro an basurahan… D. Dai mababago kan tubig…</blockquote>
+  </section>
+</main>
+</body>
+</html>

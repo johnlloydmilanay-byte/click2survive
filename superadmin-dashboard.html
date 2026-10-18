@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Click to Survive — Super Admin Dashboard</title>
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+<div id="dash-loading">Loading your dashboard…</div>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">Click to <em style="font-style:normal;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Survive</em> — Super Admin</div>
+    <div class="tb-right">
+      <span id="admin-name"></span>
+      <button class="logout-btn" onclick="doLogoutSuperAdmin()">Logout</button>
+    </div>
+  </div>
+
+  <div class="stat-row" id="stat-row"></div>
+
+  <div class="panel panel-highlight">
+    <h2><span>🎮 Active Sessions — all grades</span></h2>
+    <p class="panel-hint">Live view of every quiz session currently open school-wide. Only the teacher who started a session can end it or pull its results — this is read-only oversight.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Grade</th><th>Section</th><th>Label</th><th>Teacher</th><th>Started</th><th>Played</th></tr></thead>
+        <tbody id="active-sessions-body"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>
+      <span>Sections</span>
+      <span class="row">
+        <select id="sec-grade" onchange="renderSectionsTable()">
+          <option value="7">Grade 7</option>
+          <option value="8">Grade 8</option>
+          <option value="9">Grade 9</option>
+          <option value="10">Grade 10</option>
+        </select>
+        <input id="new-sec-name" type="text" placeholder="New section name (e.g. Rizal)">
+        <button class="action" onclick="createSection()">+ Add Section</button>
+      </span>
+    </h2>
+    <p class="panel-hint">Sections are the unit teachers get assigned to. Create one per class before assigning a teacher to it — students pick from this list when they register.</p>
+    <div class="msg" id="sec-msg"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Section</th><th>Grade</th><th>Students</th><th></th></tr></thead>
+        <tbody id="sections-body"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>
+      <span>Teachers</span>
+      <span class="row">
+        <input id="new-teacher-name" type="text" placeholder="Teacher's full name">
+        <button class="action" onclick="createTeacher()">+ Create Teacher Account</button>
+      </span>
+    </h2>
+    <p class="panel-hint">Creating an account generates a username and password to hand to the teacher — they can't self-register. Use Assign Sections to give them access to their grade(s); Reset Password issues fresh login credentials if they lose theirs.</p>
+    <div class="msg" id="teacher-msg"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Username</th><th>Assigned Sections</th><th></th></tr></thead>
+        <tbody id="teachers-body"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="cred-modal" style="display:none">
+  <div class="modal-card">
+    <h3 id="cred-modal-title">Teacher account created</h3>
+    <p id="cred-modal-note">Copy these now and send them to the teacher — the password will not be shown again.</p>
+    <div class="cred-row"><span class="cred-label">Username</span><span class="cred-val" id="cred-username"></span><button class="copy-btn" onclick="copyCred('cred-username',this)">Copy</button></div>
+    <div class="cred-row"><span class="cred-label">Password</span><span class="cred-val" id="cred-password"></span><button class="copy-btn" onclick="copyCred('cred-password',this)">Copy</button></div>
+    <button class="action" style="width:100%;margin-top:.4rem" onclick="document.getElementById('cred-modal').style.display='none'">Done</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="assign-modal" style="display:none">
+  <div class="modal-card">
+    <h3>Assign sections</h3>
+    <p id="assign-teacher-name"></p>
+    <div class="section-toggle-list" id="assign-list"></div>
+    <div class="msg" id="assign-msg"></div>
+    <div class="row">
+      <button class="action" style="flex:1" onclick="saveAssignments()">Save</button>
+      <button class="danger" style="flex:0" onclick="document.getElementById('assign-modal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/session.js"></script>
+<script src="js/superadmin.js"></script>
+</body>
+</html>
