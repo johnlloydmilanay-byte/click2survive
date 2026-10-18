@@ -91,12 +91,14 @@ service cloud.firestore {
       allow update: if isSignedIn()
                     && request.resource.data.diff(resource.data).affectedKeys()
                          .hasOnly(['latestPercent','latestSolved','latestTotal','latestAt','attemptCount','tutorialDoneAt']);
-      allow delete: if false;
+      // Only a super admin may remove a student (Students page → Remove).
+      allow delete: if isSuperAdmin();
 
       match /history/{attemptId} {
         allow read: if isSignedIn();
         allow create: if isSignedIn();
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if isSuperAdmin();
       }
     }
 
@@ -126,13 +128,16 @@ service cloud.firestore {
     match /attempts/{attemptId} {
       allow read: if isSuperAdmin() || isAssignedToSection(resource.data.get('sectionId', null));
       allow create: if isSignedIn();
-      allow update, delete: if false;
+      allow update: if false;
+      // A super admin removing a student may also purge that student's records.
+      allow delete: if isSuperAdmin();
     }
 
     match /scenarioResults/{resultId} {
       allow read: if isSuperAdmin() || isAssignedToSection(resource.data.get('sectionId', null));
       allow create: if isSignedIn();
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if isSuperAdmin();
     }
   }
 }

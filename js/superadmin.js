@@ -197,7 +197,8 @@ function renderTeachers(){
       <td>${r.played ? barHTML(r.mps) : '<span class="dim">—</span>'}</td>
       <td><div class="row" style="flex-wrap:nowrap;justify-content:flex-end">
         <button class="btn secondary sm" onclick="openAssignModal('${t.id}')" aria-label="Assign sections to ${esc(t.name)}">${ico('diagram-3')}Assign</button>
-        <button class="btn danger sm" onclick="resetTeacherCredentials('${t.id}')" aria-label="Reset password for ${esc(t.name)}">${ico('key')}Reset</button>
+        <button class="btn secondary sm" onclick="resetTeacherCredentials('${t.id}')" aria-label="Issue a new username and password for ${esc(t.name)}">${ico('key')}Reset login</button>
+        <button class="btn danger sm" onclick="removeTeacher('${t.id}')" aria-label="Remove teacher ${esc(t.name)}">${ico('person-x')}Remove</button>
       </div></td></tr>`;
   }).join('');
 }
@@ -227,13 +228,14 @@ function renderStudents(){
   const rows = studentRows();
   const body = document.getElementById('students-body');
   document.getElementById('stu-foot').textContent = rows.length > STUDENT_ROW_CAP ? `Showing ${STUDENT_ROW_CAP} of ${rows.length}. Narrow with the filters, or export CSV for the full list.` : `${rows.length} of ${studentsCache.length} student${studentsCache.length===1?'':'s'} shown`;
-  if (!rows.length){ body.innerHTML = `<tr><td colspan="8">${emptyHTML(studentsCache.length ? 'No students match these filters.' : 'No students have registered yet.', 'people')}</td></tr>`; return; }
+  if (!rows.length){ body.innerHTML = `<tr><td colspan="9">${emptyHTML(studentsCache.length ? 'No students match these filters.' : 'No students have registered yet.', 'people')}</td></tr>`; return; }
   body.innerHTML = rows.slice(0, STUDENT_ROW_CAP).map(r => `<tr class="clickable" onclick="rowClick(event,this)">
     <td>${studentNameBtn(r.s.id, r.s.name)}</td><td class="mono">${esc(r.s.id)}</td><td>${r.s.grade}</td>
     <td>${esc(sectionName(r.s.sectionId) || r.s.sectionName)}</td>
     <td>${r.a ? barHTML(r.p, { tip:`${r.a.solvedCount}/${r.a.totalScenarios} correct` }) : '<span class="dim">—</span>'}</td>
     <td>${r.a ? masteryBadge(r.p) : `<span class="badge none">${ico('hourglass')}Not yet played</span>`}</td>
-    <td class="num">${r.runs}</td><td class="dim nowrap">${fmtWhen(r.s.createdAt)}</td></tr>`).join('');
+    <td class="num">${r.runs}</td><td class="dim nowrap">${fmtWhen(r.s.createdAt)}</td>
+    <td><button class="btn danger sm" data-sid="${esc(r.s.id)}" onclick="removeStudent(this.dataset.sid)" aria-label="Remove student ${esc(r.s.name)}">${ico('person-x')}Remove</button></td></tr>`).join('');
 }
 function exportStudents(){
   const rows = [['Student ID','Name','Grade','Section','Latest score %','Correct','Items','Mastery','Runs','Last played','Registered']];
@@ -251,6 +253,7 @@ function renderStudentModal(){
   const s = studentById(openStudentId); if (!s) return;
   renderStudentDetail(s, attemptsCache.filter(a => a.studentId === s.id), resultsCache, { sectionName, sessionLabel });
   document.getElementById('st-pdf-btn').onclick = e => pdfStudent(s.id, e.currentTarget);
+  document.getElementById('st-remove-btn').onclick = () => removeStudent(s.id);
 }
 
 // ═══ SESSIONS ═══
@@ -435,7 +438,9 @@ async function createTeacherAuthAccount(name){
   throw lastErr;
 }
 
+const TEACHER_LOGIN_URL = new URL('teacher-login.html', location.href).href;
 function showCredModal(username, password, title, note){
+  document.getElementById('cred-login-url').textContent = TEACHER_LOGIN_URL;
   document.getElementById('cred-modal-title').textContent = title;
   document.getElementById('cred-modal-note').textContent = note;
   document.getElementById('cred-username').textContent = username;
@@ -504,6 +509,94 @@ function copyCred(elId, btn){
     btn.textContent = 'Copied!'; btn.classList.add('copied');
     setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
   });
+}
+
+// One message the admin can paste straight into Messenger, SMS or email.
+function copyAllCreds(btn){
+  const u = document.getElementById('cred-username').textContent;
+  const p = document.getElementById('cred-password').textContent;
+  const text = `Click to Survive — Teacher account\nLogin page: ${TEACHER_LOGIN_URL}\nUsername: ${u}\nPassword: ${p}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const original = btn.innerHTML;
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = original; btn.classList.remove('copied'); }, 1500);
+  });
+}
+// A printable slip to hand to the teacher in person.
+function printCreds(){
+  const u = document.getElementById('cred-username').textContent;
+  const p = document.getElementById('cred-password').textContent;
+  const w = window.open('', '_blank', 'width=520,height=640');
+  if (!w){ toast('Allow pop-ups to print the login slip.', 'err'); return; }
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Teacher login slip</title>
+    <style>body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;margin:40px;color:#0a1830}
+    .slip{border:2px dashed #94a3b8;border-radius:14px;padding:28px;max-width:420px}
+    .hd{display:flex;align-items:center;gap:12px;margin-bottom:18px}h1{font-size:20px;margin:0}
+    .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#475569;margin-top:14px}
+    .v{font:600 18px ui-monospace,Menlo,monospace;margin-top:4px;word-break:break-all}
+    p{font-size:12px;color:#475569;margin-top:20px}</style></head><body>
+    <div class="slip"><div class="hd"><img src="${new URL('icons/logo-mark.svg', location.href).href}" width="44" height="44" alt=""><h1>Click to Survive<br><span style="font-weight:500;font-size:14px">Teacher account</span></h1></div>
+    <div class="k">Login page</div><div class="v" style="font-size:13px">${esc(TEACHER_LOGIN_URL)}</div>
+    <div class="k">Username</div><div class="v">${esc(u)}</div>
+    <div class="k">Password</div><div class="v">${esc(p)}</div>
+    <p>Keep this slip private. Ask your school's Click to Survive admin if you lose it.</p></div>
+    <script>window.onload=()=>{window.print()}<\/script></body></html>`);
+  w.document.close();
+}
+
+// ═══ REMOVING ACCOUNTS ═══
+// Removing a teacher deletes their profile, which is what the teacher login checks,
+// so their username and password stop working at once. Their past sessions and their
+// students' results stay, so school reports remain complete. (The underlying Firebase
+// Auth login can only be deleted with the Admin SDK; without a profile it can't open
+// the dashboard.)
+async function removeTeacher(teacherId){
+  const t = teachersCache.find(x => x.id === teacherId);
+  if (!t) return;
+  const live = sessionsCache.some(s => s.teacherId === teacherId && s.status === 'active');
+  const warn = live ? '\n\nThis teacher has a session running right now. Students in it can finish, but the teacher will be signed out of the dashboard.' : '';
+  if (!confirm(`Remove ${t.name} (${t.username})?\n\nTheir username and password will stop working immediately. Their past sessions and their students' results are kept.${warn}`)) return;
+  try{
+    await db.collection('teachers').doc(teacherId).delete();
+    if (assignTeacherId === teacherId) closeModal('assign-modal');
+    toast(`${t.name} was removed.`);
+  }catch(e){
+    toast(friendlyAuthError(e) || e.message, 'err');
+  }
+}
+
+// Removing a student deletes their profile (so the Student ID can no longer log in)
+// together with all their runs and answers, so they disappear from every report.
+async function removeStudent(studentId){
+  const s = studentById(studentId);
+  if (!s) return;
+  const runs = attemptsCache.filter(a => a.studentId === studentId);
+  const answers = resultsCache.filter(r => r.studentId === studentId);
+  const what = runs.length ? `\n\nThis also permanently deletes their ${runs.length} game run${runs.length===1?'':'s'} and all their answers.` : '';
+  if (!confirm(`Remove ${s.name} (Student ID ${s.id}) from ${sectionName(s.sectionId) || s.sectionName || 'their section'}?${what}\n\nThis cannot be undone.`)) return;
+  try{
+    const refs = [];
+    const hist = await db.collection('students').doc(studentId).collection('history').get().catch(() => null);
+    if (hist) hist.docs.forEach(d => refs.push(d.ref));
+    runs.forEach(a => refs.push(db.collection('attempts').doc(a.id)));
+    answers.forEach(r => refs.push(db.collection('scenarioResults').doc(r.id)));
+    // Firestore batches hold up to 500 writes; delete the records in chunks first and
+    // the profile last, so a failure part-way never leaves records without an owner.
+    for (let i = 0; i < refs.length; i += 450){
+      const b = db.batch(); refs.slice(i, i + 450).forEach(r => b.delete(r)); await b.commit();
+    }
+    const b = db.batch();
+    b.delete(db.collection('students').doc(studentId));
+    if (s.sectionId && sectionById(s.sectionId)) b.update(db.collection('sections').doc(s.sectionId), { studentCount: firebase.firestore.FieldValue.increment(-1) });
+    await b.commit();
+    if (openStudentId === studentId) closeModal('student-modal');
+    toast(`${s.name} was removed.`);
+  }catch(e){
+    console.error(e);
+    toast(e.code === 'permission-denied'
+      ? 'The database security rules do not allow the Super Admin to delete this. Update firestore.rules (see the setup notes) and try again.'
+      : (e.message || 'Could not remove the student.'), 'err');
+  }
 }
 
 function openAssignModal(teacherId){

@@ -6,6 +6,7 @@
 // re-renders from these caches.
 let TEACHER_SESSION = null;
 let assignedSectionIds = [];       // live, from the teacher's own doc
+let assignmentsLoaded = false;
 let assignedSectionsInfo = [];     // [{id,grade,name,studentCount}], refreshed when assignments change
 let currentGrade = null;
 let unsubs = [];
@@ -384,11 +385,13 @@ async function onAssignmentsChanged(newIds){
   // leaving a dashboard full of stale data and silent permission errors on screen.
   db.collection('teachers').doc(TEACHER_SESSION.uid).onSnapshot(doc => {
     if (!doc.exists){
-      sessionStorage.setItem('c2s_login_error', 'Your account credentials were reset by your Super Admin. Please log in with your new username and password.');
+      sessionStorage.setItem('c2s_login_error', 'Your teacher account was removed or its login was reset by your Super Admin. Ask them for your current username and password.');
       doLogoutTeacher();
       return;
     }
     const ids = doc.data().assignedSectionIds || [];
-    if (JSON.stringify(ids) !== JSON.stringify(assignedSectionIds)) onAssignmentsChanged(ids);
+    // Always handle the first snapshot, even an empty list, so a teacher with no
+    // sections yet sees the "no sections assigned" notice instead of a blank page.
+    if (!assignmentsLoaded || JSON.stringify(ids) !== JSON.stringify(assignedSectionIds)){ assignmentsLoaded = true; onAssignmentsChanged(ids); }
   });
 })();

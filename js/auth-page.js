@@ -1,6 +1,7 @@
 'use strict';
 // If already logged in, skip straight to the game.
 if (getStudentSession()) window.location.href = 'game.html';
+else document.addEventListener('DOMContentLoaded', () => consumeLoginError('login-msg'));
 
 function switchTab(name){
   document.getElementById('tab-login').classList.toggle('active', name==='login');

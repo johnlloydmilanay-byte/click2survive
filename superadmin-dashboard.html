@@ -119,7 +119,7 @@
 
       <!-- ══ TEACHERS ══ -->
       <section class="view" data-view="teachers" aria-labelledby="t-h">
-        <div class="page-head"><div><h2 id="t-h">Teachers</h2><p>Teachers can't self-register. Creating an account generates a username and password to hand to them. Use Assign to give access to their sections.</p></div></div>
+        <div class="page-head"><div><h2 id="t-h">Teachers</h2><p>Teachers can't self-register. Enter a name and the system creates the account and gives you a username and password to hand to them. Use Assign to give access to their sections, and Remove when a teacher leaves.</p></div></div>
         <section class="panel panel-highlight" aria-labelledby="add-t-h">
           <div class="panel-h"><h3 id="add-t-h"><i class="bi bi-person-plus" aria-hidden="true"></i>Create a teacher account</h3></div>
           <form class="toolbar" style="margin-bottom:0" onsubmit="event.preventDefault();createTeacher()">
@@ -142,7 +142,7 @@
 
       <!-- ══ STUDENTS ══ -->
       <section class="view" data-view="students" aria-labelledby="s-h">
-        <div class="page-head"><div><h2 id="s-h">Students</h2><p>Every registered student. Select a name to see their runs and answers.</p></div>
+        <div class="page-head"><div><h2 id="s-h">Students</h2><p>Every registered student. Select a name to see their runs and answers. Remove deletes the student and their records.</p></div>
           <button class="btn secondary" onclick="exportStudents()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>Export CSV</button></div>
         <div class="toolbar">
           <div class="field search"><label for="stu-search">Search</label><input id="stu-search" type="search" placeholder="Name or Student ID" oninput="renderStudents()"></div>
@@ -162,8 +162,8 @@
           <div class="table-wrap tall">
             <table>
               <caption class="sr-only">Students</caption>
-              <thead><tr><th scope="col">Student</th><th scope="col">Student ID</th><th scope="col">Grade</th><th scope="col">Section</th><th scope="col" style="min-width:150px">Latest score</th><th scope="col">Mastery</th><th scope="col" class="num">Runs</th><th scope="col">Registered</th></tr></thead>
-              <tbody id="students-body"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
+              <thead><tr><th scope="col">Student</th><th scope="col">Student ID</th><th scope="col">Grade</th><th scope="col">Section</th><th scope="col" style="min-width:150px">Latest score</th><th scope="col">Mastery</th><th scope="col" class="num">Runs</th><th scope="col">Registered</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+              <tbody id="students-body"><tr><td colspan="9" class="empty">Loading…</td></tr></tbody>
             </table>
           </div>
           <div class="table-foot" id="stu-foot" aria-live="polite"></div>
@@ -256,13 +256,18 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="cred-modal" style="display:none">
+<div class="modal-overlay" id="cred-modal" style="display:none" data-static>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cred-modal-title" aria-describedby="cred-modal-note" tabindex="-1">
     <h2 id="cred-modal-title">Teacher account created</h2>
     <p id="cred-modal-note">Copy these now and send them to the teacher — the password will not be shown again.</p>
     <div class="cred-row"><span class="cred-label" id="cl-u">Username</span><span class="cred-val" id="cred-username" aria-labelledby="cl-u"></span><button class="btn secondary sm copy-btn" onclick="copyCred('cred-username',this)" aria-label="Copy username">Copy</button></div>
     <div class="cred-row"><span class="cred-label" id="cl-p">Password</span><span class="cred-val" id="cred-password" aria-labelledby="cl-p"></span><button class="btn secondary sm copy-btn" onclick="copyCred('cred-password',this)" aria-label="Copy password">Copy</button></div>
-    <button class="btn primary" style="width:100%;margin-top:.4rem" onclick="closeModal('cred-modal')">Done</button>
+    <div class="cred-row"><span class="cred-label" id="cl-l">Login page</span><span class="cred-val" id="cred-login-url" aria-labelledby="cl-l" style="font-size:.78rem"></span></div>
+    <div class="row" style="margin-top:.4rem">
+      <button class="btn secondary" style="flex:1" onclick="copyAllCreds(this)"><i class="bi bi-clipboard" aria-hidden="true"></i>Copy all</button>
+      <button class="btn secondary" style="flex:1" onclick="printCreds()"><i class="bi bi-printer" aria-hidden="true"></i>Print slip</button>
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:.6rem" onclick="if(confirm('Have you copied or printed the password? It cannot be shown again.'))closeModal('cred-modal')">Done, I've saved it</button>
   </div>
 </div>
 
@@ -306,6 +311,7 @@
     <div class="modal-head">
       <div class="row"><span class="avatar" id="st-avatar" style="width:44px;height:44px;font-size:1rem" aria-hidden="true">?</span><div><h2 id="st-title">Student</h2><div class="modal-sub" id="st-sub"></div></div></div>
       <div class="row">
+        <button class="btn danger" id="st-remove-btn"><i class="bi bi-person-x" aria-hidden="true"></i>Remove</button>
         <button class="btn primary" id="st-pdf-btn"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Download PDF</button>
         <button class="icon-btn" onclick="closeModal('student-modal')" aria-label="Close dialog"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
       </div>
@@ -331,10 +337,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js"></script>
-<script src="js/session.js"></script>
+<script src="js/session.js?v=20261018rm"></script>
 <script src="js/game-data.js?v=20261018d"></script>
-<script src="js/dash-common.js?v=20261018d"></script>
+<script src="js/dash-common.js?v=20261018rm"></script>
 <script src="js/report-pdf.js?v=20261018d"></script>
-<script src="js/superadmin.js?v=20261018d"></script>
+<script src="js/superadmin.js?v=20261018rm"></script>
 </body>
 </html>

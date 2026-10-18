@@ -44,6 +44,18 @@ async function requireStudentSession(){
   const profile = getStudentSession();
   if (!profile){ window.location.href = 'index.html'; return null; }
   await ensureAnonAuth();
+  // A Super Admin may have removed this student since they last logged in on this
+  // device. Only a confirmed "doesn't exist" logs them out; a network error lets the
+  // game carry on as before.
+  try{
+    const doc = await db.collection('students').doc(profile.studentId).get();
+    if (!doc.exists){
+      clearStudentSession();
+      sessionStorage.setItem('c2s_login_error', 'This Student ID is no longer registered. Ask your teacher, or register again.');
+      window.location.href = 'index.html';
+      return null;
+    }
+  }catch(e){ /* offline or transient: keep the cached profile */ }
   return profile;
 }
 

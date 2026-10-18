@@ -372,7 +372,7 @@ function closeModal(id){
 document.addEventListener('keydown', e => {
   const open = [...document.querySelectorAll('.modal-overlay')].filter(m => m.style.display === 'flex').pop();
   if (e.key === 'Escape'){
-    if (open) closeModal(open.id);
+    if (open && !open.hasAttribute('data-static')) closeModal(open.id);
     else if (document.querySelector('.app.nav-open')) setNavOpen(false);
   }
   if (e.key === 'Tab' && open){
@@ -382,7 +382,7 @@ document.addEventListener('keydown', e => {
     else if (!e.shiftKey && document.activeElement === f[f.length-1]){ e.preventDefault(); f[0].focus(); }
   }
 });
-document.addEventListener('click', e => { if (e.target.classList && e.target.classList.contains('modal-overlay')) closeModal(e.target.id); });
+document.addEventListener('click', e => { if (e.target.classList && e.target.classList.contains('modal-overlay') && !e.target.hasAttribute('data-static')) closeModal(e.target.id); });
 
 // ── Tooltip (mouse + keyboard focus) and toast (announced politely) ───────
 (function(){
