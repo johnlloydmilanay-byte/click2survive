@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/dashboard.css?v=20261018logo">
+<link rel="stylesheet" href="css/dashboard.css?v=20261020rep">
 </head>
 <body data-app="Click to Survive Admin">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -193,7 +193,7 @@
       <!-- ══ ITEM ANALYSIS ══ -->
       <section class="view" data-view="items" aria-labelledby="ia-h">
         <div class="page-head"><div><h2 id="ia-h">Item analysis</h2><p>School-wide learning per item and competency. Narrow it to one section or session to compare classes.</p></div>
-          <div class="row"><button class="btn secondary" onclick="exportItems()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>CSV</button><button class="btn primary" onclick="pdfItems(this)"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Download PDF</button></div></div>
+          <div class="row"><button class="btn secondary" onclick="exportItems()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>CSV</button><button class="btn primary" onclick="pdfItems(this)"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>PDF report</button></div></div>
         <div class="notice warn" id="ia-notice" role="alert" style="display:none"></div>
         <div class="toolbar">
           <div class="field"><label for="ia-grade">Grade</label>
@@ -219,14 +219,14 @@
           <article class="report-card" aria-labelledby="rc0">
             <h3 id="rc0"><span class="stat-ico" aria-hidden="true"><i class="bi bi-building"></i></span>School summary</h3>
             <p>All grades, sections and teachers: participation, mean percentage scores, mastery levels and teacher activity.</p>
-            <button class="btn primary" onclick="pdfSchool(this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+            <button class="btn primary" onclick="pdfSchool(this)"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>Create report</button>
           </article>
           <article class="report-card" aria-labelledby="rc1">
             <h3 id="rc1"><span class="stat-ico" aria-hidden="true"><i class="bi bi-people"></i></span>Class performance</h3>
             <p>One grade or section: mastery distribution, competencies and every student's latest result.</p>
             <div class="field"><label for="rep-class-grade">Grade</label><select id="rep-class-grade" onchange="populateReportPickers()"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></select></div>
             <div class="field"><label for="rep-class-section">Section</label><select id="rep-class-section"></select></div>
-            <button class="btn primary" onclick="pdfClass(this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+            <button class="btn primary" onclick="pdfClass(this)"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>Create report</button>
           </article>
           <article class="report-card" aria-labelledby="rc2">
             <h3 id="rc2"><span class="stat-ico" aria-hidden="true"><i class="bi bi-clipboard-data"></i></span>Item analysis</h3>
@@ -235,20 +235,20 @@
             <div class="field"><label for="rep-ia-section">Section</label><select id="rep-ia-section" onchange="populateReportPickers()"></select></div>
             <div class="field"><label for="rep-ia-session">Session</label><select id="rep-ia-session"></select></div>
             <div class="field"><label for="rep-ia-mode">Runs counted</label><select id="rep-ia-mode"><option value="all">All runs</option><option value="first">First run per student</option><option value="latest">Latest run per student</option></select></div>
-            <button class="btn primary" onclick="pdfItemsFromReports(this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+            <button class="btn primary" onclick="pdfItemsFromReports(this)"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>Create report</button>
           </article>
           <article class="report-card" aria-labelledby="rc3">
             <h3 id="rc3"><span class="stat-ico" aria-hidden="true"><i class="bi bi-broadcast"></i></span>Session results</h3>
             <p>One quiz session: ranked results, who has not played yet, and item analysis for that session.</p>
             <div class="field"><label for="rep-session">Session</label><select id="rep-session"></select></div>
-            <button class="btn primary" onclick="pdfSession(document.getElementById('rep-session').value, this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+            <button class="btn primary" onclick="pdfSession(document.getElementById('rep-session').value, this)"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>Create report</button>
           </article>
           <article class="report-card" aria-labelledby="rc4">
             <h3 id="rc4"><span class="stat-ico" aria-hidden="true"><i class="bi bi-person-badge"></i></span>Student progress</h3>
             <p>One learner: run history, growth, learning per competency and their answers in the latest run.</p>
             <div class="field"><label for="rep-student-grade">Grade</label><select id="rep-student-grade" onchange="populateReportPickers()"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></select></div>
             <div class="field"><label for="rep-student">Student</label><select id="rep-student"></select></div>
-            <button class="btn primary" onclick="pdfStudent(document.getElementById('rep-student').value, this)"><i class="bi bi-download" aria-hidden="true"></i>Generate PDF</button>
+            <button class="btn primary" onclick="pdfStudent(document.getElementById('rep-student').value, this)"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>Create report</button>
           </article>
         </div>
       </section>
@@ -290,7 +290,7 @@
     <div class="modal-head">
       <div><h2 id="sm-title">Session</h2><div class="modal-sub" id="sm-sub"></div></div>
       <div class="row">
-        <button class="btn primary" id="sm-pdf-btn"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Download PDF</button>
+        <button class="btn primary" id="sm-pdf-btn"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>PDF report</button>
         <button class="icon-btn" onclick="closeModal('session-modal')" aria-label="Close dialog"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -312,7 +312,7 @@
       <div class="row"><span class="avatar" id="st-avatar" style="width:44px;height:44px;font-size:1rem" aria-hidden="true">?</span><div><h2 id="st-title">Student</h2><div class="modal-sub" id="st-sub"></div></div></div>
       <div class="row">
         <button class="btn danger" id="st-remove-btn"><i class="bi bi-person-x" aria-hidden="true"></i>Remove</button>
-        <button class="btn primary" id="st-pdf-btn"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Download PDF</button>
+        <button class="btn primary" id="st-pdf-btn"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>PDF report</button>
         <button class="icon-btn" onclick="closeModal('student-modal')" aria-label="Close dialog"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -340,7 +340,7 @@
 <script src="js/session.js?v=20261018rm"></script>
 <script src="js/game-data.js?v=20261018d"></script>
 <script src="js/dash-common.js?v=20261018rm"></script>
-<script src="js/report-pdf.js?v=20261018d"></script>
+<script src="js/report-pdf.js?v=20261020rep3"></script>
 <script src="js/superadmin.js?v=20261018rm"></script>
 </body>
 </html>
