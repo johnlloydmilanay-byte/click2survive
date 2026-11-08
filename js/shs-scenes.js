@@ -443,7 +443,7 @@ function shsTiltBoat(scen){
   g7Path([[-12,3],[13.5,3]], 2.4, 0xa29d92, .04, 'concrete');
   g7SafePad(-5,-8.5,'SAFE SPOT');
 
-  const BX = 22.5;
+  const BX = 21.2;                                   // stern just off the end of the landing
   const boat = shsBanca(1.05); boat.position.set(BX,.12,3); scene.add(boat);
   // Passengers and boxes, all on the +z side; `even` is where each goes once spread out.
   const load = [];
@@ -455,26 +455,56 @@ function shsTiltBoat(scen){
   const lb = g7Label('Buoyant force F_b', {size:.52, fg:'#7dd3fc'}); scene.add(lb);
   const ls = g7Label('LOAD within capacity ✓\nPLACEMENT all on one side ✗', {size:.62, fg:'#fecaca', border:'#ef4444'}); ls.position.set(BX,4,3); scene.add(ls);
   const lt = g7Label('Off-centre weight + buoyancy → torque → TILT', {size:.6, fg:'#fde047'}); lt.position.set(BX,2.9,3); scene.add(lt);
-  let spread = 0, relabelled = false;
+  // Take Control: from the landing the learner has the passengers move to the centre line,
+  // then the boxes spread evenly, and checks the boat is level. sp[0] passengers, sp[1] boxes.
+  const sp = [0, 0], go = [false, false];
+  let relabelled = false;
   animCallbacks.push((t,dt)=>{
-    if(ctrl.on) spread = Math.min(1, spread + dt*.4);          // the decision carried out: the load is spread evenly
-    const e = spread*spread*(3-2*spread);
-    load.forEach(l=> l.o.position.lerpVectors(l.from, l.to, e));
+    go.forEach((g,i)=>{ if(g) sp[i] = Math.min(1, sp[i] + dt*.6); });
+    load.forEach((l,i)=> l.o.position.lerpVectors(l.from, l.to, ease(sp[i < 3 ? 0 : 1])));
+    load.forEach((l,i)=>{ if(i < 3) l.o.userData.moving = sp[0] > 0 && sp[0] < 1; });
+    const e = (sp[0]*.55 + sp[1]*.45);                          // share of the off-centre load moved
     const heel = (.2 + Math.sin(t*.9)*.04) * (1-e);
     boat.rotation.x = heel + Math.sin(t*1.1)*.02;
     boat.position.y = .12 + Math.sin(t*1.3)*.04;
     const cgz = 3 + .55*(1-e);
     fW.position.set(BX, 1.5, cgz); fB.position.set(BX, -.2, 3);
     lw.position.set(BX+1.6, 1.2, cgz+.4); lb.position.set(BX-1.6, .9, 3);
-    if(e > .98 && !relabelled){ relabelled = true; g7Relabel(ls, 'LOAD spread evenly ✓\nBoat level & stable', {size:.62, fg:'#bbf7d0', border:'#22c55e'}); lt.visible = false; }
+    if(e > .98 && !relabelled){ relabelled = true; lt.visible = false; }
   });
 
   g7Human(6,1.2, 0x1e3a8a);
   humanGroup.rotation.y = Math.PI/2;
   g7Gateway(-5,-8.5,0);
+  const onDock = (x,z)=> x > 13.1 && x < 17.7 && Math.abs(z-3) < 1.45;
+  const end = [17.15, 3];
   G7 = { bounds:[-12,12,-13,9], camOff:[6,4.5,5],
-    hazards:[{test:(x,z)=> x>11.5, msg:'⚠ Do not board the tilting boat — wait at the safe spot while the load is spread evenly.'}] };
-  g7Camera([17,4.2,11.5],[22,.6,2.6]);
+    hazards:[{test:(x,z)=> x>11.5, msg:'⚠ Do not board the tilting boat — wait at the safe spot while the load is spread evenly.'}],
+    onControl(){
+      G7.bounds = [-12,17.6,-13,9];
+      G7.heightAt = (x,z)=> onDock(x,z) ? .33 : 0;
+      G7.hazards = [{test:(x,z)=> x > 13.3 && !onDock(x,z), msg:'⚠ Stay on the landing — do not board or step into the water.'}];
+    },
+    tasks:[
+      {at:[17.15, 3.75], face:[BX, 3.4], text:'Ask the passengers to sit along the boat’s centre line', done:'Passengers centred — the boat is heeling less',
+       run(next){
+         humanGroup.userData.pose = 'wave';
+         g7Say(humanGroup, 'Please move to the middle of the boat, one by one!', 2400);
+         g7Seq([[1200, ()=>{ humanGroup.userData.pose = null; go[0] = true; }], [1900, next]]);
+       }},
+      {at:[17.15, 2.25], face:[BX, 2.6], text:'Have the boxes moved so the load is spread evenly', done:'Boxes spread out — weight is balanced on both sides',
+       run(next){
+         humanGroup.userData.pose = 'wave';
+         g7Say(humanGroup, 'Move one box to the bow and one to the other side, please.', 2400);
+         g7Seq([[1200, ()=>{ humanGroup.userData.pose = null; go[1] = true; }], [1900, next]]);
+       }},
+      {at:end, face:[BX, 3], text:'Check the boat is level and within capacity', done:'Level and within capacity ✓ — cross only when conditions are safe',
+       run(next){
+         g7Relabel(ls, 'LOAD spread evenly ✓  Within capacity ✓\nBoat level & stable', {size:.62, fg:'#bbf7d0', border:'#22c55e'});
+         setTimeout(next, 900);
+       }}],
+    finish:[-5,-8.5], finishText:'Wait at the safe spot until conditions are safe to cross' };
+  g7Camera([16.5,4.2,11.5],[21,.6,2.6]);
 }
 
 // 6 · TYPHOON · Physics of fluids — a sealed container of emergency supplies floats but is
@@ -619,7 +649,7 @@ function shsMomentum(scen, mode){
   const BZ = 7;
   const boat = shsBanca(.62); boat.position.set(-1.8,.1,BZ); boat.rotation.y = .1; scene.add(boat);
   const rower = makeHuman(-.6,.15,0,0x065f46,0x334155,.62); rower.rotation.y = -Math.PI/2; boat.add(rower);
-  g7Tag(ke ? 'Boat at the landing' : 'Boat waiting at the crossing', -1.8, 2.3, BZ, {size:.52});
+  const boatTag = g7Tag(ke ? 'Boat at the landing' : 'Boat waiting at the crossing', -1.8, 2.3, BZ, {size:.52});
   const logG = new THREE.Group(); scene.add(logG);
   const logM = new THREE.Mesh(new THREE.CylinderGeometry(.42,.5,4.2,20), pbr({color:0x5a4030,map:woodTex(),roughness:.92}));
   logM.rotation.z = Math.PI/2; logM.castShadow = true; logG.add(logM);
@@ -633,17 +663,24 @@ function shsMomentum(scen, mode){
   const lc = g7Label(ke ? 'Bottle: small m → small KE' : 'Container: small m → small p', {size:.54, fg:'#fde047'}); scene.add(lc);
   const lv = g7Label('Same velocity v', {size:.55}); scene.add(lv);
   const bars = shsBars(7,1.5,-1, ke ? ['KE log','KE bottle'] : ['p log','p can'], [0xef4444, 0xfacc15]); bars.userData.set(1, ke ? .04 : .1);
-  let z = -24, away = 0;
+  // The log drifts down the lane x ≈ 0.2 (its ends at −1.9 … 2.3), the small object at x ≈ 3.4.
+  // The safe decision moves the boat out of that lane: it turns and moors alongside the near
+  // bank (hull centre x = −3.6, outriggers −4.65 … −2.55, clear of the log and of the bank).
+  const LX = .2, CX = 3.4;
+  let z = -24, away = 0, going = false;
   animCallbacks.push((t,dt)=>{
-    if(ctrl.on) away = Math.min(1, away + dt*.35);           // the decision: the boat moves out of the log's path
+    if(going || (ke && ctrl.on)) away = Math.min(1, away + dt*.3);
     z += 2.1*dt;
     const stop = BZ - 2.6 + away*12;
     if(z > Math.min(stop, 24)){ z = -24; }
-    logG.position.set(-1.6, .14+Math.sin(t*1.7)*.04, z); logG.rotation.y = Math.sin(t*.4)*.08;
-    can.position.set(2.4, .14+Math.sin(t*2.3+1)*.05, z); can.rotation.x += dt*1.4;
-    pLog.position.set(-1.6, 1.15, z+.2); pCan.position.set(2.4, .8, z+.2);
-    ll.position.set(-1.6, 2.2, z); lc.position.set(2.6, 1.5, z); lv.position.set(.4, 3, z);
-    boat.position.x = -1.8 - away*1.9; boat.position.z = BZ + away*2; boat.position.y = .1 + Math.sin(t*1.3)*.04;
+    logG.position.set(LX, .14+Math.sin(t*1.7)*.04, z); logG.rotation.y = Math.sin(t*.4)*.08;
+    can.position.set(CX, .14+Math.sin(t*2.3+1)*.05, z); can.rotation.x += dt*1.4;
+    pLog.position.set(LX, 1.15, z+.2); pCan.position.set(CX, .8, z+.2);
+    ll.position.set(LX, 2.2, z); lc.position.set(CX+.2, 1.5, z); lv.position.set(1.5, 3, z);
+    const e = ease(away);
+    boat.position.set(-1.8 - e*1.8, .1 + Math.sin(t*1.3)*.04, BZ + e*1.6); boat.rotation.y = .1 + e*(Math.PI/2 - .1);
+    boatTag.position.set(boat.position.x, 2.3, boat.position.z);
+    if(away > .99 && !boatTag.userData.moved){ boatTag.userData.moved = true; g7Relabel(boatTag, ke ? 'Boat moved out of the log’s path' : 'Crossing postponed · boat out of the log’s path', {size:.52, pin:true, bg:'rgba(20,83,45,.92)', border:'#4ade80'}); }
   });
   g7Tag(ke ? 'Kinetic energy KE = ½mv²' : 'Momentum p = mv', 7, 4, 1.5, {size:.5});
 
@@ -653,6 +690,18 @@ function shsMomentum(scen, mode){
   g7Gateway(-11,-6,Math.PI/2);
   G7 = { bounds:[-15,4,-12,12], camOff:[5,4.5,-3],
     hazards:[{test:(x,z)=> x>-4.7, msg: ke ? '⚠ The log carries far more kinetic energy — stay away from its path!' : '⚠ The log has far more momentum — stay out of its path and postpone crossing!'}] };
+  // Momentum items: the learner warns the boat operator, who postpones the crossing and moves aside.
+  if(!ke) Object.assign(G7, {
+    tasks:[
+      {at:[-5.45, BZ-.9], face:[-1.8, BZ], text:'Warn the boat operator: a log is coming — postpone the crossing',
+       done:'The operator postponed the crossing and is moving out of the log’s path',
+       run(next){
+         humanGroup.userData.pose = 'wave';
+         g7Say(humanGroup, 'Wait! A big log is drifting this way — don’t cross yet!', 2600);
+         g7Seq([[1600, ()=>{ humanGroup.userData.pose = null; g7Say(rower, 'Thanks — I’ll move out of its path and wait!', 2600, {border:'#4ade80', h:1.6}); going = true; }],
+                [1200, next]]);
+       }}],
+    finish:[-11,-6], finishRot:Math.PI/2, finishText:'Now move away from the river to the safe spot' });
   g7Camera([-9,6.5,15],[.5,0,-1]);   // downstream: the log drifts toward the boat and the viewer
 }
 

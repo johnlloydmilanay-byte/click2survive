@@ -249,7 +249,7 @@ const GRADES = {
        phy_html:"Gravitational potential energy is PE = mgh. A heavy flowerpot on a high ledge stores energy because of its height; if dislodged, this energy can become kinetic energy. Before strong winds arrive, place it securely at a lower level.",
        phy_bi_html:"An gravitational potential energy iyo an PE = mgh. An magabat na paso sa halangkaw na tungtungan may enerhiya huli sa langkaw kaini; kun mahulog, puwede ining magin kinetic energy. Bago magkusog an duros, ibalyo ini sa mas hababa asin ligtas na lugar.",
        live:[{l:"Flowerpot",v:"Heavy, on a high ledge",s:"unsafe"},{l:"Stored energy",v:"U = mgh (large h)",s:"risky"},{l:"Wind",v:"Getting stronger",s:"risky"}],
-       mission:"The pot is now low and secure — walk to the safe spot away from the ledge"},
+       mission:"Lift the flowerpot down and set it on the low, secure crate — then go to the safe spot"},
 
       {scene:"stuckbox", hazard:"flood", comp:"Work", concept:"work", out:"risky", ci:2, key:"C",
        sit:"Relief supplies must be moved from the boat landing to a dry waiting area. A learner pushes a box but it does not move because it is caught on a raised portion of the pathway.",
@@ -272,7 +272,7 @@ const GRADES = {
        phy_html:"Work done by a constant force is W = Fd cos θ. If the box does not move, d = 0 and the applied force does zero mechanical work on the box, even though the learner expends bodily energy. Work occurs when the force produces displacement with a component in its direction.",
        phy_bi_html:"An mechanical work iyo an W = Fd cos θ. Kun dai naghihiro an kahon, d = 0 kaya sero an mechanical work kan puwersa sa kahon maski napapagal an estudyante. May work kun an puwersa may kawsa sa displacement kan kahon.",
        live:[{l:"Box",v:"Caught on a raised part",s:"risky"},{l:"Displacement",v:"d = 0 → W = 0",s:"risky"},{l:"Clear path",v:"d > 0 → W = Fd",s:"safe"}],
-       mission:"Carry the relief box along the clear path to the dry waiting area"},
+       mission:"Push the relief box along the clear path to the dry waiting area"},
 
       {scene:"platform", hazard:"typhoon", comp:"Mechanical Energy", concept:"mechanical_energy", out:"unsafe", ci:2, key:"C", wind:80,
        sit:"Several loose objects are stored on an elevated platform beside the hanging bridge. Strong wind may cause them to fall or move toward people using the pathway.",
@@ -295,7 +295,7 @@ const GRADES = {
        phy_html:"Mechanical energy is the sum of kinetic and potential energy, E<sub>mech</sub> = KE + PE. Elevated objects possess gravitational potential energy, PE = mgh, which can convert into kinetic energy if they fall. Secure or lower the objects before the typhoon.",
        phy_bi_html:"An mechanical energy iyo an E<sub>mech</sub> = KE + PE. An mga bagay sa halangkaw na lugar may gravitational potential energy, PE = mgh, na puwedeng magin kinetic energy kun mahulog. Igakod o ibalyo ini sa mas hababang ligtas na lugar bago magbagyo.",
        live:[{l:"Objects",v:"Loose and elevated",s:"unsafe"},{l:"Stored energy",v:"U = mgh",s:"risky"},{l:"Wind",v:"Strong",s:"unsafe"}],
-       mission:"The objects are being secured low — go to the safe spot away from the platform"}
+       mission:"Carry the loose objects into the low enclosed storage and close it — then go to the safe spot"}
     ]},
 
   // Grade 9 — revised instrument, MATATAG Science Grade 9 Quarter 1: inertia,
@@ -324,7 +324,7 @@ const GRADES = {
        phy_html:"Newton's first law states that an object maintains its velocity unless a net external force changes it. When the boat stops suddenly, the unsecured bag tends to keep moving forward because of inertia. Secure supplies before travel to prevent impact injuries.",
        phy_bi_html:"Segun sa enot na law ni Newton, an bagay nagpapadagos sa velocity kaini kun mayong net external force na magbabago digdi. Kun biglang magpundo an baroto, padagos sa inutan an bag huli sa inertia. Igakod an mga suplay bago bumiyahe.",
        live:[{l:"Boat",v:"Stops suddenly",s:"unsafe"},{l:"Unsecured bag",v:"Keeps moving forward",s:"unsafe"},{l:"Secured bag",v:"Stays in place",s:"safe"}],
-       mission:"Stay on the bank while the cargo is tied down — go to the safe spot"},
+       mission:"Tie down the loose bag in the boat from the bank — then wait at the safe spot"},
 
       {scene:"vehiclestop", hazard:"typhoon", comp:"Inertia", concept:"inertia", out:"risky", ci:2, key:"C", wind:55,
        sit:"During an evacuation before a typhoon, a vehicle carrying learners and supplies suddenly stops. Unsecured containers continue moving toward the front of the vehicle.",
@@ -347,7 +347,7 @@ const GRADES = {
        phy_html:"Newton's first law explains why loose containers keep their forward velocity when a vehicle brakes suddenly. Restraints provide the force required to slow the containers with the vehicle. Secure them before departure and avoid abrupt maneuvers where possible.",
        phy_bi_html:"An enot na law ni Newton nagpapaliwanag kun tano padagos sa inutan an mga daing gakod na laagan kun biglang magpundo an sakayan. An panggakod nagtatao nin puwersa tanganing mapundo man an mga ini. Igakod antes bumiyahe.",
        live:[{l:"Vehicle",v:"Sudden stop",s:"unsafe"},{l:"Loose containers",v:"Keep moving forward",s:"unsafe"},{l:"Secured containers",v:"Stay put",s:"safe"}],
-       mission:"Go to the waiting area while the containers are tied down"},
+       mission:"Strap down the loose drums in the parked truck — then go to the waiting area"},
 
       {scene:"twocontainers", hazard:"flood", comp:"Force, Mass, and Acceleration", concept:"force_mass_acceleration", out:"risky", ci:1, key:"B",
        sit:"Floodwater applies approximately the same force to an empty plastic container and a water filled container near the boat landing. The empty container has less mass.",
@@ -414,7 +414,7 @@ const GRADES = {
        phy_html:"Newton's third law states that forces between interacting bodies are equal in magnitude and opposite in direction: Flearner on boat = −F<sub>b</sub>oat on learner. Pushing backward on the boat makes the boat move away. Hold the boat securely and step ashore slowly.",
        phy_bi_html:"An ikatolong law ni Newton nagsasabi na an puwersa kan duwang nag-iinterak na bagay magkapareho an dakula alagad magkontra an direksyon: Flearner on boat = −F<sub>b</sub>oat on learner. Kun itulod palikod an baroto, naghihiro ini paparayo. Igakod an baroto asin maluway na magtukad.",
        live:[{l:"Learner pushes boat",v:"Backward",s:"risky"},{l:"Boat pushes learner",v:"Equal and opposite",s:"risky"},{l:"Boat held, slow step",v:"Boat stays put",s:"safe"}],
-       mission:"Step off slowly while the boat is held — walk to the safe spot on the bank"},
+       mission:"You are in the boat: step off slowly onto the dock while it is held — then go to the safe spot"},
 
       {scene:"branchspring", hazard:"typhoon", comp:"Action–Reaction Forces", concept:"action_reaction", out:"unsafe", ci:2, key:"C", wind:45,
        sit:"After a typhoon, a learner tries to pull a large branch caught against the side support of the hanging bridge. The branch pushes back against the support and may suddenly spring toward the learner when released.",
@@ -437,7 +437,7 @@ const GRADES = {
        phy_html:"The branch and bridge support exert contact forces on each other in equal and opposite pairs, consistent with Newton's third law. A bent or trapped branch may also store elastic potential energy, U = ½kx² for an ideal spring model. Releasing it can cause sudden motion; trained responders should handle removal.",
        phy_bi_html:"An sanga asin suporta nagtatao nin magkapareho an dakula alagad magkakontrang puwersa, segun sa ikatolong law ni Newton. An nabaluktot na sanga puwede man magtipon nin elastic potential energy, U = ½kx² sa simpleng spring model. Kun mabutasan, puwede ining biglang maghiro; bihasang responder an dapat maghali kaini.",
        live:[{l:"Branch",v:"Bent against the support",s:"unsafe"},{l:"Support pushes back",v:"Equal and opposite",s:"risky"},{l:"If released",v:"May spring out",s:"unsafe"}],
-       mission:"Leave the branch to trained adults — go to the safe spot"}
+       mission:"Don’t pull the branch: ask the trained adults to remove it — then wait at the safe spot"}
     ]},
 
   // Grade 10 — revised instrument, MATATAG Science Grade 10 Quarter 2: projectile
@@ -466,7 +466,7 @@ const GRADES = {
        phy_html:"For ideal projectile motion without air resistance, horizontal and vertical motions follow x = v₀ cosθ · t and y = y₀ + v₀ sinθ · t − ½gt². Launch speed, angle, and relative height determine where the rope lands. A trained rescue worker should estimate the gap and adjust the throw accordingly.",
        phy_bi_html:"Sa ideal projectile motion na mayong air resistance, x = v₀ cosθ · t asin y = y₀ + v₀ sinθ · t − ½gt². An kapinunan na speed, anggulo, asin langkaw nagdedeterminar kan babagsakan kan lubid. An bihasang rescuer dapat mag-estimar kan distansya asin i-adjust an pag-apon.",
        live:[{l:"Gap",v:"Flooded",s:"unsafe"},{l:"Landing point",v:"Depends on angle and speed",s:"risky"},{l:"Aim",v:"Adjusted to the distance",s:"safe"}],
-       mission:"Stay back from the flooded gap — go to the safe spot"},
+       mission:"Help the rescue worker aim: estimate the distance, set the angle and speed, and throw the rope"},
 
       {scene:"roofproj", hazard:"typhoon", comp:"Projectile Motion", concept:"projectile_motion", out:"unsafe", ci:2, key:"C", wind:90,
        sit:"During strong winds, a loose piece of roofing is lifted from a nearby structure. Its initial speed, direction, and height may affect its path and landing area near the hanging bridge.",
@@ -512,7 +512,7 @@ const GRADES = {
        phy_html:"Linear momentum is p = mv. At the same velocity, the more massive log carries greater momentum than the plastic container. Because stopping or redirecting it may require a large impulse, the boat operator should avoid its path and postpone crossing.",
        phy_bi_html:"An momentum iyo an p = mv. Sa parehong velocity, mas dakula an momentum kan mas magabat na troso kaysa plastik na laagan. Dakulang impulse an puwedeng kaipuhan sa pagpundo kaini, kaya likayan an agihan asin ipagpaliban an pagbalyo.",
        live:[{l:"Velocity",v:"Same for log and container",s:"risky"},{l:"Log momentum",v:"Much larger (more mass)",s:"unsafe"},{l:"Boat",v:"In the log’s path",s:"unsafe"}],
-       mission:"Postpone the crossing — move away from the river and the log’s path to the safe spot"},
+       mission:"Warn the boat operator to postpone the crossing and avoid the log — then go to the safe spot"},
 
       {scene:"barrier", hazard:"typhoon", comp:"Momentum and Impulse", concept:"impulse", out:"unsafe", ci:0, key:"A", wind:85,
        sit:"Strong wind causes a loose wooden panel to move toward a pathway. A properly installed protective barrier is designed to slow the panel over a longer period before it reaches people.",
@@ -708,7 +708,7 @@ const GRADES = {
        phy_html:"A floating boat is supported by buoyant force, F<sub>b</sub> = ρ<sub>water</sub> g V<sub>displaced</sub>, balancing its weight at rest. But being within capacity does not guarantee stability: an off-center load shifts the center of gravity and can create a tipping moment, τ = rF. Redistribute people and supplies and cross only when current and boat conditions are safe.",
        phy_bi_html:"An barotong naglalataw sinusuportahan kan buoyant force, F<sub>b</sub> = ρ<sub>water</sub> g V<sub>displaced</sub>, na nagbabalanse sa gabat kaini kun nakapundo. Alagad an kapasidad dai garantiya nin stability: an kargang nasa sarong gilid nagpapabago kan center of gravity asin nakakatao nin torque, τ = rF. Ipantay an karga asin magbalyo sana kun ligtas.",
        live:[{l:'Total load',v:'Within capacity',s:'safe'},{l:'Load placement',v:'All on one side',s:'unsafe'},{l:'Boat',v:'Tilting',s:'unsafe'}],
-       mission:'Do not board the tilting boat — wait at the safe spot while the load is spread evenly'},
+       mission:'Don’t board: have the passengers and boxes spread evenly, check the boat is level — then wait at the safe spot'},
 
       {scene:'floatbox', hazard:'typhoon', comp:'Physics of Fluids', concept:'fluids_buoyancy', out:'unsafe', ci:1, key:'B', wind:60,
        sit:'During typhoon-related flooding, a tightly sealed plastic container filled with emergency supplies falls into the river. Its average density is lower than the density of the surrounding water, but the floodwater is moving rapidly.',
@@ -855,7 +855,7 @@ const GRADES = {
        phy_html:"Momentum is p = mv. With equal velocity, the larger mass of the log gives it greater momentum than the container. A collision could involve a large impulse, J = Δp; move the boat away from the log's path and postpone crossing.",
        phy_bi_html:"An momentum iyo an p = mv. Sa parehong velocity, mas dakula an momentum kan troso huli sa mas dakulang mass kaini. An pagbunggo puwedeng magtao nin dakulang impulse, J = Δp; iparayo an baroto asin ipagpaliban an pagbalyo.",
        live:[{l:'Velocity',v:'Same for log and container',s:'risky'},{l:'Log momentum',v:'Much larger (more mass)',s:'unsafe'},{l:'Boat',v:'In the log’s path',s:'unsafe'}],
-       mission:'Postpone the crossing — move away from the river and the log’s path to the safe spot'},
+       mission:'Warn the boat operator to postpone the crossing and avoid the log — then go to the safe spot'},
 
       {scene:'barrier', hazard:'typhoon', comp:'Momentum and Impulse', concept:'momentum_impulse', out:'unsafe', ci:1, key:'B', wind:85,
        sit:'During a typhoon, a windblown object moves toward the pathway leading to the hanging bridge. A properly installed protective barrier contains flexible padding that increases the time required to bring the object to rest.',

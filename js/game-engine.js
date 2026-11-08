@@ -122,7 +122,10 @@ function animate(){
       updateControl(dt, t);
       cam.yaw *= .9; cam.pitch *= .9;
       const wp = new THREE.Vector3();
-      if(ctrl.subject){
+      if(isSceneGrade(ctrl.grade) && G7 && G7.camView){
+        // an item scene's action wants a wider look (e.g. watching a rope throw land)
+        cam.look.lerp(G7.camView.look, .06); cam.target.copy(G7.camView.pos);
+      } else if(ctrl.subject){
         ctrl.subject.getWorldPosition(wp);
         cam.look.lerp(new THREE.Vector3(wp.x, wp.y+1.2, wp.z), .1);
         cam.target.copy(wp).add(ctrl.camOff);
@@ -1466,12 +1469,19 @@ function makeHuman(x,y,z,shirtC,pantC,s){
   //   'cart'  — hands forward at waist height on a cart's handle
   g.userData = { legs, arms, knees, elbows, moving:false, human:true, pose:null };
   // (push: nearly straight arms angled down — pair it with a ~0.5 rad forward lean)
-  const HOLD = { carry:{sh:-.62, el:-.85, out:.12}, push:{sh:-.4, el:-.1, out:.1}, cart:{sh:-.78, el:-.55, out:.13} };
+  //   'reach' — both arms reaching forward at chest height (tying a strap, handing over)
+  //   'wave'  — right arm raised and waving, to call someone's attention
+  const HOLD = { carry:{sh:-.62, el:-.85, out:.12}, push:{sh:-.4, el:-.1, out:.1}, cart:{sh:-.78, el:-.55, out:.13},
+                 reach:{sh:-1.15, el:-.35, out:.05} };
   animCallbacks.push((t)=>{
     const ud = g.userData;
     head.rotation.y = Math.sin(t*.3+ph)*.15;
     const P = ud.pose && HOLD[ud.pose];
-    if(P){
+    if(ud.pose === 'wave'){
+      arms[1].rotation.x += (-2.75 - arms[1].rotation.x)*.25; arms[1].rotation.z = .25 + Math.sin(t*9)*.28;
+      elbows[1].rotation.x += (-.35 - elbows[1].rotation.x)*.25;
+      arms[0].rotation.x *= .8; arms[0].rotation.z = -.07; elbows[0].rotation.x += (-.12 - elbows[0].rotation.x)*.2;
+    } else if(P){
       // Arms ease into the hold and stay there; while walking they just follow the
       // stride a little (no swing through the load).
       const step = ud.moving ? Math.sin(t*8.5)*.03 : 0;
@@ -1486,7 +1496,7 @@ function makeHuman(x,y,z,shirtC,pantC,s){
       legs[0].rotation.x = sw*.5;  legs[1].rotation.x = -sw*.5;
       knees[0].rotation.x = Math.max(0, -Math.cos(w))*.75 + .05;
       knees[1].rotation.x = Math.max(0,  Math.cos(w))*.75 + .05;
-      if(!P){
+      if(!P && ud.pose !== 'wave'){
         arms[0].rotation.x = -sw*.42; arms[1].rotation.x = sw*.42;
         elbows[0].rotation.x = -.25 - Math.max(0, sw)*.35;
         elbows[1].rotation.x = -.25 - Math.max(0,-sw)*.35;
@@ -1497,9 +1507,10 @@ function makeHuman(x,y,z,shirtC,pantC,s){
       // idle: settle the joints, gentle breathing sway in the arms
       legs.forEach(l=> l.rotation.x *= .82);
       knees.forEach(k=> k.rotation.x *= .82);
-      if(!P){
-        arms[0].rotation.x = Math.sin(t*.8+ph)*.04;
-        arms[1].rotation.x = -Math.sin(t*.8+ph)*.04;
+      if(!P && ud.pose !== 'wave'){
+        arms.forEach((a,i)=>{ a.rotation.z += ((i ? .07 : -.07) - a.rotation.z)*.15; });
+        arms[0].rotation.x += (Math.sin(t*.8+ph)*.04 - arms[0].rotation.x)*.2;     // eases down after a hold
+        arms[1].rotation.x += (-Math.sin(t*.8+ph)*.04 - arms[1].rotation.x)*.2;
         elbows.forEach(e=> e.rotation.x += (-.12 - e.rotation.x)*.1);
       }
     }
@@ -1565,7 +1576,8 @@ function makeGateway(x,y,z,color){
       op = Math.max(0, rm1.uniforms.op.value - .02);
     } else op = gatewayActive ? 1 : .28;
     rm1.uniforms.op.value = rm2.uniforms.op.value = discMat.uniforms.op.value = op;
-    if(!gatewayPassed) g.scale.setScalar(1+Math.sin(t*(gatewayActive?2.5:1.5))*(gatewayActive?.05:.02));
+    // userData.k shrinks the ring into a small step marker for on-the-spot actions
+    if(!gatewayPassed) g.scale.setScalar((g.userData.k||1)*(1+Math.sin(t*(gatewayActive?2.5:1.5))*(gatewayActive?.05:.02)));
   });
   return g;
 }
@@ -2098,7 +2110,7 @@ function buildMenuBackground(){
 //  CONTROL PHASE — student pilots the simulation
 // ═══════════════════════════════════════════════
 function missionText(proceed, grade){
-  if(isSceneGrade(grade)) return (ctrl.scen && ctrl.scen.mission) || 'Carry out the safe decision — reach the gateway';
+  if(isSceneGrade(grade)) return (G7 && G7.taskText) || (ctrl.scen && ctrl.scen.mission) || 'Carry out the safe decision — reach the gateway';
   if(grade===9) return proceed ? 'Steer the bancá across the river to the gateway' : 'Return the bancá safely to the dock gateway';
   if(grade===10) return proceed ? 'Walk across the hanging bridge to the gateway' : 'Retreat carefully off the bridge to the safe-zone gateway';
   return proceed ? 'Wade across the floodwater to the gateway' : 'Retreat to the high-ground gateway behind you';
@@ -2379,6 +2391,15 @@ function startControl(){
   if(boatMode) applyBoatCorrection(scen);
 
   ctrl.subject = boatMode ? boatGroup : humanGroup;
+  const dl = document.getElementById('m-dist-l'); if(dl) dl.textContent = 'to gateway';
+  // Item scenes can hand the joystick to something else (e.g. a boat to steer) and set up
+  // the on-the-spot actions their safe decision calls for (see g7StartTasks).
+  if(isSceneGrade(GS.grade) && G7){
+    if(G7.subject) ctrl.subject = G7.subject;
+    if(G7.onControl) G7.onControl();
+    if(G7.tasks) g7StartTasks();
+    document.getElementById('m-text').textContent = missionText(proceed, GS.grade);
+  }
 
   // Chase camera offsets per mode
   if(isSceneGrade(GS.grade) && G7 && G7.camOff) ctrl.camOff.set(...G7.camOff);
@@ -2430,7 +2451,10 @@ function updateControl(dt, t){
   const mv = new THREE.Vector3().addScaledVector(fwd, joy.y).addScaledVector(right, joy.x);
   const mag = mv.length();
   const moving = mag > .12;
-  if(humanGroup && humanGroup.userData) humanGroup.userData.moving = !ctrl.boat && moving;
+  // Item scenes: an interaction panel replaces walking, or an action is playing out
+  // (the action itself drives the learner's walk cycle).
+  if(isSceneGrade(ctrl.grade) && G7 && (G7.noWalk || G7.busy)) return;
+  if(humanGroup && humanGroup.userData) humanGroup.userData.moving = !ctrl.boat && moving && ctrl.subject === humanGroup;
   // footsteps in time with the walk cycle
   if(moving && !ctrl.boat){ footT += dt; if(footT > .37){ footT = 0; AudioSysSafe('footstep'); } } else footT = .3;
 
@@ -2496,7 +2520,9 @@ function updateControl(dt, t){
 
   // Distance HUD + gateway collision
   document.getElementById('m-dist').textContent = gdist.toFixed(1) + ' m';
-  if(gdist < 2.2) controlSuccess();
+  // Item scenes with on-the-spot actions: reaching the marker runs the next step.
+  if(isSceneGrade(ctrl.grade) && G7 && G7.onReach){ if(gdist < (G7.reachR || 2.2)) G7.onReach(); }
+  else if(gdist < 2.2) controlSuccess();
 }
 
 function controlSuccess(){
@@ -2507,8 +2533,9 @@ function controlSuccess(){
   const mb = document.getElementById('mission');
   mb.classList.remove('warn');
   mb.classList.add('passed');
-  document.getElementById('m-text').textContent = '✓ GATEWAY PASSED — Level Complete';
+  document.getElementById('m-text').textContent = (isSceneGrade(ctrl.grade) && G7 && G7.doneText) || '✓ GATEWAY PASSED — Level Complete';
   document.getElementById('m-dist').textContent = 'advancing...';
+  const dl = document.getElementById('m-dist-l'); if(dl) dl.textContent = '';
   if(navigator.vibrate) navigator.vibrate([50,40,50,40,90]);
   AudioSysSafe('fanfare');
   const stick = document.getElementById('joy-stick');

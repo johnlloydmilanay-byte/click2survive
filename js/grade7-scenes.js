@@ -489,6 +489,7 @@ function g7Current(x0,x1,z0,z1,y,speedFn,alongZ){
 const G7_SCENES = {trashbin:g7TrashBin, sign:g7Sign, route:g7Route, fallentree:g7FallenTree, bottle:g7Bottle, windupdate:g7WindUpdate, practice:g7Practice};
 function buildGrade7Scene(scen){
   G7 = null;
+  g7ClosePanels();
   G7_LABELS = [];
   const b = G7_SCENES[scen.scene];
   if(!b) throw new Error('Unknown item scene: '+scen.scene);
@@ -1091,7 +1092,7 @@ function g7InHazard(x,z){
   return null;
 }
 function g7UpdateControl(dt, s, mv, moving){
-  const speed = 3.2;
+  const speed = (G7 && G7.speed) || 3.2;           // e.g. a slow, careful step off a boat
   const nx = s.position.x + mv.x*speed*dt, nz = s.position.z + mv.z*speed*dt;
   const [x0,x1,z0,z1] = G7 ? G7.bounds : [-20,20,-20,20];
   const cx = THREE.MathUtils.clamp(nx,x0,x1), cz = THREE.MathUtils.clamp(nz,z0,z1);
@@ -1106,5 +1107,140 @@ function g7UpdateControl(dt, s, mv, moving){
   }
   // Scenes with raised ground (a ramp up to a platform) give the walking height here.
   if(G7 && G7.heightAt){ s.position.y = G7.heightAt(s.position.x, s.position.z); if(s.userData) s.userData.baseY = s.position.y; }
-  if(moving) s.rotation.y = Math.atan2(mv.x, mv.z);
+  if(moving){
+    const want = Math.atan2(mv.x, mv.z) + ((G7 && G7.yawOff) || 0);   // yawOff: a boat's bow is its local +x
+    let d = want - s.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
+    s.rotation.y += (G7 && G7.turnRate) ? d*Math.min(1, dt*G7.turnRate) : d;
+  }
+  if(G7 && G7.onMove) G7.onMove(dt, s, moving);
 }
+
+// ─── ON-THE-SPOT ACTIONS ───
+// When the safe decision is something to DO — lift a pot down, tie down cargo, ask the
+// trained adults — a scene lists the steps in G7.tasks: [{at:[x,z], text, done, run(next)}].
+// The gateway becomes a small marker over the current step; walking up to it runs that
+// step's action (the learner holds still while it plays), then the marker moves on. After
+// the last step the learner goes to G7.finish ([x,z], the safe spot), or the level ends
+// right there if there is no finish.
+function g7StartTasks(){
+  const T = G7.tasks, gw = gatewayGroup, y0 = gw.position.y, MK = .5;
+  G7.step = 0;
+  const aim = ()=>{
+    const k = G7.step;
+    if(k < T.length){
+      // small marker ring standing on the spot where the learner does this step
+      gw.userData.k = MK; G7.reachR = T[k].r || 1.1;
+      gw.position.set(T[k].at[0], y0*MK + (T[k].y||0), T[k].at[1]);
+      if(T[k].face) gw.rotation.y = Math.atan2(T[k].face[0]-T[k].at[0], T[k].face[1]-T[k].at[1]);
+      G7.taskText = `Step ${k+1} of ${T.length}: ${T[k].text}`;
+    } else {
+      gw.userData.k = 1; G7.reachR = 2.2;
+      gw.position.set(G7.finish[0], y0, G7.finish[1]); gw.rotation.y = G7.finishRot || 0;
+      G7.taskText = G7.finishText || 'Done — now go to the safe spot';
+    }
+    document.getElementById('m-text').textContent = G7.taskText;
+    g7DistLabel(k < T.length ? 'to the next step' : 'to the safe spot');
+    missionExpand(4000);
+    G7.busy = false;
+  };
+  G7.onReach = ()=>{
+    if(G7.busy) return;
+    const k = G7.step;
+    if(k >= T.length){ controlSuccess(); return; }
+    G7.busy = true;
+    humanGroup.userData.moving = false;
+    document.getElementById('m-text').textContent = '⏳ ' + T[k].text + '…';
+    missionExpand(3000);
+    AudioSysSafe('click');
+    // step onto the exact spot, turn to the object, then play the action
+    g7StepTo(T[k].at, T[k].face, ()=> T[k].run(()=>{
+      G7.step++;                 // stays busy (no walking, no re-trigger) until the next marker is set
+      document.getElementById('m-text').textContent = '✓ ' + (T[k].done || 'Done');
+      missionExpand(3000);
+      AudioSysSafe('correct');
+      if(navigator.vibrate) navigator.vibrate(30);
+      if(G7.step >= T.length && !G7.finish){ setTimeout(()=> controlSuccess(), 900); return; }
+      setTimeout(aim, 1100);
+    }));
+  };
+  aim();
+}
+// Walks the learner the last few centimetres onto a step's spot and turns them to face
+// the object (if given), then calls done().
+function g7StepTo(at, face, done){
+  const h = humanGroup, from = h.position.clone();
+  const to = new THREE.Vector3(at[0], from.y, at[1]);
+  const yaw0 = h.rotation.y;
+  let dy = face ? Math.atan2(face[0]-at[0], face[1]-at[1]) - yaw0 : 0; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+  const dist = from.distanceTo(to), dur = Math.max(250, dist/2*1000, Math.abs(dy)/4*1000), t0 = performance.now();
+  h.userData.moving = dist > .15;
+  const step = ()=>{
+    if(!ctrl.on) return;
+    const f = Math.min(1, (performance.now()-t0)/dur);
+    h.position.x = from.x + (to.x-from.x)*f; h.position.z = from.z + (to.z-from.z)*f;
+    if(G7 && G7.heightAt){ h.position.y = G7.heightAt(h.position.x, h.position.z); h.userData.baseY = h.position.y; }
+    h.rotation.y = yaw0 + dy*Math.min(1, f*1.4);
+    if(f < 1) requestAnimationFrame(step);
+    else { h.userData.moving = false; setTimeout(done, 120); }
+  };
+  requestAnimationFrame(step);
+}
+// Speech bubble over a character for ms milliseconds.
+function g7Say(who, text, ms, o){
+  const l = g7Label(text, Object.assign({size:.56, fg:'#0f172a', bg:'rgba(248,250,252,.96)', border:'#38bdf8', pin:true}, o||{}));
+  scene.add(l);
+  const wp = new THREE.Vector3();
+  const follow = ()=>{ who.getWorldPosition(wp); l.position.set(wp.x, wp.y + (o && o.h || 2.25), wp.z); };
+  follow(); animCallbacks.push(follow);
+  setTimeout(()=>{ scene.remove(l); const i = animCallbacks.indexOf(follow); if(i >= 0) animCallbacks.splice(i, 1); }, ms || 2400);
+  return l;
+}
+// Sets a timed sequence: g7Seq([[ms, fn], …]) runs each fn after the previous one's delay.
+function g7Seq(list){
+  let acc = 0;
+  list.forEach(([ms, fn])=>{ acc += ms; setTimeout(()=>{ if(ctrl.on) fn(); }, acc); });
+}
+// Smoothly moves obj (in world space) to a target position over dur seconds, lifting it
+// along an arc; calls done() at the end. Used for setting objects down / moving cargo.
+function g7Tween(obj, to, dur, lift, done, each){
+  const from = obj.position.clone(), t0 = performance.now();
+  const step = ()=>{
+    const f = Math.min(1, (performance.now() - t0)/(dur*1000)), e = f*f*(3-2*f);
+    obj.position.lerpVectors(from, to, e); obj.position.y += Math.sin(e*Math.PI)*(lift||0);
+    if(each) each(e);
+    if(f < 1) requestAnimationFrame(step); else if(done) done();
+  };
+  requestAnimationFrame(step);
+}
+// A visible rope/strap (a thin cylinder) between two moving points: set(a, b) with Vector3s.
+function g7Cord(color, r){
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r||.025, r||.025, 1, 8), pbr({color:color||0xfacc15, roughness:.7}));
+  const up = new THREE.Vector3(0,1,0), d = new THREE.Vector3();
+  m.userData.set = (a, b)=>{ d.subVectors(b, a); const L = d.length(); if(L < 1e-4) return;
+    m.position.copy(a).addScaledVector(d, .5); m.scale.set(1, L, 1); m.quaternion.setFromUnitVectors(up, d.divideScalar(L)); };
+  scene.add(m); return m;
+}
+// Runs each(f) for f = 0…1 (eased) over dur seconds, then done().
+function g7Anim(dur, each, done){ g7Tween({position:new THREE.Vector3()}, new THREE.Vector3(1,0,0), dur, 0, done, each); }
+// Walks a character (e.g. a trained adult) to a world (x, z), facing the way it goes.
+function g7WalkTo(h, x, z, speed, done){
+  const from = h.position.clone(), d = Math.hypot(x-from.x, z-from.z);
+  h.rotation.y = Math.atan2(x-from.x, z-from.z); h.userData.moving = true; h.userData.baseY = from.y;
+  g7Tween(h, new THREE.Vector3(x, from.y, z), Math.max(.3, d/(speed||1.6)), 0, ()=>{ h.userData.moving = false; if(done) done(); });
+}
+// The learner takes obj into both hands (carry pose), or puts it down at a world position.
+function g7Carry(obj, local, rotY, done){
+  humanGroup.userData.pose = 'carry';
+  humanGroup.attach(obj);
+  const r0 = obj.rotation.y, r1 = rotY || 0;
+  g7Tween(obj, new THREE.Vector3(...(local || [0,1.06,.42])), .6, .12, done, f=>{ obj.rotation.set(obj.rotation.x*(1-f), r0 + (r1-r0)*f, obj.rotation.z*(1-f)); });
+}
+function g7PutDown(obj, worldTo, done, rotY, keepPose){
+  scene.attach(obj);
+  if(!keepPose) humanGroup.userData.pose = null;
+  const r0 = obj.rotation.y, r1 = rotY == null ? r0 : rotY;
+  g7Tween(obj, worldTo, .7, .18, done, f=>{ obj.rotation.y = r0 + (r1-r0)*f; });
+}
+// Remove any interaction panel a scene added (e.g. the rope-throw aiming panel).
+function g7ClosePanels(){ document.querySelectorAll('.g7-panel').forEach(p=> p.remove()); g7DistLabel('to gateway'); }
+function g7DistLabel(s){ const l = document.getElementById('m-dist-l'); if(l) l.textContent = s; }

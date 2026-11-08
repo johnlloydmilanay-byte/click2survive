@@ -147,7 +147,7 @@ function jRoofSlide(scen){
 // 4 · TYPHOON · Potential energy — a heavy flowerpot on a high ledge near the pathway.
 function jFlowerpot(scen){
   shsBridge(scen);
-  const WX = -11, WZ = 2.6, H = 3.1;
+  const WX = -11, WZ = 2.6, H = 1.8;
   g7Clear(WX,WZ,3.6); g7Clear(-14,4.8,2); g7Clear(-17,-5.5,3); g7Clear(-19.5,-6.5,3.2);
   const concrete = pbr({color:0xb6b0a4, map:g7PathTex('concrete'), roughness:.95});
   const wall = new THREE.Mesh(new THREE.BoxGeometry(3.2,H,1), concrete); wall.position.set(WX,H/2,WZ+.6); wall.castShadow = wall.receiveShadow = true; scene.add(wall);
@@ -157,34 +157,47 @@ function jFlowerpot(scen){
   const prof = [[0,0],[.22,0],[.3,.42],[.34,.5],[.34,.56],[0,.56]].map(([r,y])=> new THREE.Vector2(r,y));
   const clay = new THREE.Mesh(new THREE.LatheGeometry(prof, 28), pbr({color:0xb45309, roughness:.85})); clay.castShadow = true; pot.add(clay);
   [[0,.75,0,.32],[.18,.68,.1,.24],[-.16,.7,-.08,.26]].forEach(([x,y,z,r])=>{ const b = new THREE.Mesh(blobGeo(r,16,.35,x*40+7), pbr({color:0x3f7d2a,roughness:.85,map:leafTex(),rim:.07})); b.position.set(x,y,z); pot.add(b); });
-  pot.scale.setScalar(1.25); scene.add(pot);
+  pot.scale.setScalar(.85); scene.add(pot);          // its body fits between the learner's hands
   const start = new THREE.Vector3(WX+1.2, H+.14, WZ-.15);
+  pot.position.copy(start);
   const crate = new THREE.Mesh(new THREE.BoxGeometry(1.3,.7,1.1), pbr({color:0x6b4f30,map:woodTex(),roughness:.9})); crate.position.set(-14.2,.35,5); crate.castShadow = true; scene.add(crate);
   const end = new THREE.Vector3(-14.2,.72,5);
-  g7Tag('LOW & SECURE', -14.2, 1.7, 5, {size:.55, bg:'rgba(20,83,45,.92)', border:'#4ade80'});
+  const lowTag = g7Tag('LOW & SECURE', -14.2, 1.7, 5, {size:.55, bg:'rgba(20,83,45,.92)', border:'#4ade80'});
   const zone = jDanger(4, 3.4, WX+1.2, WZ-1.6, .7);
-  g7Tag('fall zone', WX+1.2, .8, WZ-2.6, {size:.5, fg:'#fecaca', border:'#ef4444'});
+  const zoneTag = g7Tag('fall zone', WX+1.2, .8, WZ-2.6, {size:.5, fg:'#fecaca', border:'#ef4444'});
   const hLine = new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,1,6), new THREE.MeshBasicMaterial({color:0xfacc15, toneMapped:false})); scene.add(hLine);
   const lh = g7Label('h', {size:.65, fg:'#fde047'}); scene.add(lh);
   const lu = g7Label('High up: PE = mgh (large h)', {size:.66, fg:'#fde047', border:'#facc15'}); scene.add(lu);
-  let moved = 0, relabelled = false;
-  animCallbacks.push((t,dt)=>{
-    if(ctrl.on) moved = Math.min(1, moved + dt*.45);                      // the decision: move it low and secure
-    const e = ease(moved);
-    const p = new THREE.Vector3().lerpVectors(start, end, e); p.y += Math.sin(e*Math.PI)*1.2;
-    const wob = (1-e)*(Math.sin(t*2.6)*.09 + Math.max(0, Math.sin(t*1.3))*.08);
-    pot.position.copy(p); pot.rotation.set(0, 0, -wob);
-    hLine.position.set(p.x+.55, p.y/2, p.z); hLine.scale.y = Math.max(.01, p.y);
-    lh.position.set(p.x+.85, p.y/2, p.z); lu.position.set(p.x, p.y+1.6, p.z);
-    zone.visible = e < .5;
-    if(e > .98 && !relabelled){ relabelled = true; g7Relabel(lu, 'Low & secure: small h → small PE', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); }
+  // The learner lifts the pot down and sets it on the low crate (Take Control steps below);
+  // until then it rocks on the ledge in the gusts.
+  let state = 'ledge';
+  const p = new THREE.Vector3();
+  animCallbacks.push((t)=>{
+    if(state === 'ledge') pot.rotation.set(0, 0, -(Math.sin(t*2.6)*.09 + Math.max(0, Math.sin(t*1.3))*.08));
+    pot.getWorldPosition(p);
+    hLine.position.set(p.x+.5, p.y/2, p.z); hLine.scale.y = Math.max(.01, p.y);
+    lh.position.set(p.x+.8, p.y/2, p.z); lu.position.set(p.x, p.y+1.5, p.z);
+    zone.visible = zoneTag.visible = state === 'ledge';
   });
   g7SafePad(-17,-5.5,'SAFE SPOT');
   g7Human(-9,-3.5, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2;
   g7Gateway(-17,-5.5,0);
-  G7 = { bounds:[-19,-6.4,-9,9], camOff:[6,4.5,5],
-    hazards:[{test:(x,z)=> Math.hypot(x-(WX+1.2), z-(WZ-1.4)) < 2.6 || (Math.abs(x-WX) < 2 && Math.abs(z-WZ-.6) < 1), msg:'⚠ Don’t stand under the ledge — the pot could fall here!'}] };
-  g7Camera([-20,5.5,-6.5],[-11.5,2,2]);
+  const wallBody = {test:(x,z)=> Math.abs(x-WX) < 2 && Math.abs(z-WZ-.6) < .95, msg:'⚠ That’s the wall — go around it.'};
+  const crateBody = {test:(x,z)=> Math.abs(x+14.2) < .95 && Math.abs(z-5) < .85, msg:'⚠ Set the pot on the crate from the front.'};
+  G7 = { bounds:[-19,-6.4,-9,9], camOff:[-6,5,-3],
+    hazards:[{test:(x,z)=> Math.hypot(x-(WX+1.2), z-(WZ-1.4)) < 2.6 || (Math.abs(x-WX) < 2 && Math.abs(z-WZ-.6) < 1), msg:'⚠ Don’t stand under the ledge — the pot could fall here!'}],
+    // The decision is something to DO: take the pot down before the wind gets stronger.
+    onControl(){ G7.hazards = [wallBody, crateBody]; },
+    tasks:[
+      {at:[WX+1.2, WZ-.96], face:[WX+1.2, WZ-.15], text:'Lift the flowerpot down from the high ledge',
+       done:'Pot lifted down — carry it with both hands',
+       run(next){ state = 'held'; pot.rotation.set(0,0,0); g7Carry(pot, [0,.82,.42], 0, ()=> setTimeout(next, 250));
+         g7Relabel(lu, 'Lifted down: smaller h → less PE', {size:.62, fg:'#fde047', border:'#facc15'}); }},
+      {at:[-14.2, 3.98], face:[-14.2, 5], text:'Set the pot on the low, secure crate',
+       done:'Pot is low and secure: small h → small PE',
+       run(next){ g7PutDown(pot, end, ()=>{ state = 'low'; lowTag.visible = false; g7Relabel(lu, 'Low & secure: small h → small PE', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); next(); }); }}],
+    finish:[-17,-5.5], finishText:'Pot secured — now walk to the safe spot, away from the ledge' };
+  g7Camera([-20,5.5,-6.5],[-11.5,1.6,2]);
 }
 
 // 5 · FLOOD · Work — a box caught on a raised lip doesn't move (W = 0); on a clear path it does (W = Fd).
@@ -215,71 +228,116 @@ function jStuckBox(scen){
   const fM = g7Arrow(0xfb923c, .9, .08); fM.rotation.y = Math.PI; scene.add(fM);
   const dA = g7Arrow(0xfacc15, 1, .06); dA.rotation.y = Math.PI; scene.add(dA);
   const lM = g7Label('Moves with the push: W = F·d', {size:.62, fg:'#bbf7d0', border:'#22c55e'}); scene.add(lM);
-  let mt = 0;
+  // Take Control: the learner pushes their own relief box along the clear path — the
+  // force now produces a displacement, so work is done (W = F·d, d measured live).
+  const myBox = shsReliefBox(1.78); myBox.visible = false; scene.add(myBox);
+  const X0 = 8.6, GAP = 1.14;
+  let mt = 0, mine = false, shownD = -1;
   animCallbacks.push((t,dt)=>{
     const strain = Math.sin(t*6)*.04;
     pusher.rotation.x = .5 + strain; sBox.position.x = 4.6 + strain*.15;
+    if(mine){
+      const h = humanGroup, fx = Math.sin(h.rotation.y), fz = Math.cos(h.rotation.y);
+      myBox.position.set(h.position.x + fx*GAP, .38, h.position.z + fz*GAP); myBox.rotation.y = h.rotation.y;
+      h.rotation.x = .5 + (h.userData.moving ? Math.sin(t*8.5)*.02 : 0);
+      const d = Math.max(0, X0 - myBox.position.x);
+      fM.rotation.y = h.rotation.y - Math.PI/2; fM.position.set(h.position.x + fx*.35, .9, h.position.z + fz*.35 + .45);
+      dA.position.set(X0, .12, -2.9); dA.userData.setLen(Math.max(.05, d)); dA.visible = d > .1;
+      lM.position.set(myBox.position.x, 2.6, myBox.position.z);
+      const r = Math.round(d);
+      if(r !== shownD){ shownD = r; g7Relabel(lM, `Your push moves it: d ≈ ${r} m → W = F·d > 0`, {size:.62, fg:'#bbf7d0', border:'#22c55e'}); }
+      return;
+    }
     mt = (mt + dt) % 7;
     const f = Math.min(1, mt/6), x = 10 - f*15;
-    mBox.position.set(x, .38, -1.5); mover.position.x = x + 1.14; mover.userData.moving = mt < 6; mover.rotation.x = .5;
+    mBox.position.set(x, .38, -1.5); mover.position.x = x + GAP; mover.userData.moving = mt < 6; mover.rotation.x = .5;
     fM.position.set(x+1.1, .9, -1.1); dA.position.set(10, .12, -2.9); dA.userData.setLen(Math.max(.05, 10 - x));
     lM.position.set(x, 2.6, -1.5);
   });
-  g7Human(11,-4.2, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2;
-  const b = shsReliefBox(.82); b.position.set(0,1.06,.42); humanGroup.add(b);
-  humanGroup.userData.pose = 'carry';                // both hands on the box's sides
+  g7Human(11,-4.2, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2; humanGroup.rotation.order = 'YXZ';
   g7Gateway(-9.4,-1.5,Math.PI/2);
   G7 = { bounds:[-12,12,-12,8], camOff:[6,4.5,-4],
     hazards:[{test:(x,z)=> z > 3.4, msg:'⚠ That path is blocked by the raised portion — use the clear path.'},
-             {test:(x,z)=> x > 12.3, msg:'⚠ Stay off the dock — take the box to the dry waiting area.'}] };
+             {test:(x,z)=> x > 12.3, msg:'⚠ Stay off the dock — take the box to the dry waiting area.'}],
+    onControl(){
+      // the demonstration pusher steps aside; the learner's own box waits at the start of the clear path
+      mover.visible = mBox.visible = false;
+      myBox.position.set(X0, .38, -1.5); myBox.rotation.y = -Math.PI/2; myBox.visible = true;
+      fM.rotation.y = Math.PI; fM.position.set(X0+1.1, .9, -1.1); dA.visible = false; lM.position.set(X0, 2.6, -1.5);
+      g7Relabel(lM, 'Your relief box — push it along the clear path', {size:.6, fg:'#fde047', border:'#facc15'});
+    },
+    tasks:[
+      {at:[X0+GAP, -1.5], face:[X0, -1.5], text:'Get behind your relief box on the clear path',
+       done:'Hands on the box — now push it (force → displacement)',
+       run(next){ humanGroup.userData.pose = 'push';
+         g7Anim(.4, f=>{ humanGroup.rotation.x = .5*f; }, ()=>{ mine = true; G7.speed = 1.8; G7.turnRate = 3; next(); }); }}],
+    finish:[-9.4,-1.5], finishRot:Math.PI/2, finishText:'Push the box along the clear path to the dry waiting area' };
   g7Camera([3,8.5,-13],[-1,.5,2]);
 }
 
 // 6 · TYPHOON · Mechanical energy — loose objects on a high platform are secured low.
 function jPlatform(scen){
   shsBridge(scen);
-  const PX = -11, PZ = 3.2, H = 2.7;
+  const PX = -11, PZ = 3.2, H = 1.5;
   g7Clear(PX,PZ,3.8); g7Clear(-15,5,2.2); g7Clear(-17,-5.5,3); g7Clear(-19.5,-7,3.6);
   const wood = pbr({color:0x7a5532, map:woodTex(), roughness:.88});
   const top = new THREE.Mesh(new THREE.BoxGeometry(3,.16,2), wood); top.position.set(PX,H,PZ); top.castShadow = true; scene.add(top);
   [[-1.35,-.85],[1.35,-.85],[-1.35,.85],[1.35,.85]].forEach(([x,z])=>{ const l = new THREE.Mesh(new THREE.BoxGeometry(.14,H,.14), wood); l.position.set(PX+x,H/2,PZ+z); l.castShadow = true; scene.add(l); });
-  // low enclosed storage box
-  const store = new THREE.Group(); store.position.set(-15,0,5.2); scene.add(store);
-  const sb = new THREE.Mesh(new THREE.BoxGeometry(2.2,.9,1.6), pbr({color:0x334155, roughness:.6, metalness:.3})); sb.position.y = .45; sb.castShadow = true; store.add(sb);
-  const lidPivot = new THREE.Group(); lidPivot.position.set(0,.9,-.8); store.add(lidPivot);
-  const lid = new THREE.Mesh(new THREE.BoxGeometry(2.3,.1,1.7), pbr({color:0x1e293b, roughness:.6})); lid.position.set(0,.05,.85); lidPivot.add(lid);
-  g7Tag('LOW ENCLOSED STORAGE', -15, 2.2, 5.2, {size:.55, bg:'rgba(20,83,45,.92)', border:'#4ade80'});
+  // low enclosed storage: an open-topped steel box with a lid hinged at the back
+  const SX = -15, SZ = 5.2;
+  const store = new THREE.Group(); store.position.set(SX,0,SZ); scene.add(store);
+  const sm = pbr({color:0x334155, roughness:.6, metalness:.3});
+  [[0,.03,0,2.2,.06,1.6],[0,.45,-.77,2.2,.9,.06],[0,.45,.77,2.2,.9,.06],[-1.07,.45,0,.06,.9,1.6],[1.07,.45,0,.06,.9,1.6]].forEach(([x,y,z,w,h,d])=>{
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), sm); m.position.set(x,y,z); m.castShadow = m.receiveShadow = true; store.add(m); });
+  const lidPivot = new THREE.Group(); lidPivot.position.set(0,.9,.8); store.add(lidPivot);
+  const lid = new THREE.Mesh(new THREE.BoxGeometry(2.3,.1,1.7), pbr({color:0x1e293b, roughness:.6})); lid.position.set(0,.05,-.85); lid.castShadow = true; lidPivot.add(lid);
+  lidPivot.rotation.x = 1.25;                                    // open, ready to receive the objects
+  const latch = new THREE.Mesh(new THREE.BoxGeometry(.3,.12,.05), pbr({color:0xfacc15, metalness:.5})); latch.position.set(0,.84,-.82); latch.visible = false; store.add(latch);
+  g7Tag('LOW ENCLOSED STORAGE', SX, 2.2, SZ, {size:.55, bg:'rgba(20,83,45,.92)', border:'#4ade80'});
+  // loose objects on the platform; `b` is each one's place inside the storage box
   const objs = [
-    {m: shsReliefBox(1.1), from:[-1,.25,-.3]}, {m: shsReliefBox(.9), from:[.1,.2,.3]},
-    {m: new THREE.Mesh(new THREE.CylinderGeometry(.22,.18,.45,16), pbr({color:0x16a34a, roughness:.5})), from:[1,.23,-.2]},
-    {m: jBoard(), from:[.2,.08,-.6]} ];
-  objs.forEach((o,i)=>{ o.m.castShadow = true; scene.add(o.m); o.a = new THREE.Vector3(PX+o.from[0], H+.08+o.from[1], PZ+o.from[2]);
-    o.b = new THREE.Vector3(-15 + (i%2?.45:-.45), .55 + (i>1?.1:0), 5.2 + (i<2?.3:-.3)); o.delay = i*.35; });
-  jDanger(5, 5.5, PX, PZ-1.8, .65);
+    {m: shsReliefBox(.82), from:[-1,.17,-.3], b:[SX-.5,.23,SZ+.25]}, {m: shsReliefBox(.7), from:[-.3,.15,.35], b:[SX-.5,.57,SZ+.25]},
+    {m: new THREE.Mesh(new THREE.CylinderGeometry(.22,.18,.45,16), pbr({color:0x16a34a, roughness:.5})), from:[.8,.23,-.2], b:[SX+.45,.29,SZ+.2]},
+    {m: jBoard(), from:[.3,.06,-.62], b:[SX,.12,SZ-.45]} ];
+  objs.forEach((o,i)=>{ o.m.castShadow = true; scene.add(o.m); o.a = new THREE.Vector3(PX+o.from[0], H+.08+o.from[1], PZ+o.from[2]); o.m.position.copy(o.a); o.loose = true; });
+  const zone = jDanger(5, 5.5, PX, PZ-1.8, .65);
   const lu = g7Label('Elevated & loose: PE = mgh', {size:.66, fg:'#fde047', border:'#facc15'}); lu.position.set(PX,H+2,PZ); scene.add(lu);
   const lk = g7Label('wind can turn PE → KE', {size:.58, fg:'#fecaca'}); lk.position.set(PX,H+1.25,PZ); scene.add(lk);
   const wA = g7Arrow(0xe2e8f0, 1.6, .07); wA.position.set(PX-3.4,H+.6,PZ); scene.add(wA);
-  let s = 0, done = false;
-  animCallbacks.push((t,dt)=>{
-    if(ctrl.on) s += dt*.55;
+  animCallbacks.push((t)=>{
     const gust = Math.max(0, Math.sin(t*1.6));
     wA.userData.setLen(1.1 + gust*1.2);
-    objs.forEach((o,i)=>{
-      const f = Math.min(1, Math.max(0, s - o.delay)), e = ease(f);
-      const p = new THREE.Vector3().lerpVectors(o.a, o.b, e); p.y += Math.sin(e*Math.PI)*1.4;
-      o.m.position.copy(p);
-      o.m.rotation.set(0, i*.7, (1-e)*(Math.sin(t*5+i)*.08*(.5+gust)));
-    });
-    const all = s > objs[objs.length-1].delay + 1;
-    lidPivot.rotation.x = all ? Math.max(0, lidPivot.rotation.x - dt*1.5) : -1.2;
-    if(all && !done){ done = true; g7Relabel(lu, 'Secured low & enclosed: little PE', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); lk.visible = false; }
+    objs.forEach((o,i)=>{ if(o.loose) o.m.rotation.set(0, i*.7, Math.sin(t*5+i)*.08*(.5+gust)); });   // rattling in the gusts
   });
   g7SafePad(-17,-5.5,'SAFE SPOT');
   g7Human(-9,-3.5, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2;
   g7Gateway(-17,-5.5,0);
-  G7 = { bounds:[-19,-6.4,-9,9], camOff:[6,4.5,5],
-    hazards:[{test:(x,z)=> Math.hypot(x-PX, z-(PZ-1)) < 3.4, msg:'⚠ Stay away from the platform — loose objects could fall or fly off!'}] };
-  g7Camera([-20,6,-7],[-11.5,1.6,2.5]);
+  // Take Control: two trips from the platform to the storage box, then the lid is closed and latched.
+  const take = (list, next)=>{ list.forEach(([i, local, ry])=>{ objs[i].loose = false; g7Carry(objs[i].m, local, ry); }); setTimeout(next, 750); };
+  const stow = (list, next)=>{ list.forEach((i,k)=> setTimeout(()=> g7PutDown(objs[i].m, new THREE.Vector3(...objs[i].b), null, i === 3 ? 0 : i*.25, k < list.length-1), k*200)); setTimeout(next, 200*(list.length-1) + 800); };
+  const stand = [SX, SZ-1.48];
+  G7 = { bounds:[-19,-6.4,-9,9], camOff:[-6,5,-3],
+    hazards:[{test:(x,z)=> Math.hypot(x-PX, z-(PZ-1)) < 3.4, msg:'⚠ Stay away from the platform — loose objects could fall or fly off!'}],
+    onControl(){ lk.visible = false; G7.hazards = [
+      {test:(x,z)=> Math.abs(x-PX) < 1.65 && Math.abs(z-PZ) < 1.15, msg:'⚠ Reach the objects from the front of the platform.'},
+      {test:(x,z)=> Math.abs(x-SX) < 1.3 && Math.abs(z-SZ) < 1, msg:'⚠ Load the storage box from the front.'}]; },
+    tasks:[
+      {at:[PX-.65, PZ-1.43], face:[PX-.65, PZ], text:'Take the two loose relief boxes down from the platform', done:'Boxes in hand — carry them to the storage',
+       run(next){ take([[0,[0,1.06,.42],0],[1,[0,1.38,.42],0]], next); }},
+      {at:stand, face:[SX, SZ], text:'Put the boxes in the low enclosed storage', done:'Boxes stored low — go back for the rest',
+       run(next){ stow([0,1], next); }},
+      {at:[PX+.55, PZ-1.43], face:[PX+.55, PZ], text:'Take the water container and the loose board', done:'Got them — carry them to the storage',
+       run(next){ take([[2,[0,1.06,.42],0],[3,[0,1.34,.42],0]], next); }},
+      {at:stand, face:[SX, SZ], text:'Store them, then close and latch the lid', done:'All objects secured low & enclosed: little PE',
+       run(next){ stow([2,3], ()=>{
+         humanGroup.userData.pose = 'reach';
+         g7Anim(.8, f=>{ lidPivot.rotation.x = 1.25*(1-f); }, ()=>{
+           latch.visible = true; humanGroup.userData.pose = null; zone.visible = false;
+           g7Relabel(lu, 'Secured low & enclosed: little PE', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); lu.position.set(SX, 2.9, SZ);
+           next(); });
+       }); }}],
+    finish:[-17,-5.5], finishText:'Everything is secured — now go to the safe spot' };
+  g7Camera([-20,6,-7],[-12.5,1.2,2.5]);
 }
 
 // ═══ GRADE 9 ═══
@@ -299,8 +357,24 @@ function jBoatStop(scen){
   const lT = g7Label('Tied-down bag stays put', {size:.56, fg:'#bbf7d0'}); scene.add(lT);
   const lS = g7Label('Boat stops suddenly', {size:.6, fg:'#fde047'}); scene.add(lS);
   const vA = g7Arrow(0xfacc15, 1, .07); vA.rotation.y = Math.PI; scene.add(vA);
-  let t0 = 0;
+  const strap2 = new THREE.Mesh(new THREE.TorusGeometry(.32,.025,6,20), pbr({color:0xfacc15})); strap2.visible = false; scene.add(strap2);
+  const tieLine = g7Cord(0xfacc15, .022); tieLine.visible = false;
+  const DX = -2.75;                                   // end-on against the bank (outriggers stay over the water)
+  let t0 = 0, dock = -1, tiedK = 0;
+  const L = (x,y,z)=> boat.localToWorld(new THREE.Vector3(x,y,z));
   animCallbacks.push((t,dt)=>{
+    if(dock >= 0){
+      // Take Control: the boatman has brought the boat in; both bags sit in it, one still loose
+      dock = Math.min(1, dock + dt/1.4); const e = ease(dock);
+      boat.position.set(stopX + (DX-stopX)*e, .1 + Math.sin(t*1.4)*.025, BZ); boat.updateMatrixWorld();
+      loose.position.copy(L(-2.2,(.42-.1)/.62,0)); loose.rotation.set(0, 0, tiedK ? 0 : Math.sin(t*1.8)*.08);
+      tied.position.copy(L(1.2,(.4-.1)/.62,.05)); strap.position.copy(tied.position); strap.rotation.y = boat.rotation.y + Math.PI/2;
+      strap2.position.copy(loose.position); strap2.rotation.y = boat.rotation.y + Math.PI/2;
+      if(tiedK) tieLine.userData.set(loose.position.clone().add(new THREE.Vector3(.12,-.1,0)), L(-1.75,.02,-.5));
+      vA.visible = lS.visible = false; lL.position.set(loose.position.x+.2, 1.9, loose.position.z-.4); lT.position.set(tied.position.x+.2, 1.4, tied.position.z+.6);
+      ripple.position.set(boat.position.x+.2, .1, BZ); ripple.scale.setScalar(.6);
+      return;
+    }
     t0 = (t0 + dt) % 7.5;
     const tStop = 2.4, v0 = 2.2;
     const jolt = t0 >= tStop && t0 < tStop+.25 ? -Math.sin((t0-tStop)/.25*Math.PI)*.08 : 0;   // the bump
@@ -321,7 +395,25 @@ function jBoatStop(scen){
   g7Human(-6.2,2.5); humanGroup.rotation.y = Math.PI/2;
   g7Gateway(-11,-9,Math.PI/2);
   G7 = { bounds:[-15,4,-12,12], camOff:[5,4.5,-3],
-    hazards:[{test:(x,z)=> x > -4.7, msg:'⚠ Stay on the bank — the boat’s loose cargo isn’t secured yet.'}] };
+    hazards:[{test:(x,z)=> x > -4.7, msg:'⚠ Stay on the bank — the boat’s loose cargo isn’t secured yet.'}],
+    onControl(){
+      dock = 0; lL.visible = true; lT.visible = true;
+      g7Relabel(lL, 'Loose bag — it would keep moving if the boat stops', {size:.56, fg:'#fecaca', border:'#ef4444'});
+      G7.hazards = [{test:(x,z)=> x > -4.85, msg:'⚠ Stay on the bank — reach the bag from the edge, don’t step into the boat.'}];
+    },
+    tasks:[
+      {at:[-5.0, BZ], face:[DX, BZ], text:'Tie down the loose bag before the boat travels',
+       done:'Bag tied down — it now moves with the boat',
+       run(next){
+         humanGroup.userData.pose = 'reach';
+         strap2.visible = true;
+         g7Anim(1.1, f=>{ strap2.scale.setScalar(.2 + .8*f); }, ()=>{
+           tiedK = 1; tieLine.visible = true; humanGroup.userData.pose = null;
+           loose.material = tied.material;                      // now strapped like the other bag
+           g7Relabel(lL, 'Both bags secured ✓ — safe to travel', {size:.58, fg:'#bbf7d0', border:'#22c55e'}); lT.visible = false;
+           next(); });
+       }}],
+    finish:[-11,-9], finishRot:Math.PI/2, finishText:'Cargo secured — wait at the safe spot on the bank' };
   g7Camera([-6.5,3.8,5.5],[-.8,.5,-1.2]);
 }
 
@@ -352,8 +444,19 @@ function jVehicleStop(scen){
   const lL = g7Label('Loose containers keep moving forward — inertia', {size:.6, fg:'#fecaca', border:'#ef4444'}); scene.add(lL);
   const lT = g7Label('Strapped containers stay put', {size:.55, fg:'#bbf7d0'}); scene.add(lT);
   const lB = g7Label('Sudden stop!', {size:.66, fg:'#fde047'}); scene.add(lB);
-  let tt = 0;
+  // Take Control: the truck waits, engine off, beside the waiting area; the learner straps
+  // the loose drums down before it travels (bands round each drum + two straps across the bed).
+  const bands = loose.map(o=>{ const b = new THREE.Mesh(new THREE.TorusGeometry(.31,.03,6,22), pbr({color:0xfacc15})); b.rotation.x = Math.PI/2; b.visible = false; truck.add(b); return b; });
+  const cross = [-1.95,-1.25].map(x=>{ const s = new THREE.Mesh(new THREE.BoxGeometry(.07,.04,2.16), pbr({color:0xfacc15})); s.position.set(x,1.79,0); s.visible = false; truck.add(s); return s; });
+  const PARK = -18 + 6*3.2 + .3;
+  let tt = 0, parked = false;
   animCallbacks.push((t,dt)=>{
+    if(parked){
+      truck.position.set(PARK, 0, 0); truck.rotation.z = 0;
+      loose.forEach((o,i)=>{ o.m.position.set(o.x0, 1.41, o.z); o.m.rotation.z = 0; bands[i].position.set(o.x0, 1.45, o.z); });
+      lB.visible = lL.visible = false; lT.position.set(PARK-.1, 2.6, 1.6);
+      return;
+    }
     tt = (tt + dt) % 8;
     const tStop = 3.2, v0 = 6;
     const x = tt < tStop ? -18 + v0*tt : -18 + v0*tStop + .3;
@@ -374,8 +477,19 @@ function jVehicleStop(scen){
   g7SafePad(-4,-9,'WAITING AREA');
   g7Human(6,-5, 0x1e3a8a); humanGroup.rotation.y = -Math.PI*.7;
   g7Gateway(-4,-9,0);
+  const truckBody = {test:(x,z)=> x > PARK-2.75 && x < PARK+3 && Math.abs(z) < 1.3, msg:'⚠ That’s the truck — strap the drums from beside the cargo bed.'};
   G7 = { bounds:[-14,12,-13,8], camOff:[6,5,5],
-    hazards:[{test:road, msg:'⚠ Stay off the road — wait in the waiting area while the cargo is secured.'}] };
+    hazards:[{test:road, msg:'⚠ Stay off the road — wait in the waiting area while the cargo is secured.'}],
+    onControl(){ parked = true; lT.visible = true; G7.hazards = [truckBody]; },
+    tasks:[
+      {at:[PARK-1.75, -1.62], face:[PARK-1.75, 0], text:'Strap down the loose drums in the truck bed', done:'All drums strapped — they will move with the truck',
+       run(next){
+         humanGroup.userData.pose = 'reach';
+         const seq = [...bands, ...cross];
+         g7Seq(seq.map((m,i)=> [i ? 380 : 150, ()=>{ m.visible = true; g7Anim(.3, f=>{ m.scale.setScalar(Math.max(.05, f)); }); AudioSysSafe('click'); }]));
+         setTimeout(()=>{ humanGroup.userData.pose = null; g7Relabel(lT, 'All containers secured ✓ — no sliding when it brakes', {size:.56, fg:'#bbf7d0', border:'#22c55e'}); next(); }, 150 + 380*(seq.length-1) + 500);
+       }}],
+    finish:[-4,-9], finishText:'Cargo secured — go to the waiting area until it is time to travel' };
   g7Camera([3,5.5,10.5],[0,1.2,-1]);
 }
 
@@ -461,8 +575,21 @@ function jBoatStep(scen){
   const lEq = g7Label('F learner on boat = −F boat on learner', {size:.66, fg:'#fde047', border:'#facc15'}); lEq.position.set(-1.6,3.9,BZ); scene.add(lEq);
   const l1 = g7Label('Hard step → boat pushed away ✗', {size:.62, fg:'#fecaca', border:'#ef4444'}); l1.position.set(-1.6,3,BZ); scene.add(l1);
   const l2 = g7Label('Boat held + slow step → boat stays ✓', {size:.62, fg:'#bbf7d0', border:'#22c55e'}); l2.position.set(-1.6,3,BZ); scene.add(l2);
-  let tt = 0;
+  let tt = 0, mine = false;
   animCallbacks.push((t,dt)=>{
+    if(mine){
+      // Take Control: the learner is the one stepping off — the boat is held, so it stays put
+      const h = humanGroup, x = h.position.x, crossing = x < -3.5 && x > -5.3;
+      boat.position.set(-3.7, .1 + Math.sin(t*1.3)*.03, BZ);
+      stepper.visible = false; holder.visible = rope.visible = true;
+      rope.userData.set(new THREE.Vector3(-6.3,1.1,BZ+1.2), new THREE.Vector3(-3.7-.2,.4,BZ+1.4));
+      fB.visible = fP.visible = lB.visible = lP.visible = crossing;
+      const k = h.userData.moving ? .35 : .15;            // a slow step → only a small push on the boat
+      fB.position.set(-3.2, .9, BZ-.4); fB.userData.setLen(k); fP.position.set(Math.min(-3.6, x), 1.6, BZ-.4); fP.userData.setLen(k);
+      lB.position.set(-2.4, 1.35, BZ-.4); lP.position.set(Math.min(-4.4, x-.8), 2.05, BZ-.4);
+      l1.visible = false; l2.visible = x < -5;
+      return;
+    }
     tt = (tt + dt) % 11;
     const held = tt >= 5.5, s = held ? tt - 5.5 : tt;
     let bx = -3.7, px = -3.4, py = .3;
@@ -488,8 +615,27 @@ function jBoatStep(scen){
   g7SafePad(-11,-8,'SAFE SPOT · on the bank');
   g7Human(-7.5,4.5); humanGroup.rotation.y = Math.PI;
   g7Gateway(-11,-8,Math.PI/2);
+  // walking surfaces once the learner is the one in the boat: hull floor, the step across, the dock
+  const onDock = (x,z)=> x > -7.3 && x < -4.9 && Math.abs(z-BZ) < 1.7;
+  const inBoat = (x,z)=> x >= -4.1 && x < -3.3 && Math.abs(z-BZ) < 1.6;
+  const across = (x,z)=> x > -4.95 && x < -4.05 && Math.abs(z-BZ) < .45;
   G7 = { bounds:[-15,4,-12,12], camOff:[5,4.5,-3],
-    hazards:[{test:(x,z)=> x > -4.8, msg:'⚠ Stay on the bank — only step off a boat slowly while it is held.'}] };
+    hazards:[{test:(x,z)=> x > -4.8, msg:'⚠ Stay on the bank — only step off a boat slowly while it is held.'}],
+    onControl(){
+      mine = true; l2.visible = false;
+      g7Relabel(l2, 'Boat held + slow step → boat stays ✓', {size:.62, fg:'#bbf7d0', border:'#22c55e'});
+      humanGroup.position.set(-3.6, .3, BZ); humanGroup.userData.baseY = .3; humanGroup.rotation.y = -Math.PI/2;
+      G7.speed = 1;
+      G7.heightAt = (x,z)=> inBoat(x,z) ? .3 : across(x,z) ? .3 - (-4.05 - x)/.9*.05 : onDock(x,z) ? .25 : .02;
+      G7.onMove = (dt, s)=>{ G7.speed = s.position.x > -5.6 ? 1 : 3.2; };       // slow and careful until you’re on the dock
+      G7.hazards = [{test:(x,z)=> x > -4.85 && !inBoat(x,z) && !across(x,z), msg:'⚠ Careful — step straight across onto the dock, slowly.'},
+                    {test:(x,z)=> x > -3.3, msg:'⚠ Step toward the dock, not the far side of the boat.'}];
+    },
+    tasks:[
+      {at:[-5.9, BZ], face:[-7.2, BZ], r:.7, text:'Step off slowly onto the dock while the boat is held',
+       done:'Off the boat safely — small, equal forces; the held boat barely moved',
+       run(next){ g7Say(holder, 'Good — slow and steady!', 2000, {border:'#4ade80'}); setTimeout(next, 600); }}],
+    finish:[-11,-8], finishRot:Math.PI/2, finishText:'Now walk to the safe spot on the bank' };
   g7Camera([-10,5,-7.5],[-3,.8,1.5]);
 }
 
@@ -515,27 +661,47 @@ function jBranchSpring(scen){
   const lB = g7Label('support pushes back', {size:.5, fg:'#fdba74'}); lB.position.set(SX-.2,2.6,SZ-.6); scene.add(lB);
   const lEq = g7Label('Equal & opposite forces · stores elastic PE', {size:.64, fg:'#fde047', border:'#facc15'}); lEq.position.set(-10.2,4.4,3.5); scene.add(lEq);
   const zone = jDanger(4.6, 4.6, -10.2, 2.2, .7);
-  g7Tag('springs this way if released', -10.4, .9, .6, {size:.5, fg:'#fecaca', border:'#ef4444'});
+  const springTag = g7Tag('springs this way if released', -10.4, .9, .6, {size:.5, fg:'#fecaca', border:'#ef4444'});
   // trained adults with equipment, standing to the side
-  [[-14.6,8.2],[-13.6,8.6]].forEach(([x,z],i)=>{ const h = makeHuman(x,0,z,0xfacc15); h.rotation.y = Math.PI*.8; scene.add(h);
-    const hat = new THREE.Mesh(new THREE.SphereGeometry(.17,14,10,0,6.28,0,Math.PI/2), pbr({color:0xf97316})); hat.position.set(x,1.78,z); scene.add(hat); });
-  g7Tag('trained adults · proper equipment', -14.1, 2.8, 8.4, {size:.5, bg:'rgba(20,83,45,.92)', border:'#4ade80'});
-  let rel = 0, relabelled = false;
+  const adults = [[-14.6,8.2],[-13.6,8.6]].map(([x,z],i)=>{ const h = makeHuman(x,0,z,0xfacc15); h.rotation.y = Math.PI*.8; h.userData.baseY = 0; scene.add(h);
+    const hat = new THREE.Mesh(new THREE.SphereGeometry(.17,14,10,0,6.28,0,Math.PI/2), pbr({color:0xf97316})); hat.position.set(0,1.78,0); h.add(hat); return h; });
+  const tag = g7Tag('trained adults · proper equipment', -14.1, 2.8, 8.4, {size:.5, bg:'rgba(20,83,45,.92)', border:'#4ade80'});
+  // their release line: tied to the branch, paid out slowly so it unbends under control
+  const line = g7Cord(0xfacc15, .03); line.visible = false;
+  const tieP = new THREE.Vector3();
+  let rel = 0, relabelled = false, releasing = false;
   animCallbacks.push((t,dt)=>{
-    if(ctrl.on) rel = Math.min(1, rel + dt*.5);
+    if(releasing) rel = Math.min(1, rel + dt*.32);
+    if(line.visible){ tieP.copy(curve.getPoint(.55)); pivot.localToWorld(tieP); const a = adults[0].position; line.userData.set(new THREE.Vector3(a.x, 1.1, a.z), tieP); }
     const quiver = Math.sin(t*9)*.01 + Math.max(0, Math.sin(t*1.4))*.02;
     pivot.rotation.y = -quiver + rel*.9;                       // released by the adults: it springs away from the support
     pivot.rotation.z = rel*.25;
     fOnS.userData.setLen(.9 + quiver*10); fOnB.userData.setLen(.9 + quiver*10);
     fOnS.visible = fOnB.visible = lS.visible = lB.visible = rel < .1;
-    zone.visible = rel < .95;
+    zone.visible = springTag.visible = rel < .95;
     if(rel > .98 && !relabelled){ relabelled = true; g7Relabel(lEq, 'Released safely by trained adults', {size:.64, fg:'#bbf7d0', border:'#22c55e'}); }
   });
   g7SafePad(-17,-6,'SAFE SPOT');
   g7Human(-9,-3.6, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2;
   g7Gateway(-17,-6,0);
   G7 = { bounds:[-19,-6.4,-9,9], camOff:[6,4.5,5],
-    hazards:[{test:(x,z)=> Math.hypot(x+10.2, z-2.4) < 3, msg:'⚠ Don’t pull the branch — it can spring out. Leave it to trained adults!'}] };
+    hazards:[{test:(x,z)=> Math.hypot(x+10.2, z-2.4) < 3, msg:'⚠ Don’t pull the branch — it can spring out. Leave it to trained adults!'}],
+    tasks:[
+      {at:[-14.3, 6.9], face:[-14.1, 8.4], text:'Ask the trained adults to remove the bent branch',
+       done:'The trained adults will release it with proper equipment',
+       run(next){
+         humanGroup.userData.pose = 'wave';
+         g7Say(humanGroup, 'The branch is bent against the support — please remove it safely!', 2600);
+         g7Seq([
+           [1500, ()=>{ humanGroup.userData.pose = null; g7Say(adults[1], 'Thanks — we’ll handle it. Stay back!', 2600, {border:'#4ade80'}); }],
+           [1300, ()=>{ next();
+             tag.visible = false;
+             // they walk round to the branch's root (outside its swing) and tie on a release line
+             g7WalkTo(adults[0], -13.4, 6.1, 1.4, ()=>{ adults[0].rotation.y = Math.atan2(-10.2+13.4, 2.4-6.1); adults[0].userData.pose = 'reach'; line.visible = true; });
+             g7WalkTo(adults[1], -12.4, 7.1, 1.4, ()=>{ adults[1].rotation.y = Math.atan2(-10.2+12.4, 2.4-7.1); adults[1].userData.pose = 'reach'; setTimeout(()=>{ releasing = true; }, 900); });
+           }]]);
+       }}],
+    finish:[-17,-6], finishText:'Stay clear — wait at the safe spot while they release it' };
   g7Camera([-17,6,-5],[-10,1.4,3]);
 }
 
@@ -558,7 +724,7 @@ function jRopeThrow(scen){
   g7Debris(10,-4,4,-30,30,.08,()=>1.1,true);
   const P = 1.6;
   const plat = new THREE.Mesh(new THREE.BoxGeometry(7,P,9), pbr({color:0xa8a29e, map:g7PathTex('concrete'), roughness:.95})); plat.position.set(8.5,P/2,0); plat.castShadow = plat.receiveShadow = true; scene.add(plat);
-  [[7,-1,0xb91c1c],[8.4,.8,0x7c3aed],[9.6,-.4,0xca8a04]].forEach(([x,z,c])=>{ const h = makeHuman(x,P,z,c); h.rotation.y = -Math.PI/2; scene.add(h); });
+  const people = [[7,-1,0xb91c1c],[8.4,.8,0x7c3aed],[9.6,-.4,0xca8a04]].map(([x,z,c])=>{ const h = makeHuman(x,P,z,c); h.rotation.y = -Math.PI/2; scene.add(h); return h; });
   g7Tag('People waiting · raised platform', 8.5, P+2.9, 0, {size:.6, bg:'rgba(20,83,45,.92)', border:'#4ade80'});
   const target = g7Decal(g7SoftTex('g7-safe-ring','rgba(134,239,172,.95)','rgba(134,239,172,0)', true), 2.4, 2.4, 6.8, P+.03, 0); target.material.toneMapped = false;
   const rescuer = makeHuman(-5.4,0,0,0xea580c); rescuer.rotation.y = Math.PI/2; scene.add(rescuer);
@@ -571,8 +737,36 @@ function jRopeThrow(scen){
   const l1 = g7Label('No aim: too low, too slow → falls short ✗', {size:.6, fg:'#fecaca', border:'#ef4444'}); scene.add(l1);
   const l2 = g7Label('Adjusted angle θ and speed v₀ → lands on target ✓', {size:.6, fg:'#bbf7d0', border:'#22c55e'}); scene.add(l2);
   const lEq = g7Label('x = v₀cos θ · t     y = y₀ + v₀sin θ · t − ½gt²', {size:.62, fg:'#fde047', border:'#facc15'}); lEq.position.set(0,7.2,0); scene.add(lEq);
+  // Take Control: the learner helps the rescue worker aim — estimate the distance, set θ and
+  // v₀, throw. The rope follows the real projectile path from the release point (−5, 1.6).
+  const X0 = -5, Y0 = 1.6, TX = 6.8, TR = 1.2, hand = new THREE.Vector3(-5.1,1.5,0);
+  let mode = 'demo', shot = null, trace = null;
+  const simThrow = (v, th)=>{
+    const r = th*Math.PI/180, vx = v*Math.cos(r), vy = v*Math.sin(r), pts = [];
+    let px = X0;
+    for(let t=0; t<6; t+=.02){
+      const x = X0 + vx*t, y = Y0 + vy*t - 4.9*t*t;
+      pts.push([x, Math.max(y, .1), 0]);
+      if(px < 5 && x >= 5 && y < P) return {pts, x:5, t, res:'wall'};              // hits the platform's side
+      if(x >= 5 && x <= 12 && y <= P+.08 && vy - 9.8*t < 0) return {pts, x, t, res: Math.abs(x-TX) <= TR ? 'hit' : 'long'};
+      if(y <= .1) return {pts, x, t, res: x < 5 ? 'short' : 'over'};
+      px = x;
+    }
+    return {pts, x:px, t:6, res:'over'};
+  };
   let tt = 0;
   animCallbacks.push((t,dt)=>{
+    if(mode !== 'demo'){
+      miss.visible = hit.visible = l1.visible = l2.visible = false; splash.visible = false;
+      if(shot){
+        shot.s += dt; const f = Math.min(1, shot.s/shot.t), i = Math.min(shot.pts.length-1, Math.floor(f*(shot.pts.length-1)));
+        coil.position.set(...shot.pts[i]); if(f < 1) coil.rotation.x += dt*6;
+        rescuer.rotation.z = shot.s < .25 ? -.25 : 0;
+        if(f >= 1 && !shot.ended){ shot.ended = true; shot.end(); }
+      } else coil.position.copy(hand);
+      rope.userData.set(hand, coil.position);
+      return;
+    }
     tt = (tt + dt) % 9;
     const first = tt < 4.2, s = first ? tt - .5 : tt - 4.7;
     const pts = first ? missPts : hitPts, dur = first ? 1.1 : 1.9;
@@ -588,9 +782,62 @@ function jRopeThrow(scen){
   g7SafePad(-12,-6,'SAFE SPOT · back from the edge');
   g7Human(-7.5,3); humanGroup.rotation.y = -Math.PI*.75;
   g7Gateway(-12,-6,0);
+  let dLine = null, dTag = null;
+  const openAim = (next)=>{
+    G7.camView = {pos:new THREE.Vector3(3,8,-19), look:new THREE.Vector3(-.5,1.2,0)};   // rescuer, gap and platform all in view
+    const p = document.createElement('div'); p.className = 'g7-panel'; p.id = 'g7-aim';
+    p.innerHTML = `<div class="g7p-h">🎯 Help aim the rescue rope</div>
+      <div class="g7p-d">Estimated distance to the target: <b>≈ ${(TX-X0).toFixed(1)} m</b> · released at the same height as the platform top (1.6 m)</div>
+      <label class="g7p-l">Release angle θ <b id="ga-at"></b><input type="range" id="ga-a" min="10" max="75" step="1" value="25"></label>
+      <label class="g7p-l">Release speed v₀ <b id="ga-vt"></b><input type="range" id="ga-v" min="4" max="14" step="0.5" value="7"></label>
+      <div class="g7p-f">Predicted range R = v₀² sin 2θ / g ≈ <b id="ga-r"></b></div>
+      <div class="g7p-msg" id="ga-m">Match the range to the distance, then throw.</div>
+      <button class="lab-go" id="ga-go">Throw the rope</button>`;
+    document.body.appendChild(p);
+    const A = p.querySelector('#ga-a'), V = p.querySelector('#ga-v'), M = p.querySelector('#ga-m'), go = p.querySelector('#ga-go');
+    const upd = ()=>{ const a = +A.value, v = +V.value;
+      p.querySelector('#ga-at').textContent = a + '°'; p.querySelector('#ga-vt').textContent = v.toFixed(1) + ' m/s';
+      p.querySelector('#ga-r').textContent = (v*v*Math.sin(2*a*Math.PI/180)/9.8).toFixed(1) + ' m'; };
+    A.oninput = V.oninput = upd; upd();
+    go.onclick = ()=>{
+      if(shot && !shot.ended) return;
+      AudioSysSafe('click');
+      const r = simThrow(+V.value, +A.value);
+      if(trace) scene.remove(trace);
+      trace = jDashed(r.pts, r.res === 'hit' ? 0x4ade80 : 0xef4444, .35);
+      go.disabled = true; M.className = 'g7p-msg';  M.textContent = 'Throwing…';
+      shot = {pts:r.pts, t:r.t, s:0, end:()=>{
+        const d = (r.x - X0).toFixed(1);
+        const msg = { hit:`On target ✓ — it landed ${d} m away, right where the people can grab it.`,
+          short:`Too short — it fell into the water at ${d} m. Give it more speed, or an angle closer to 45°.`,
+          wall:'It hit the side of the platform — throw higher: more speed or a bigger angle.',
+          long:`It landed ${d} m away — past the people. Lower the speed a little.`,
+          over:'It flew over the platform. Lower the speed or the angle.' }[r.res];
+        M.textContent = msg; M.className = 'g7p-msg ' + (r.res === 'hit' ? 'ok' : 'bad');
+        if(r.res === 'hit'){
+          AudioSysSafe('correct');
+          people[0].userData.pose = 'reach'; g7Say(people[0], 'Got it!', 1800, {border:'#4ade80'});
+          setTimeout(()=>{ p.remove(); G7.camView = null; mode = 'done'; [dLine, dTag].forEach(o=> o && (o.visible = false)); next(); }, 2200);
+        } else { AudioSysSafe('wrong'); if(r.res === 'short' || r.res === 'over') { splash.position.set(r.x, .1, 0); splash.visible = true; } go.disabled = false; go.textContent = 'Adjust and throw again'; }
+      }};
+    };
+  };
   G7 = { bounds:[-15,-3,-12,10], camOff:[6,4.5,5],
     hazards:[{test:(x,z)=> x > -4.7, msg:'⚠ Stay back from the flooded gap — let the rescuer throw.'},
-             {test:(x,z)=> Math.hypot(x+5.4,z) < 1.4, msg:'⚠ Give the rescuer room to throw.'}] };
+             {test:(x,z)=> Math.hypot(x+5.4,z) < 1.4, msg:'⚠ Give the rescuer room to throw.'}],
+    onControl(){ mode = 'aim'; coil.position.copy(hand); },
+    tasks:[
+      {at:[-6.75,-1.1], face:[-5.4,0], text:'Go to the rescue worker and estimate the distance to the platform',
+       done:'Distance estimated: about 11.8 m to the target',
+       run(next){
+         g7Say(rescuer, 'Help me aim — how far is the platform?', 2200);
+         dLine = jDashed([[X0,Y0,1.4],[TX,Y0,1.4]], 0x38bdf8, .3);
+         dTag = g7Tag(`d ≈ ${(TX-X0).toFixed(1)} m`, (X0+TX)/2, Y0+.7, 1.4, {size:.6, fg:'#7dd3fc', border:'#38bdf8'});
+         setTimeout(next, 1400);
+       }},
+      {at:[-6.75,-1.1], face:[-5.4,0], text:'Set the release angle and speed, then throw', done:'Rope delivered — adjusted angle and speed reached the target',
+       run(next){ openAim(next); }}],
+    finish:[-12,-6], finishText:'Now step back from the edge to the safe spot' };
   g7Camera([-3,7,-15],[1.5,2,0]);
 }
 
