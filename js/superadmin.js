@@ -651,6 +651,7 @@ async function saveAssignments(){
   document.getElementById('avatar').textContent = initials(ADMIN_SESSION.name);
   document.getElementById('dash-loading').style.display = 'none';
   document.querySelector('.app').classList.add('ready');
+  fillGradeSelects();
   goTab = initTabs();
   watchAll();
 })();

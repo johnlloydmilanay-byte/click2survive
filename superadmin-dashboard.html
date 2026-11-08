@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/dashboard.css?v=20261108g11">
+<link rel="stylesheet" href="css/dashboard.css?v=20261108shs">
 </head>
 <body data-app="Click to Survive Admin">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -95,7 +95,7 @@
           <div class="panel-h"><h3 id="add-sec-h"><i class="bi bi-plus-circle" aria-hidden="true"></i>Add a section</h3></div>
           <form class="toolbar" style="margin-bottom:0" onsubmit="event.preventDefault();createSection()">
             <div class="field"><label for="new-sec-grade">Grade</label>
-              <select id="new-sec-grade"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+              <select id="new-sec-grade" data-grade-select><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
             <div class="field" style="flex:1 1 240px"><label for="new-sec-name">Section name</label><input id="new-sec-name" type="text" placeholder="e.g. Rizal" maxlength="40" required></div>
             <button class="btn primary" type="submit"><i class="bi bi-plus-lg" aria-hidden="true"></i>Add section</button>
           </form>
@@ -103,7 +103,7 @@
         </section>
         <div class="toolbar">
           <div class="field"><label for="sec-grade">Grade</label>
-            <select id="sec-grade" onchange="renderSections()"><option value="">All grades</option><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+            <select id="sec-grade" data-grade-select onchange="renderSections()"><option value="">All grades</option><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
           <div class="field search"><label for="sec-search">Search</label><input id="sec-search" type="search" placeholder="Section name" oninput="renderSections()"></div>
         </div>
         <div class="panel flush">
@@ -146,7 +146,7 @@
           <button class="btn secondary" onclick="exportStudents()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>Export CSV</button></div>
         <div class="toolbar">
           <div class="field search"><label for="stu-search">Search</label><input id="stu-search" type="search" placeholder="Name or Student ID" oninput="renderStudents()"></div>
-          <div class="field"><label for="stu-grade">Grade</label><select id="stu-grade" onchange="onStuGradeChange()"><option value="">All grades</option><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+          <div class="field"><label for="stu-grade">Grade</label><select id="stu-grade" data-grade-select onchange="onStuGradeChange()"><option value="">All grades</option><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
           <div class="field"><label for="stu-section">Section</label><select id="stu-section" onchange="renderStudents()"></select></div>
           <div class="field"><label for="stu-mastery">Mastery level</label>
             <select id="stu-mastery" onchange="renderStudents()">
@@ -175,7 +175,7 @@
         <div class="page-head"><div><h2 id="ss-h">Sessions</h2><p>Every quiz session school-wide. Only the teacher who started a session can end it; this view is for oversight.</p></div></div>
         <div class="notice warn" id="sess-notice" role="alert" style="display:none"></div>
         <div class="toolbar">
-          <div class="field"><label for="ss-grade">Grade</label><select id="ss-grade" onchange="renderSessions()"><option value="">All grades</option><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+          <div class="field"><label for="ss-grade">Grade</label><select id="ss-grade" data-grade-select onchange="renderSessions()"><option value="">All grades</option><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
           <div class="field"><label for="ss-teacher">Teacher</label><select id="ss-teacher" onchange="renderSessions()"></select></div>
           <div class="field"><label for="ss-status">Status</label><select id="ss-status" onchange="renderSessions()"><option value="">Any status</option><option value="active">Active</option><option value="closed">Closed</option></select></div>
         </div>
@@ -197,7 +197,7 @@
         <div class="notice warn" id="ia-notice" role="alert" style="display:none"></div>
         <div class="toolbar">
           <div class="field"><label for="ia-grade">Grade</label>
-            <select id="ia-grade" onchange="onIaGradeChange()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+            <select id="ia-grade" data-grade-select onchange="onIaGradeChange()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
           <div class="field"><label for="ia-section">Section</label><select id="ia-section" onchange="onIaSectionChange()"></select></div>
           <div class="field"><label for="ia-session">Session</label><select id="ia-session" onchange="renderItems()"></select></div>
           <div class="field"><label for="ia-mode">Runs counted</label>
@@ -224,14 +224,14 @@
           <article class="report-card" aria-labelledby="rc1">
             <h3 id="rc1"><span class="stat-ico" aria-hidden="true"><i class="bi bi-people"></i></span>Class performance</h3>
             <p>One grade or section: mastery distribution, competencies and every student's latest result.</p>
-            <div class="field"><label for="rep-class-grade">Grade</label><select id="rep-class-grade" onchange="populateReportPickers()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+            <div class="field"><label for="rep-class-grade">Grade</label><select id="rep-class-grade" data-grade-select onchange="populateReportPickers()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
             <div class="field"><label for="rep-class-section">Section</label><select id="rep-class-section"></select></div>
             <button class="btn primary" onclick="pdfClass(this)"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>Create report</button>
           </article>
           <article class="report-card" aria-labelledby="rc2">
             <h3 id="rc2"><span class="stat-ico" aria-hidden="true"><i class="bi bi-clipboard-data"></i></span>Item analysis</h3>
             <p>Difficulty and discrimination per item, learning per competency, answer distributions and misconceptions.</p>
-            <div class="field"><label for="rep-ia-grade">Grade</label><select id="rep-ia-grade" onchange="populateReportPickers()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+            <div class="field"><label for="rep-ia-grade">Grade</label><select id="rep-ia-grade" data-grade-select onchange="populateReportPickers()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
             <div class="field"><label for="rep-ia-section">Section</label><select id="rep-ia-section" onchange="populateReportPickers()"></select></div>
             <div class="field"><label for="rep-ia-session">Session</label><select id="rep-ia-session"></select></div>
             <div class="field"><label for="rep-ia-mode">Runs counted</label><select id="rep-ia-mode"><option value="all">All runs</option><option value="first">First run per student</option><option value="latest">Latest run per student</option></select></div>
@@ -246,7 +246,7 @@
           <article class="report-card" aria-labelledby="rc4">
             <h3 id="rc4"><span class="stat-ico" aria-hidden="true"><i class="bi bi-person-badge"></i></span>Student progress</h3>
             <p>One learner: run history, growth, learning per competency and their answers in the latest run.</p>
-            <div class="field"><label for="rep-student-grade">Grade</label><select id="rep-student-grade" onchange="populateReportPickers()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+            <div class="field"><label for="rep-student-grade">Grade</label><select id="rep-student-grade" data-grade-select onchange="populateReportPickers()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
             <div class="field"><label for="rep-student">Student</label><select id="rep-student"></select></div>
             <button class="btn primary" onclick="pdfStudent(document.getElementById('rep-student').value, this)"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>Create report</button>
           </article>
@@ -338,9 +338,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js"></script>
 <script src="js/session.js?v=20261018rm"></script>
-<script src="js/game-data.js?v=20261108g11"></script>
-<script src="js/dash-common.js?v=20261108g11"></script>
+<script src="js/game-data.js?v=20261108shs"></script>
+<script src="js/dash-common.js?v=20261108shs"></script>
 <script src="js/report-pdf.js?v=20261020rep3"></script>
-<script src="js/superadmin.js?v=20261108g11"></script>
+<script src="js/superadmin.js?v=20261108shs"></script>
 </body>
 </html>

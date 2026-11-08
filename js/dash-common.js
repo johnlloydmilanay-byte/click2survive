@@ -6,6 +6,19 @@
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 // Bootstrap Icons glyph; decorative unless a label is given.
+// Rebuilds every <select data-grade-select> from GRADE_LEVELS (game-data.js), grouped into
+// Junior High / Senior High, keeping a leading "All grades" option and the current choice —
+// so a grade added to game-data.js shows up in every dashboard filter without HTML edits.
+function fillGradeSelects(){
+  if (typeof GRADE_LEVELS === 'undefined') return;
+  const bands = [...new Set(GRADE_LEVELS.map(gradeBand))];
+  const groups = bands.map(b => `<optgroup label="${b}">${GRADE_LEVELS.filter(g => gradeBand(g) === b).map(g => `<option value="${g}">Grade ${g}</option>`).join('')}</optgroup>`).join('');
+  document.querySelectorAll('select[data-grade-select]').forEach(sel => {
+    const v = sel.value, all = sel.querySelector('option[value=""]');
+    sel.innerHTML = (all ? all.outerHTML : '') + groups;
+    if ([...sel.options].some(o => o.value === v)) sel.value = v;
+  });
+}
 function ico(name, label){ return label ? `<i class="bi bi-${name}" role="img" aria-label="${esc(label)}"></i>` : `<i class="bi bi-${name}" aria-hidden="true"></i>`; }
 function emptyHTML(text, icon){ return `<div class="empty">${ico(icon || 'inbox')}${esc(text)}</div>`; }
 
