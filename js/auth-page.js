@@ -1,7 +1,24 @@
 'use strict';
-// If already logged in, skip straight to the game.
-if (getStudentSession()) window.location.href = 'game.html';
-else document.addEventListener('DOMContentLoaded', () => consumeLoginError('login-msg'));
+// One login page for everyone: "Student" (Student ID) or "Teacher / Admin" (username +
+// password, see staff-login.js). ?role=staff opens the Teacher / Admin side.
+const START_ROLE = new URLSearchParams(location.search).get('role') === 'staff' ? 'staff' : 'student';
+// A student already logged in on this device skips straight to the game.
+if (START_ROLE === 'student' && getStudentSession()) window.location.href = 'game.html';
+else document.addEventListener('DOMContentLoaded', () => {
+  switchRole(START_ROLE);
+  consumeLoginError(START_ROLE === 'staff' ? 'staff-msg' : 'login-msg');
+});
+
+function switchRole(role){
+  ['student','staff'].forEach(r=>{
+    const on = r === role;
+    document.getElementById('role-'+r).classList.toggle('active', on);
+    document.getElementById('role-'+r).setAttribute('aria-selected', String(on));
+    document.getElementById('mode-'+r).classList.toggle('active', on);
+  });
+  try{ history.replaceState(null, '', role === 'staff' ? '?role=staff' : location.pathname); }catch(e){}
+  if (role === 'staff' && typeof staffModeOpened === 'function') staffModeOpened();
+}
 
 function switchTab(name){
   document.getElementById('tab-login').classList.toggle('active', name==='login');

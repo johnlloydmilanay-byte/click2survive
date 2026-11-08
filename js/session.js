@@ -67,7 +67,7 @@ async function requireStudentSession(){
 // back to the login page with an explanatory message (via sessionStorage, read there).
 async function requireTeacherSession(){
   const user = await authReady();
-  if (!user || user.isAnonymous){ window.location.href = 'teacher-login.html'; return null; }
+  if (!user || user.isAnonymous){ window.location.href = 'index.html?role=staff'; return null; }
   let cached = getTeacherSession();
   if (!cached || cached.uid !== user.uid || !cached.name) cached = null;
   if (!cached){
@@ -77,14 +77,14 @@ async function requireTeacherSession(){
         clearTeacherSession();
         sessionStorage.setItem('c2s_login_error', 'That account is not set up as a teacher. Ask your Super Admin.');
         await auth.signOut();
-        window.location.href = 'teacher-login.html';
+        window.location.href = 'index.html?role=staff';
         return null;
       }
       cached = { uid: user.uid, username: doc.data().username, name: doc.data().name };
       saveTeacherSession(cached);
     }catch(e){
       sessionStorage.setItem('c2s_login_error', 'Could not verify your account: ' + e.message);
-      window.location.href = 'teacher-login.html';
+      window.location.href = 'index.html?role=staff';
       return null;
     }
   }
@@ -93,7 +93,7 @@ async function requireTeacherSession(){
 
 async function requireSuperAdminSession(){
   const user = await authReady();
-  if (!user || user.isAnonymous){ window.location.href = 'superadmin-login.html'; return null; }
+  if (!user || user.isAnonymous){ window.location.href = 'index.html?role=staff'; return null; }
   let cached = getSuperAdminSession();
   if (!cached || cached.uid !== user.uid || !cached.name) cached = null;
   if (!cached){
@@ -103,14 +103,14 @@ async function requireSuperAdminSession(){
         clearSuperAdminSession();
         sessionStorage.setItem('c2s_login_error', 'That account is not a super admin.');
         await auth.signOut();
-        window.location.href = 'superadmin-login.html';
+        window.location.href = 'index.html?role=staff';
         return null;
       }
       cached = { uid: user.uid, username: doc.data().username, name: doc.data().name };
       saveSuperAdminSession(cached);
     }catch(e){
       sessionStorage.setItem('c2s_login_error', 'Could not verify your account: ' + e.message);
-      window.location.href = 'superadmin-login.html';
+      window.location.href = 'index.html?role=staff';
       return null;
     }
   }
@@ -134,11 +134,11 @@ function doLogoutStudent(){
 }
 function doLogoutTeacher(){
   clearTeacherSession();
-  auth.signOut().finally(()=>{ window.location.href = 'teacher-login.html'; });
+  auth.signOut().finally(()=>{ window.location.href = 'index.html?role=staff'; });
 }
 function doLogoutSuperAdmin(){
   clearSuperAdminSession();
-  auth.signOut().finally(()=>{ window.location.href = 'superadmin-login.html'; });
+  auth.signOut().finally(()=>{ window.location.href = 'index.html?role=staff'; });
 }
 
 function friendlyAuthError(err){

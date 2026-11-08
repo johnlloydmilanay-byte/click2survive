@@ -1460,10 +1460,24 @@ function makeHuman(x,y,z,shirtC,pantC,s){
 
   g.position.set(x,y,z);
   const ph = Math.random()*6.28;
-  g.userData = { legs, arms, knees, elbows, moving:false, human:true };
+  // ud.pose holds the arms in a fixed pose while the legs keep walking/idling:
+  //   'carry' — both hands on the sides of a box held in front at chest height
+  //   'push'  — arms reaching forward and down onto something being pushed
+  //   'cart'  — hands forward at waist height on a cart's handle
+  g.userData = { legs, arms, knees, elbows, moving:false, human:true, pose:null };
+  // (push: nearly straight arms angled down — pair it with a ~0.5 rad forward lean)
+  const HOLD = { carry:{sh:-.62, el:-.85, out:.12}, push:{sh:-.4, el:-.1, out:.1}, cart:{sh:-.78, el:-.55, out:.13} };
   animCallbacks.push((t)=>{
     const ud = g.userData;
     head.rotation.y = Math.sin(t*.3+ph)*.15;
+    const P = ud.pose && HOLD[ud.pose];
+    if(P){
+      // Arms ease into the hold and stay there; while walking they just follow the
+      // stride a little (no swing through the load).
+      const step = ud.moving ? Math.sin(t*8.5)*.03 : 0;
+      arms.forEach((a,i)=>{ a.rotation.x += (P.sh + (i ? -step : step) - a.rotation.x)*.3; a.rotation.z = (i ? 1 : -1)*P.out; });
+      elbows.forEach(e=>{ e.rotation.x += (P.el - e.rotation.x)*.3; });
+    }
     if(ud.moving){
       // ── WALK CYCLE: hips swing, knees bend on the forward swing, arms counter-swing
       // with relaxed elbows, small vertical bob ──
@@ -1472,17 +1486,22 @@ function makeHuman(x,y,z,shirtC,pantC,s){
       legs[0].rotation.x = sw*.5;  legs[1].rotation.x = -sw*.5;
       knees[0].rotation.x = Math.max(0, -Math.cos(w))*.75 + .05;
       knees[1].rotation.x = Math.max(0,  Math.cos(w))*.75 + .05;
-      arms[0].rotation.x = -sw*.42; arms[1].rotation.x = sw*.42;
-      elbows[0].rotation.x = -.25 - Math.max(0, sw)*.35;
-      elbows[1].rotation.x = -.25 - Math.max(0,-sw)*.35;
+      if(!P){
+        arms[0].rotation.x = -sw*.42; arms[1].rotation.x = sw*.42;
+        elbows[0].rotation.x = -.25 - Math.max(0, sw)*.35;
+        elbows[1].rotation.x = -.25 - Math.max(0,-sw)*.35;
+        arms[0].rotation.z = -.07; arms[1].rotation.z = .07;
+      }
       g.position.y = ud.baseY!==undefined ? ud.baseY + Math.abs(Math.cos(w))*.035*s : g.position.y;
     } else {
       // idle: settle the joints, gentle breathing sway in the arms
       legs.forEach(l=> l.rotation.x *= .82);
       knees.forEach(k=> k.rotation.x *= .82);
-      arms[0].rotation.x = Math.sin(t*.8+ph)*.04;
-      arms[1].rotation.x = -Math.sin(t*.8+ph)*.04;
-      elbows.forEach(e=> e.rotation.x += (-.12 - e.rotation.x)*.1);
+      if(!P){
+        arms[0].rotation.x = Math.sin(t*.8+ph)*.04;
+        arms[1].rotation.x = -Math.sin(t*.8+ph)*.04;
+        elbows.forEach(e=> e.rotation.x += (-.12 - e.rotation.x)*.1);
+      }
     }
   });
   return g;

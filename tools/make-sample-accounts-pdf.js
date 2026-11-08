@@ -70,13 +70,13 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 
 <h2>1. Where to log in</h2>
 <div class="box">
-  <b>Students</b> — <span class="url">${esc(site)}</span><br>Open the site → <b>Log In</b> tab → type the <b>Student ID</b> exactly as listed (no password) → <b>Log In</b>.
+  <b>Students</b> — <span class="url">${esc(site)}</span><br>Open the site → <b>Student</b> → <b>Log In</b> tab → type the <b>Student ID</b> exactly as listed (no password) → <b>Log In</b>.
 </div>
 <div class="box">
-  <b>Teachers</b> — <span class="url">${esc(site)}/teacher-login.html</span><br>Enter the <b>Username</b> and <b>Password</b> below (passwords are case-sensitive).
+  <b>Teachers</b> — <span class="url">${esc(site)}</span> → <b>Teacher / Admin</b><br>Enter the <b>Username</b> and <b>Password</b> below (passwords are case-sensitive).
 </div>
 <div class="box">
-  <b>Super Admin</b> — <span class="url">${esc(site)}/superadmin-login.html</span><br>Use the school’s existing Super Admin account (not included in this document).
+  <b>Super Admin</b> — <span class="url">${esc(site)}</span> → <b>Teacher / Admin</b> (same form)<br>Use the school’s existing Super Admin account (not included in this document).
 </div>
 
 <h2>2. Sections, teachers and active sessions</h2>

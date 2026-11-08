@@ -442,7 +442,7 @@ async function createTeacherAuthAccount(name){
   throw lastErr;
 }
 
-const TEACHER_LOGIN_URL = new URL('teacher-login.html', location.href).href;
+const TEACHER_LOGIN_URL = new URL('index.html?role=staff', location.href).href;   // the shared Teacher / Admin login
 function showCredModal(username, password, title, note){
   document.getElementById('cred-login-url').textContent = TEACHER_LOGIN_URL;
   document.getElementById('cred-modal-title').textContent = title;
@@ -644,7 +644,7 @@ async function saveAssignments(){
 
 (async () => {
   ADMIN_SESSION = await requireSuperAdminSession();
-  if (!ADMIN_SESSION) return; // already redirected to superadmin-login.html
+  if (!ADMIN_SESSION) return; // already redirected to the login page
   document.getElementById('admin-name').textContent = ADMIN_SESSION.name;
   document.getElementById('admin-user').textContent = '@' + ADMIN_SESSION.username;
   document.getElementById('rep-school').value = reportSchoolName();

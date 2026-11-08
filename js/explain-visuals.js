@@ -122,13 +122,13 @@ const XV = (()=>{
       + `<line x1="112" y1="152" x2="112" y2="40" stroke="#64748b" stroke-width="5"/><line x1="112" y1="44" x2="176" y2="44" stroke="#64748b" stroke-width="4"/>`
       + signG
       + `<ellipse cx="205" cy="154" rx="46" ry="7" fill="${C.net}" opacity="0">${show(T,4.6)}</ellipse>` + `<g opacity="0">${show(T,4.6)}${text(205,183,'possible fall zone',{size:9,fill:'#fecaca'})}</g>`
-      + `<g opacity="0">${show(T,.5,2.3)}${arrow(id,64,72,124,72,'white',3.5)}${arrow(id,248,72,194,72,'resist',3.5)}${text(250,40,eq?'ΣF = 0 → equilibrium (at rest)':'Balanced: wind push = holding force',{size:11,fill:C.safe})}</g>`
+      + `<g opacity="0">${show(T,.5,2.3)}${arrow(id,64,72,124,72,'white',3.5)}${arrow(id,248,72,194,72,'resist',3.5)}${text(250,40,eq?'At rest: ΣF = 0 and Στ = 0':'Balanced: wind push = holding force',{size:11,fill:C.safe})}</g>`
       + `<g opacity="0">${show(T,2.3,5.3)}${arrow(id,40,72,124,72,'white',4.5)}${arrow(id,236,72,208,72,'resist',3)}${text(276,40,eq?'F_wind > F_support → ΣF ≠ 0':'Gust: F_wind > F_holding → unbalanced',{size:11,fill:'#fecaca'})}</g>`
       + `<g opacity="0">${show(T,2.3,5.3)}${text(74,64,'F_wind',{size:10})}</g>`
       + `<g opacity="0">${show(T,5.3)}${text(290,40,eq?'ΣF = ma: it accelerates, then gravity takes over':'Fastenings give way — gravity pulls it down',{size:10.5,fill:'#fecaca'})}</g>`
       + person(352, 152, C.safe) + `<g opacity="0">${show(T,6.6)}${check(366,118,true)}${text(352,104,'stay clear',{size:9,fill:C.safe})}</g>`;
     return { T, body, steps:[
-      S(.5, eq ? 'At rest the sign is in equilibrium: ΣF = 0.' : 'The wind push and the holding force balance — the sign hangs still.'),
+      S(.5, eq ? 'At rest the sign is in equilibrium: ΣF = 0 and Στ = 0.' : 'The wind push and the holding force balance — the sign hangs still.'),
       S(2.3, eq ? 'A strong gust makes F_wind bigger than the support force: ΣF ≠ 0.' : 'A strong gust: the wind push becomes bigger than the holding force.'),
       S(3, 'The unbalanced force swings the sign toward the pathway.'),
       S(5.3, 'If the fastenings fail, gravity pulls it down onto the path.'),
@@ -335,13 +335,13 @@ const XV = (()=>{
       +   `<g opacity="0">${show(T,.8)}${arrow(id,0,-r-12,34,-r-12,'vel',3)}${text(18,-r-18,'v_cm',{size:10,fill:C.vel})}</g>`
       +   `<g opacity="0">${show(T,1.8)}<path d="M${r+8},-6 A${r+8},${r+8} 0 0 1 -6,${r+8}" fill="none" stroke="${C.water}" stroke-width="2.6" marker-end="url(#${id}-water)"/>${text(r+20,r+4,'ω',{size:13,fill:C.water})}</g>`
       + `</g>`
-      + `<g opacity="0">${show(T,2.8)}${text(200,26,'Rolling = translation + rotation',{size:12})}${text(200,44,'without slipping:  v_cm = r · ω',{size:11,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,2.8)}${text(200,26,'Rolling = translation + rotation',{size:12})}${text(200,44,'rolling without slipping:  v_center = ωR',{size:11,fill:C.vel})}</g>`
       + person(366, 100, C.safe) + `<path d="M344,108 L392,108" stroke="${C.safe}" stroke-width="3"/>`
       + `<g opacity="0">${show(T,4.6)}${check(382,66,true)}${text(396,124,'clear of the path',{size:8.5,fill:C.safe,anchor:'end'})}</g>`;
     return { T, body, steps:[
       S(.8, 'Translation: the centre of the '+(kind==='wheel'?'wheel':'container')+' moves along the path (v_cm).'),
       S(1.8, 'Rotation: at the same time it turns about its own axis (ω).'),
-      S(2.8, 'Rolling is both at once; without slipping, v_cm = r·ω.'),
+      S(2.8, 'Rolling is both at once; for rolling without slipping, v_center = ωR.'),
       S(4.6, 'It keeps moving and speeding up along its path — stand clear'+(kind==='wheel'?' and postpone crossing.':' until the area is clear.'))] };
   }
 
@@ -369,18 +369,18 @@ const XV = (()=>{
       +   `<g opacity="0">${show(T,.6,6)}${arrow(id,-30,-9,-14,-9,'safe',3.5)}</g></g>`
       +   `<g opacity="0">${show(T,.6,6)}${text(-6,-34,work?'F (small)':'F ≈ mg·h/L',{size:10,fill:C.safe})}</g>`
       + `</g>`
-      + `<g opacity="0">${show(T,3.8)}${text(196,22,work?'Same work to raise it: ΔU = mgh':'Ramp: smaller force × longer distance',{size:11})}${text(196,38,work?'W = F·d·cos θ → longer d, smaller F':'MA = F_out / F_in = L / h > 1',{size:10.5,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,3.8)}${text(196,22,work?'Raising it always adds ΔPE = mgh':'Ramp: smaller force × longer distance',{size:11})}${text(196,38,work?'W = Fd cos θ → longer d, smaller F':'F_incline · L = mgh  →  F_incline = mg(h/L)',{size:10.5,fill:C.vel})}</g>`
       + `<g opacity="0">${show(T,6.2)}${check(366,40,true)}</g>`;
     return { T, body, steps: work ? [
       S(.6, 'Carrying a box up the steps takes a big force at every step — on a wet, slippery surface.'),
       S(2.2, 'Wet steps can make the carrier slip and drop the load.'),
-      S(3.8, 'Raising the box to height h needs the same energy either way: ΔU = mgh.'),
+      S(3.8, 'Raising the supplies adds the same ΔPE = mgh, whether the route is short or long.'),
       S(4.6, 'On the long dry ramp the cart spreads that work over more distance (W = F·d), so the force is smaller.'),
       S(6.2, 'Safe choice: the cart on the stable, dry ramp.')] : [
       S(.6, 'Lifting straight up needs a force equal to the box’s full weight, F = mg.'),
       S(1.6, 'On the ramp the same box is pushed along a longer distance L.'),
-      S(3.8, 'Force × distance (work) is about the same, so the ramp needs a smaller force: F ≈ mg·h/L.'),
-      S(5, 'That is its mechanical advantage: MA = L/h > 1.'),
+      S(3.8, 'Ignoring friction, F_incline · L = mgh, so F_incline = mg(h/L) — less than mg when L is longer than h.'),
+      S(5, 'The ramp doesn’t reduce the energy needed — it trades a smaller force for a longer distance.'),
       S(6.2, 'Safe choice: use the stable, checked ramp.')] };
   }
 
@@ -398,7 +398,7 @@ const XV = (()=>{
       + `<polygon points="${fx},118 ${fx-14},${gy} ${fx+14},${gy}" fill="#6b7280"/>` + text(fx,gy+16,'fulcrum',{size:9,fill:'#cbd5e1'})
       + beam
       + `<g opacity="0">${show(T,2)}<line x1="96" y1="96" x2="${fx}" y2="96" stroke="${C.vel}" stroke-width="1.5"/>${text(123,90,'r_out',{size:9.5,fill:C.vel})}<line x1="${fx}" y1="70" x2="346" y2="70" stroke="${C.vel}" stroke-width="1.5"/>${text(248,64,'r_in (long)',{size:9.5,fill:C.vel})}</g>`
-      + `<g opacity="0">${show(T,3.6)}${text(250,24,'F_in · r_in = F_out · r_out',{size:11.5})}${text(250,40,'MA = F_out / F_in = r_in / r_out  (> 1)',{size:10.5,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,3.6)}${text(250,24,'F_effort · d_effort = F_load · d_load',{size:11.5})}${text(250,40,'longer effort arm → smaller force needed',{size:10.5,fill:C.vel})}</g>`
       + `<g opacity="0">${show(T,5)}<circle cx="96" cy="128" r="62" fill="none" stroke="${C.net}" stroke-dasharray="5 4" stroke-width="1.6"/>${text(96,58,'work area',{size:9,fill:'#fecaca'})}</g>`
       + person(18, gy, C.safe, .9) + `<g opacity="0">${show(T,5.6)}${check(30,112,true)}${text(4,gy+30,'learners wait',{size:8.5,fill:C.safe,anchor:'start'})}</g>`;
     return { T, body, steps:[
@@ -424,13 +424,13 @@ const XV = (()=>{
     const body = water(wy, 190) + streaks(T, wy+8, 184, 22, 5)
       + boat + cg
       + `<g opacity="0">${show(T,1.4)}${arrow(id,cx,168,cx,128,'water',3.5)}${text(cx-24,172,'F_b',{size:10,fill:C.water})}</g>`
-      + `<g opacity="0">${show(T,2.2,5)}<path d="M268,62 A60,60 0 0 1 298,110" fill="none" stroke="${C.net}" stroke-width="2.6" marker-end="url(#${id}-net)"/>${text(318,64,'torque → TILT',{size:10.5,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,2.2,5)}<path d="M268,62 A60,60 0 0 1 298,110" fill="none" stroke="${C.net}" stroke-width="2.6" marker-end="url(#${id}-net)"/>${text(318,64,'tipping moment τ = rF',{size:10.5,fill:'#fecaca'})}</g>`
       + `<g opacity="0">${show(T,.4,5)}${text(110,30,'load within capacity ✓',{size:10.5,fill:C.safe})}${text(110,46,'but all on one side ✗',{size:10.5,fill:'#fecaca'})}</g>`
       + `<g opacity="0">${show(T,6.6)}${text(200,30,'Even load → CG over the centre → stable',{size:11.5,fill:C.safe})}${check(330,30,true)}</g>`;
     return { T, body, steps:[
       S(.4, 'The total load is within capacity, so the boat can float…'),
       S(1.4, '…but with everything on one side, the centre of gravity (CG) moves off-centre.'),
-      S(2.2, 'Weight (down, at the CG) and buoyancy (up, at the centre) no longer line up — they make a torque that tilts the boat.'),
+      S(2.2, 'Buoyancy F_b = ρ_water·g·V_displaced still balances the weight, but off-centre they form a tipping moment τ = rF.'),
       S(5, 'Spreading passengers and boxes evenly moves the CG back over the centre.'),
       S(6.6, 'The boat levels and is stable — cross only after the load is even and conditions are safe.')] };
   }
@@ -488,16 +488,16 @@ const XV = (()=>{
       + `<ellipse cx="150" cy="${gy+2}" rx="40" ry="6" fill="${C.net}" opacity=".6"/>` + text(150,182,'possible landing area',{size:9,fill:'#fecaca'})
       + `<g>${AT('translate',T,[[0,`150 ${top}`],[.7,`146 ${top-4}`],[1.4,`154 ${top+3}`],[2.1,`146 ${top-3}`],[2.8,`153 ${top+2}`],[tFall,`150 ${top}`],[tHit,`150 ${gy-4}`],[T-.4,`150 ${gy-4}`],[T-.1,`150 ${top}`]],'in')}`
       +   `<g>${AT('rotate',T,[[0,'-10'],[1,'12'],[2,'-14'],[tFall,'0'],[tHit,'170'],[T-.4,'180'],[T-.1,'-10']])}<rect x="-22" y="-3" width="44" height="6" fill="#a1a1aa" stroke="#e4e4e7"/></g></g>`
-      + `<g opacity="0">${show(T,.4,tFall)}<line x1="196" y1="${top}" x2="196" y2="${gy}" stroke="${C.vel}" stroke-dasharray="3 3"/>${text(206,100,'h',{size:12,fill:C.vel})}${text(150,22,'U = mgh  (stored, even at rest)',{size:10.5,fill:C.vel})}</g>`
-      + `<g opacity="0">${show(T,tFall,T-.5)}${text(150,22,'falling: U → K = ½mv²',{size:10.5,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,.4,tFall)}<line x1="196" y1="${top}" x2="196" y2="${gy}" stroke="${C.vel}" stroke-dasharray="3 3"/>${text(206,100,'h',{size:12,fill:C.vel})}${text(150,22,'PE = mgh  (stored, even at rest)',{size:10.5,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,tFall,T-.5)}${text(150,22,'falling: PE → KE = ½mv²',{size:10.5,fill:'#fecaca'})}</g>`
       + `<circle cx="150" cy="${gy-2}" r="4" fill="none" stroke="${C.net}" stroke-width="3" opacity="0">${A('r',T,[[0,4],[tHit,4],[tHit+.5,30],[tHit+.51,4]])}${A('opacity',T,[[0,0],[tHit-.01,0],[tHit,1],[tHit+.5,0]])}</circle>`
-      + `<line x1="276" y1="150" x2="380" y2="150" stroke="#475569"/>` + bar(288, C.vel, 1, .02, 'U') + bar(330, C.net, .02, 1, 'K')
-      + `<line x1="282" y1="50" x2="364" y2="50" stroke="#e2e8f0" stroke-dasharray="4 3"/>` + text(372,46,'E_mech = U + K',{size:9,fill:'#cbd5e1',anchor:'end'})
+      + `<line x1="276" y1="150" x2="380" y2="150" stroke="#475569"/>` + bar(288, C.vel, 1, .02, 'PE') + bar(330, C.net, .02, 1, 'KE')
+      + `<line x1="282" y1="50" x2="364" y2="50" stroke="#e2e8f0" stroke-dasharray="4 3"/>` + text(372,46,'Emech = PE + KE',{size:9,fill:'#cbd5e1',anchor:'end'})
       + person(236, gy, C.safe) + `<g opacity="0">${show(T,5.4)}${check(250,116,true)}${text(236,gy+16,'stay away',{size:8.5,fill:C.safe})}</g>`;
     return { T, body, steps:[
-      S(.4, 'High up, the panel stores gravitational potential energy U = mgh — even while it isn’t moving.'),
-      S(tFall, 'If the wind drops it, it falls and U turns into kinetic energy K = ½mv².'),
-      S(tFall+.6, 'The total E_mech = U + K stays about the same — by the ground almost all of mgh is motion.'),
+      S(.4, 'At height h the panel stores gravitational potential energy PE = mgh — even while it isn’t moving.'),
+      S(tFall, 'As it falls, PE turns into kinetic energy KE = ½mv².'),
+      S(tFall+.6, 'Air resistance takes a little, but by the ground most of mgh has become motion.'),
       S(tHit, 'So it hits hard where it lands.'),
       S(5.4, 'Safe decision: move away from its possible landing area.')] };
   }
@@ -510,16 +510,16 @@ const XV = (()=>{
       +   `<rect x="20" y="${by-14}" width="96" height="28" rx="14" fill="${C.wood}" stroke="#451a03" stroke-width="2"/>`
       +   `<rect x="44" y="130" width="22" height="14" rx="6" fill="#f59e0b" stroke="#78350f" stroke-width="1.4"/>`
       +   `<g opacity="0">${show(T,.6)}${arrow(id,120,by,150,by,'vel',3)}${arrow(id,70,137,100,137,'vel',3)}${text(135,by-10,'v',{size:10,fill:C.vel})}${text(85,127,'v',{size:10,fill:C.vel})}</g>`
-      +   `<g opacity="0">${show(T,1.8)}${arrow(id,20,by+26,140,by+26,'net',5)}${text(80,by+42,ke?'K_log = ½mv²  (large)':'p_log = m·v  (large)',{size:9.5,fill:'#fecaca'})}${arrow(id,44,158,58,158,'resist',3)}${text(96,168,ke?'K small':'p small',{size:9,fill:'#fdba74'})}</g>`
+      +   `<g opacity="0">${show(T,1.8)}${arrow(id,20,by+26,140,by+26,'net',5)}${text(80,by+42,ke?'KE_log = ½mv²  (large)':'p_log = m·v  (large)',{size:9.5,fill:'#fecaca'})}${arrow(id,44,158,58,158,'resist',3)}${text(96,168,ke?'KE small':'p small',{size:9,fill:'#fdba74'})}</g>`
       + `</g>`
       + `<g>${AT('translate',T,[[0,'0 0'],[4.2,'0 0'],[5.4,'0 -40'],[T-.4,'0 -40'],[T-.1,'0 0']],true)}<g transform="translate(330,${by})"><path d="M-20,-10 L20,-10 L26,0 L20,10 L-20,10 L-26,0 Z" fill="#7c4a1e" stroke="#451a03" stroke-width="1.6"/>${person(0,6,'#fde68a',.5)}</g></g>`
       + `<g opacity="0">${show(T,.6,2.8)}${text(200,22,'Same velocity v for both',{size:11})}</g>`
-      + `<g opacity="0">${show(T,3)}${text(330,22,ke?'K = ½mv² → more mass,':'p = m·v → more mass,',{size:10.5,fill:'#fecaca'})}${text(330,38,ke?'more kinetic energy':'more momentum',{size:10.5,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,3)}${text(330,22,ke?'KE = ½mv² → more mass,':'p = m·v → more mass,',{size:10.5,fill:'#fecaca'})}${text(330,38,ke?'more kinetic energy':'more momentum',{size:10.5,fill:'#fecaca'})}</g>`
       + `<g opacity="0">${show(T,5.4)}${text(330,106,'boat moves out of its path ✓',{size:9.5,fill:C.safe})}</g>`;
     if(ke) return { T, body, steps:[
       S(.6, 'The heavy log and the light plastic bottle drift at about the same speed v.'),
-      S(1.8, 'Kinetic energy K = ½mv²: at the same speed, more mass means more kinetic energy.'),
-      S(3, 'So the log carries far more energy into anything it hits — a much stronger impact.'),
+      S(1.8, 'Kinetic energy KE = ½mv²: at about the same speed, the more massive log has greater kinetic energy.'),
+      S(3, 'It can transfer more energy during an impact — a much stronger hit.'),
       S(4.2, 'Safe decision: stay away from the log’s path.')] };
     return { T, body, steps:[
       S(.6, 'The log and the plastic container drift at the same velocity v.'),
@@ -553,7 +553,7 @@ const XV = (()=>{
       S(3, 'A rubber fender squashes, so the log takes longer to stop.'),
       S(4, 'The momentum to remove, Δp, is the same either way.'),
       S(6.4, 'J = F_avg·Δt = Δp: a longer impact time means a smaller average force on the boat.'),
-      S(7.2, 'The fender also absorbs part of the kinetic energy, so less damage is done.')] };
+      S(7.2, 'Deforming, the fender turns some energy into heat and internal motion — it does not remove momentum.')] };
     return { T, body, steps:[
       S(.6, 'Hitting a hard wall, the object stops almost instantly — a huge force spike.'),
       S(3, 'Flexible padding squashes, so the object takes longer to stop.'),
@@ -597,12 +597,12 @@ const XV = (()=>{
     const body = `<rect x="0" y="150" width="400" height="40" fill="${C.ground}"/>` + text(200,174,'pathway →',{size:9,fill:'#94a3b8'})
       + `<g opacity=".7">${streaks(T,40,90,160,6)}</g>`
       + `<g>${AT('translate',T,[[0,'40 0'],...p,[T-.4,'316 0'],[T-.1,'40 0']])}<g transform="translate(-40,0)"><rect x="24" y="122" width="32" height="6" rx="1" fill="#d4d4d8" stroke="#71717a"/></g></g>`
-      + marks + `<g opacity="0">${show(T,4.4)}${text(200,30,'Each second it moves farther: speeding up',{size:11})}${text(200,48,'a = Δv / Δt > 0',{size:11.5,fill:C.vel})}</g>`
+      + marks + `<g opacity="0">${show(T,4.4)}${text(200,30,'Each second it moves farther: speeding up',{size:11})}${text(200,48,'a = Δv / Δt > 0   ·   ΣF = ma (unbalanced wind force)',{size:10.5,fill:C.vel})}</g>`
       + person(372, 104, C.safe, .9) + `<g opacity="0">${show(T,6.4)}${check(386,72,true)}${text(370,124,'out of its path',{size:8.5,fill:C.safe})}</g>`;
     return { T, body, steps:[
       S(.6, 'The wind pushes the loose roofing sheet along the ground.'),
       S(2, 'Each gust adds speed: it covers more distance every second.'),
-      S(4.4, 'A changing speed means it is accelerating: a = Δv/Δt > 0.'),
+      S(4.4, 'A changing speed means it is accelerating: a = Δv/Δt. The wind gives an unbalanced net force, ΣF = ma.'),
       S(6.4, 'The faster it goes, the harder it hits — stay away from its path.')] };
   }
 
@@ -614,17 +614,17 @@ const XV = (()=>{
       + `<rect x="40" y="56" width="50" height="94" fill="#78716c"/><rect x="36" y="50" width="72" height="8" fill="#a8a29e"/>` + text(64,166,'high ledge',{size:9,fill:'#cbd5e1'})
       + `<rect x="180" y="128" width="46" height="22" fill="#6b4f30"/>` + text(203,166,'low & secure',{size:9,fill:C.safe})
       + `<g>${AT('translate',T,[[0,'92 50'],[3.8,'92 50'],[5.6,'203 128'],[T-.4,'203 128'],[T-.1,'92 50']],true)}${pot}</g>`
-      + `<g opacity="0">${show(T,.6,3.8)}<line x1="122" y1="50" x2="122" y2="${gy}" stroke="${C.vel}" stroke-dasharray="3 3"/>${text(132,104,'h',{size:12,fill:C.vel})}${text(130,24,'High up: U = mgh is large',{size:11,fill:C.vel})}</g>`
-      + `<g opacity="0">${show(T,1.8,3.8)}<path d="M100,60 Q110,110 104,148" stroke="${C.net}" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#${id}-net)"/>${text(150,140,'if it falls: U → K',{size:9.5,fill:'#fecaca'})}</g>`
-      + `<g opacity="0">${show(T,5.6)}${text(130,24,'Low & secure: small h → small U',{size:11,fill:C.safe})}</g>`
+      + `<g opacity="0">${show(T,.6,3.8)}<line x1="122" y1="50" x2="122" y2="${gy}" stroke="${C.vel}" stroke-dasharray="3 3"/>${text(132,104,'h',{size:12,fill:C.vel})}${text(130,24,'High up: PE = mgh is large',{size:11,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,1.8,3.8)}<path d="M100,60 Q110,110 104,148" stroke="${C.net}" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#${id}-net)"/>${text(150,140,'if it falls: PE → KE',{size:9.5,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,5.6)}${text(130,24,'Low & secure: small h → small PE',{size:11,fill:C.safe})}</g>`
       + `<line x1="276" y1="150" x2="380" y2="150" stroke="#475569"/>`
-      + growBar(T, 300, 150, 30, 100, C.vel, [[0,.92],[3.8,.92],[5.6,.08],[T-.4,.08],[T-.1,.92]], true) + text(315,166,'U = mgh',{size:9.5,fill:C.vel})
+      + growBar(T, 300, 150, 30, 100, C.vel, [[0,.92],[3.8,.92],[5.6,.08],[T-.4,.08],[T-.1,.92]], true) + text(315,166,'PE = mgh',{size:9.5,fill:C.vel})
       + text(350,30,'stored energy',{size:9,fill:'#94a3b8',weight:600});
     return { T, body, steps:[
-      S(.6, 'On the high ledge the heavy pot stores gravitational potential energy U = mgh.'),
-      S(1.8, 'Strong wind could knock it off: U would turn into kinetic energy as it falls onto the path.'),
+      S(.6, 'On the high ledge the heavy pot stores gravitational potential energy PE = mgh because of its height.'),
+      S(1.8, 'If strong wind dislodges it, that PE becomes kinetic energy as it falls onto the path.'),
       S(3.8, 'Moving it low and securing it makes h small…'),
-      S(5.6, '…so U is small and it can no longer fall far. Do this before the wind gets stronger.')] };
+      S(5.6, '…so its PE is small and it can no longer fall far. Do this before strong winds arrive.')] };
   }
 
   // Work needs displacement: stuck box (d = 0 → W = 0) vs moving box (W = F·d) (G8 #5).
@@ -662,17 +662,17 @@ const XV = (()=>{
       + `<rect x="196" y="${gy-30}" width="56" height="30" fill="#334155" stroke="#94a3b8"/>` + text(224,166,'low, enclosed',{size:9,fill:C.safe})
       + o
       + `<g opacity="0">${show(T,.6,3.6)}${arrow(id,8,36,48,36,'white',3)}${text(26,28,'wind',{size:9})}</g>`
-      + `<g opacity="0">${show(T,1.4,3.6)}<path d="M110,50 Q150,90 160,148" stroke="${C.net}" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#${id}-net)"/>${text(176,98,'U → K',{size:10,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,1.4,3.6)}<path d="M110,50 Q150,90 160,148" stroke="${C.net}" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#${id}-net)"/>${text(176,98,'PE → KE',{size:10,fill:'#fecaca'})}</g>`
       + `<line x1="276" y1="150" x2="390" y2="150" stroke="#475569"/>`
-      + growBar(T, 290, 150, 26, 100, C.vel, [[0,.85],[3.6,.85],[5.8,.06],[T-.4,.06],[T-.1,.85]], true) + text(303,166,'U',{size:10,fill:C.vel})
-      + growBar(T, 340, 150, 26, 100, C.net, [[0,.02],[1.4,.02],[2.4,.5],[3.4,.02],[T,.02]], true) + text(353,166,'K',{size:10,fill:C.net})
-      + text(334,30,'E_mech = K + U',{size:10,fill:'#cbd5e1'})
+      + growBar(T, 290, 150, 26, 100, C.vel, [[0,.85],[3.6,.85],[5.8,.06],[T-.4,.06],[T-.1,.85]], true) + text(303,166,'PE',{size:10,fill:C.vel})
+      + growBar(T, 340, 150, 26, 100, C.net, [[0,.02],[1.4,.02],[2.4,.5],[3.4,.02],[T,.02]], true) + text(353,166,'KE',{size:10,fill:C.net})
+      + text(334,30,'Emech = KE + PE',{size:10,fill:'#cbd5e1'})
       + `<g opacity="0">${show(T,5.8)}${text(130,24,'Secured & low: little energy to release',{size:10.5,fill:C.safe})}</g>`;
     return { T, body, steps:[
-      S(.6, 'Loose objects on the high platform store potential energy U = mgh.'),
-      S(1.4, 'Strong wind can knock them off: U turns into kinetic energy K as they fall or fly at people.'),
+      S(.6, 'Loose objects on the high platform store gravitational potential energy PE = mgh.'),
+      S(1.4, 'If strong wind knocks them off, PE converts into kinetic energy KE as they fall or fly at people.'),
       S(3.6, 'Securing them, or moving them to a low, enclosed area…'),
-      S(5.8, '…leaves little mechanical energy (K + U) to release — the hazard is reduced.')] };
+      S(5.8, '…leaves little mechanical energy (Emech = KE + PE) to release — secure or lower them before the typhoon.')] };
   }
 
   // Inertia: the vehicle/boat stops, the loose load keeps going (G9 #1 boat, #2 vehicle).
@@ -692,13 +692,13 @@ const XV = (()=>{
       + `<g>${AT('translate',T,[[0,`${startX} ${gy}`],[2.4,`${stopX} ${gy}`],[3.1,`${stopX+44} ${gy}`],[3.5,`${stopX+56} ${gy+(kind==='boat'?30:0)}`],[T-.4,`${stopX+56} ${gy+(kind==='boat'?30:0)}`],[T-.1,`${startX} ${gy}`]])}`
       +   `<circle cx="10" cy="${kind==='boat'?-30:-38}" r="8" fill="#dc2626"/></g>`
       + `<g opacity="0">${show(T,.4,2.4)}${arrow(id,20,40,70,40,'vel',3)}${text(45,32,'v (all together)',{size:9.5,fill:C.vel})}</g>`
-      + `<g opacity="0">${show(T,2.6)}${text(200,26,'Vehicle stops — loose load keeps moving',{size:11,fill:'#fecaca'})}${text(200,44,'Inertia: ΣF = 0 ⇒ v stays the same',{size:10.5,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,2.6)}${text(200,26,'Vehicle stops — loose load keeps moving',{size:11,fill:'#fecaca'})}${text(200,44,'Newton’s 1st law (inertia): no net force ⇒ velocity unchanged',{size:10,fill:C.vel})}</g>`
       + `<g opacity="0">${show(T,4.4)}${text(150,kind==='boat'?84:64,'strapped load stays put ✓',{size:10,fill:C.safe})}</g>`;
     return { T, body, steps:[
       S(.4, kind==='boat' ? 'The boat and everything in it move toward the bank at the same speed.' : 'The vehicle, learners and supplies all move at the same speed.'),
       S(2.4, kind==='boat' ? 'The boat hits a submerged object and stops suddenly.' : 'The vehicle stops suddenly.'),
       S(2.6, 'Nothing stops the loose load, so it keeps moving forward — inertia (ΣF = 0 ⇒ v constant).'),
-      S(4.4, kind==='boat' ? 'A tied-down bag is stopped with the boat. Secure loose objects before travelling.' : 'Strapped containers stop with the vehicle. Secure them and avoid sudden stops.')] };
+      S(4.4, kind==='boat' ? 'A tied-down bag is stopped with the boat. Secure supplies before travel to prevent impact injuries.' : 'Restraints supply the force that slows the containers with the vehicle. Secure them before departure and avoid abrupt stops.')] };
   }
 
   // Same force, different mass → different acceleration (G9 #3 containers, #4 roofing vs board).
@@ -714,12 +714,12 @@ const XV = (()=>{
       + lane(84, shape1, 300, n1) + lane(160, shape2, 90, n2)
       + `<g opacity="0">${show(T,.5)}${text(200,22,'same force F on both',{size:11,fill:kind==='wind'?C.white:C.water})}</g>`
       + `<g opacity="0">${show(T,3.4)}${text(330,62,'large a',{size:11,fill:'#fecaca'})}${text(250,140,'small a',{size:11,fill:C.safe})}</g>`
-      + `<g opacity="0">${show(T,5)}${text(330,108,'a = F / m',{size:14,fill:C.vel})}</g>`;
+      + `<g opacity="0">${show(T,5)}${text(330,108,'a = Fnet / m',{size:14,fill:C.vel})}</g>`;
     return { T, body, steps:[
       S(.5, kind==='wind' ? 'The wind pushes both objects with about the same force F.' : 'The floodwater pushes both containers with about the same force F.'),
       S(1.6, 'Both start to speed up…'),
       S(3.4, kind==='wind' ? '…but the light roofing sheet gains speed much faster than the heavy board.' : '…but the light, empty container gains speed much faster than the filled one.'),
-      S(5, 'Newton’s second law: a = F/m — the same force gives less mass more acceleration.'),
+      S(5, 'Newton’s second law: a = Fnet/m — with about equal net forces, less mass means more acceleration.'),
       S(6.4, kind==='wind' ? 'The fast-moving sheet is the bigger danger: stay away from its path.' : 'Stay clear of light objects in moving water — they are swept away quickly.')] };
   }
 
@@ -732,7 +732,7 @@ const XV = (()=>{
       + `<g>${AT('translate',T,[[0,'0 0'],[1.2,'0 0'],[3.4,'110 0'],[5,'110 0'],[5.4,'0 0'],[T,'0 0']])}<path d="M136,${gy-4} L300,${gy-4} L286,${gy+14} L150,${gy+14} Z" fill="#7c4a1e" stroke="#451a03" stroke-width="1.6"/></g>`
       + `<g>${AT('translate',T,[[0,'170 0'],[1,'170 0'],[1.6,'92 0'],[5,'92 0'],[5.4,'170 0'],[6.6,'170 0'],[8.6,'92 0'],[T,'92 0']])}${person(0, gy-4, C.white, .9)}</g>`
       + `<g opacity="0">${show(T,1,2.4)}${arrow(id,150,gy-22,200,gy-22,'net',4)}${text(176,gy-30,'F on boat',{size:9.5,fill:'#fecaca'})}${arrow(id,138,gy-50,88,gy-50,'resist',4)}${text(112,gy-58,'F on learner',{size:9.5,fill:'#fdba74'})}</g>`
-      + `<g opacity="0">${show(T,1.2,5)}${text(270,30,'Equal and opposite: F_A→B = −F_B→A',{size:10.5,fill:C.vel})}${text(270,48,'Hard step → boat shoots away ✗',{size:10.5,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,1.2,5)}${text(270,30,'F learner on boat = −F boat on learner',{size:10.5,fill:C.vel})}${text(270,48,'Hard step → boat shoots away ✗',{size:10.5,fill:'#fecaca'})}</g>`
       // held + slow step
       + `<g opacity="0">${show(T,5.6)}<line x1="40" y1="${gy-30}" x2="142" y2="${gy+2}" stroke="#d6b98c" stroke-width="2"/>${person(36, gy-6, C.safe, .9)}${text(270,30,'Boat held + slow step',{size:10.5,fill:C.safe})}${text(270,48,'→ small forces, boat stays ✓',{size:10.5,fill:C.safe})}</g>`;
     return { T, body, steps:[
@@ -749,13 +749,13 @@ const XV = (()=>{
       + `<g>${AT('rotate',T,[[0,'0 70 146'],[4.6,'0 70 146'],[5.2,'-30 70 146'],[5.6,'-22 70 146'],[6,'-26 70 146'],[T-.4,'-26 70 146'],[T-.1,'0 70 146']])}`
       +   `<path d="M70,146 Q150,70 248,84" stroke="#7a5532" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="190" cy="78" r="12" fill="#3f6212"/><circle cx="214" cy="72" r="10" fill="#4d7c0f"/></g>`
       + `<g opacity="0">${show(T,.6,4.6)}${arrow(id,216,96,246,96,'net',3.6)}${text(222,114,'branch → support',{size:9,fill:'#fecaca'})}${arrow(id,298,76,268,76,'resist',3.6)}${text(318,66,'support → branch',{size:9,fill:'#fdba74'})}</g>`
-      + `<g opacity="0">${show(T,1.8,4.6)}${text(150,26,'Equal and opposite forces hold it bent',{size:11,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,1.8,4.6)}${text(150,26,'Equal & opposite forces · stored elastic PE: U = ½kx²',{size:10.5,fill:C.vel})}</g>`
       + `<g opacity="0">${show(T,3,4.6)}${person(150,150,C.net,.9)}${text(150,166,'learner pulling ✗',{size:9,fill:'#fecaca'})}</g>`
       + `<g opacity="0">${show(T,4.6)}${text(150,26,'Released → the push is gone → it springs!',{size:11,fill:'#fecaca'})}<path d="M220,70 Q200,40 160,40" stroke="${C.net}" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#${id}-net)"/></g>`
       + person(370,150,C.vel,.9) + person(386,150,C.vel,.9) + `<g opacity="0">${show(T,6.2)}${text(372,44,'trained adults',{size:9,fill:C.safe})}${text(372,58,'+ equipment ✓',{size:9,fill:C.safe})}</g>`;
     return { T, body, steps:[
       S(.6, 'The bent branch pushes on the bridge support; the support pushes back equally (Newton’s third law).'),
-      S(1.8, 'Those equal and opposite forces are what hold the branch bent, storing energy.'),
+      S(1.8, 'Bent, the branch stores elastic potential energy (U = ½kx² in a simple spring model).'),
       S(3, 'Pulling it could free it suddenly…'),
       S(4.6, '…then the support’s push is gone and the branch springs toward whoever is in front of it.'),
       S(6.2, 'Safe decision: don’t pull it — trained adults with proper equipment should remove it.')] };
@@ -773,12 +773,12 @@ const XV = (()=>{
       + text(350,110,'raised platform',{size:9,fill:'#1f2937'}) + text(190,184,'flooded gap',{size:9,fill:'#bae6fd'})
       + person(32,132,C.resist,.9) + person(340,92,C.white,.8) + person(362,92,C.white,.8)
       + ps
-      + `<g opacity="0">${show(T,7.2)}${text(150,70,'x = x₀ + (v₀ cos θ) t',{size:10.5,fill:C.vel})}${text(150,86,'y = y₀ + (v₀ sin θ) t − ½ g t²',{size:10.5,fill:C.vel})}</g>`;
+      + `<g opacity="0">${show(T,7.2)}${text(150,70,'x = v₀ cos θ · t',{size:10.5,fill:C.vel})}${text(150,86,'y = y₀ + v₀ sin θ · t − ½gt²',{size:10.5,fill:C.vel})}</g>`;
     return { T, body, steps:[
       S(.6, 'Thrown without aiming — too low and too slow — the rope falls into the water.'),
       S(2.8, 'Too steep, it goes up high and still comes down short.'),
       S(5, 'After estimating the distance, the right angle and speed land it on the platform.'),
-      S(7.2, 'The rope is a projectile: where it lands depends on the release angle θ and initial speed v₀.')] };
+      S(7.2, 'Ideal projectile (no air resistance): launch speed, angle and relative height decide where the rope lands — estimate the gap and adjust the throw.')] };
   }
 
   // Windblown roofing: a curved projectile path, not straight down (G10 #2).
@@ -791,7 +791,7 @@ const XV = (()=>{
       + `<path d="${d}" stroke="${C.vel}" stroke-width="2.4" fill="none" stroke-dasharray="5 4"/>`
       + `<g opacity="0">${A('opacity',T,[[0,0],[.6,0],[.7,1],[3.2,1],[3.3,0]])}<rect x="-12" y="-3" width="24" height="5" fill="#d4d4d8" stroke="#71717a"><animateMotion dur="${T}s" repeatCount="indefinite" path="${d}" keyPoints="0;0;1;1" keyTimes="0;${(.6/T).toFixed(3)};${(3.2/T).toFixed(3)};1" calcMode="linear" rotate="auto"/></rect></g>`
       + `<ellipse cx="236" cy="${gy+2}" rx="38" ry="6" fill="${C.net}" opacity=".55"/>` + text(236,182,'landing area',{size:9,fill:'#fecaca'})
-      + `<g opacity="0">${show(T,3.4)}${text(200,24,'It flies sideways as it falls: a projectile',{size:11})}${text(200,42,'x = x₀ + (v₀ cos θ) t,  y = y₀ + (v₀ sin θ) t − ½ g t²',{size:9.5,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,3.4)}${text(200,24,'It flies sideways as it falls: a projectile',{size:11})}${text(200,42,'x = v₀ₓ t,   y = y₀ + v₀ᵧ t − ½gt²   (wind & drag can alter it)',{size:9.5,fill:C.vel})}</g>`
       + person(278,gy,C.safe,.9) + `<g opacity="0">${show(T,5)}<path d="M286,140 L306,140" stroke="${C.safe}" stroke-width="2" marker-end="url(#${id}-safe)"/>${check(292,112,true)}</g>`;
     return { T, body, steps:[
       S(.8, 'The wind tears a piece of roofing off the structure.'),
@@ -807,18 +807,18 @@ const XV = (()=>{
       + `<g>${AT('translate',T,[[0,'30 0'],[tHit,'170 0'],[6,'250 0'],[T-.4,'250 0'],[T-.1,'30 0']])}<rect x="0" y="${gy-12}" width="40" height="8" fill="#8a6236"/></g>`
       + `<g>${AT('translate',T,[[0,'0 0'],[tHit,'0 0'],[6,'80 0'],[T-.4,'80 0'],[T-.1,'0 0']])}<rect x="210" y="${gy-24}" width="22" height="24" rx="2" fill="#e5e7eb" stroke="#64748b"/></g>`
       + `<g opacity="0">${show(T,.4,tHit)}${arrow(id,40,70,100,70,'vel',3.2)}${text(70,62,'v₁',{size:10,fill:C.vel})}${text(222,80,'at rest',{size:9.5,fill:'#cbd5e1'})}</g>`
-      + `<g opacity="0">${show(T,tHit+.2)}${arrow(id,230,70,258,70,'vel',3.2)}${text(244,62,'v′ (slower, together)',{size:10,fill:C.vel})}${text(200,24,'INELASTIC: they stick together',{size:11.5,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,tHit+.2)}${arrow(id,230,70,258,70,'vel',3.2)}${text(244,62,'v′ (slower, together)',{size:10,fill:C.vel})}${text(200,24,'PERFECTLY INELASTIC: they stick together',{size:11.5,fill:'#fecaca'})}</g>`
       + `<line x1="40" y1="176" x2="380" y2="176" stroke="#475569"/>`
       + growBar(T, 70, 176, 26, 40, C.purple, [[0,1],[T,1]]) + text(83,188,'p before',{size:8.5,fill:'#ddd6fe'})
       + `<g opacity="0">${show(T,tHit+.4)}${growBar(T, 130, 176, 26, 40, C.purple, [[0,1],[T,1]])}${text(143,188,'p after',{size:8.5,fill:'#ddd6fe'})}${text(110,138,'Σp before = Σp after',{size:10,fill:'#ddd6fe'})}</g>`
       + growBar(T, 250, 176, 26, 40, C.net, [[0,1],[T,1]]) + text(263,188,'KE before',{size:8.5,fill:'#fecaca'})
       + `<g opacity="0">${show(T,tHit+.4)}${growBar(T, 310, 176, 26, 40, C.net, [[0,.45],[T,.45]])}${text(323,188,'KE after',{size:8.5,fill:'#fecaca'})}${text(300,138,'some KE lost',{size:10,fill:'#fecaca'})}</g>`
-      + `<g opacity="0">${show(T,6.4)}${text(200,44,'m₁v₁ = (m₁ + m₂) v′ — still moving: stay out of their path',{size:9.5,fill:C.vel})}</g>`;
+      + `<g opacity="0">${show(T,6.4)}${text(200,44,'m₁u₁ + m₂u₂ = (m₁ + m₂)v — still moving: stay out of their path',{size:9.5,fill:C.vel})}</g>`;
     return { T, body, steps:[
       S(.4, 'The windblown board moves at v₁; the plastic container is at rest.'),
-      S(tHit, 'They collide and move off together — an inelastic collision.'),
-      S(tHit+.4, 'Total momentum is conserved (Σp before = Σp after), but some kinetic energy is lost.'),
-      S(6.4, 'm₁v₁ = (m₁ + m₂)v′: the joined objects keep moving, so stay out of their path.')] };
+      S(tHit, 'They stick together and move with one common velocity — a perfectly inelastic collision.'),
+      S(tHit+.4, 'With negligible external impulse, total momentum is conserved; kinetic energy is not.'),
+      S(6.4, 'm₁u₁ + m₂u₂ = (m₁ + m₂)v: the joined objects keep moving and stay dangerous.')] };
   }
 
   // ═══ selection ═══
@@ -886,9 +886,14 @@ const XV = (()=>{
     try{ v = build(scen, opts); }catch(e){ console.error('Visual explanation failed:', e); }
     if(!v){ host.innerHTML = ''; host.hidden = true; return false; }
     host.hidden = false;
+    // timeline: play/pause, progress with a tick per step, and "step n / N"
+    const ticks = v.steps.map((st,i)=>`<i class="xv-tick" style="left:${(st.t/v.T*100).toFixed(1)}%" title="Step ${i+1}"></i>`).join('');
     host.innerHTML = `<div class="xv-stage">${v.svg}<button type="button" class="xv-replay" aria-label="Replay the animation" title="Replay">↺</button></div>`
+      + `<div class="xv-bar"><button type="button" class="xv-play" aria-label="Pause the animation" title="Pause">❚❚</button>`
+      + `<div class="xv-prog" aria-hidden="true"><span class="xv-fill"></span>${ticks}</div><span class="xv-count" aria-live="off">1 / ${v.steps.length}</span></div>`
       + `<ol class="xv-steps">${v.steps.map((s,i)=>`<li data-t="${s.t}"><span class="xv-n">${i+1}</span><span>${String(s.s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span></li>`).join('')}</ol>`;
     const svg = host.querySelector('svg'), lis = [...host.querySelectorAll('.xv-steps li')];
+    const fill = host.querySelector('.xv-fill'), count = host.querySelector('.xv-count'), play = host.querySelector('.xv-play');
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     // 'on' = reached; 'now' = the latest reached step (the first one before any is reached),
     // which compact mode shows alone as a caption.
@@ -896,12 +901,18 @@ const XV = (()=>{
       let now = 0;
       lis.forEach((li,i)=>{ if(+li.dataset.t <= t) now = i; });
       lis.forEach((li,i)=>{ li.classList.toggle('on', +li.dataset.t <= t); li.classList.toggle('now', i === now); });
+      fill.style.width = (Math.min(1, t / v.T) * 100).toFixed(1) + '%';
+      count.textContent = `${now+1} / ${lis.length}`;
     };
-    const restart = ()=>{ try{ svg.setCurrentTime(0); svg.unpauseAnimations(); }catch(e){} };
+    const setPlaying = (on)=>{ try{ on ? svg.unpauseAnimations() : svg.pauseAnimations(); }catch(e){}
+      play.textContent = on ? '❚❚' : '▶'; play.setAttribute('aria-label', on ? 'Pause the animation' : 'Play the animation'); play.title = on ? 'Pause' : 'Play'; };
+    play.onclick = ()=> setPlaying(svg.animationsPaused && svg.animationsPaused());
+    const restart = ()=>{ try{ svg.setCurrentTime(0); }catch(e){} setPlaying(true); };
     host.querySelector('.xv-replay').onclick = restart;
     if(reduce){
       try{ svg.pauseAnimations(); svg.setCurrentTime(v.final || v.T - .6); }catch(e){}
       lis.forEach(li=> li.classList.add('on'));
+      fill.style.width = '100%'; count.textContent = `${lis.length} / ${lis.length}`; play.textContent = '▶';
       return true;
     }
     restart();

@@ -211,7 +211,7 @@ function shsWheel(scen){
   const spin = shsSpinArrow(0x38bdf8, .7);
   const lv = g7Label('Centre moves →  v_cm', {size:.55, fg:'#fde047'}); scene.add(lv);
   const lw = g7Label('Rim rotates  ω', {size:.55, fg:'#7dd3fc'}); scene.add(lw);
-  const ln = g7Label('ROLLING WHEEL: v_cm = rω', {size:.7, fg:'#fecaca', border:'#ef4444'}); scene.add(ln);
+  const ln = g7Label('ROLLING WHEEL: v_center = ωR', {size:.7, fg:'#fecaca', border:'#ef4444'}); scene.add(ln);
   const pz = g7Decal(g7SoftTex('g7-danger','rgba(239,68,68,.55)','rgba(239,68,68,0)'), 3, 1, 0, .05, 0);
   pz.material.toneMapped = false; pz.scale.set(4.2,1,1); pz.position.x = -12.5;
   animCallbacks.push((t)=>{ pz.material.opacity = .45 + Math.sin(t*3)*.25; });
@@ -324,8 +324,11 @@ function shsRampScene(scen, cart){
   }
 
   // A responder already using the ramp, so the method is visible before deciding.
-  const pusher = makeHuman(0,0,-10.3, 0x0f766e); scene.add(pusher);
+  const pusher = makeHuman(0,0,-10, 0x0f766e); scene.add(pusher);
   pusher.userData.baseY = 0; pusher.userData.moving = true;
+  // hands on the load: a cart handle at waist height, or a box pushed with a forward lean
+  pusher.userData.pose = cart ? 'cart' : 'push';
+  pusher.rotation.order = 'YXZ';                     // lean about the body's own x axis
   let load;
   if(cart){
     load = new THREE.Group();
@@ -333,19 +336,21 @@ function shsRampScene(scen, cart){
     [-.38,.38].forEach(z=>[-.4,.4].forEach(x=>{ const wh = new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,.08,16), pbr({color:0x111827, roughness:.7})); wh.rotation.x = Math.PI/2; wh.position.set(x,.15,z); load.add(wh); }));
     const b1 = shsReliefBox(); b1.position.y = .65; load.add(b1);
     const b2 = shsReliefBox(.9); b2.position.set(.05,1.04,0); load.add(b2);
-  } else { load = shsReliefBox(1.1); }
+  } else { load = shsReliefBox(1.78); }
   scene.add(load);
   const fRamp = g7Arrow(0x4ade80, .8, .07); scene.add(fRamp);
-  const lr = g7Label('RAMP: F ≈ mg·h/L  (smaller)', {size:.58, fg:'#bbf7d0'}); scene.add(lr);
+  const lr = g7Label('RAMP: F_incline = mg(h/L)  (smaller)', {size:.58, fg:'#bbf7d0'}); scene.add(lr);
   let rt = 0;
   animCallbacks.push((t,dt)=>{
     rt = (rt + dt) % 9;
     const f = Math.min(1, rt/7.5);
     const x = RX1 + .6 - f*(RX1-RX0+1.6);
     const y = heightAt(Math.min(RX1, x), -10);
-    pusher.position.x = x + .95; pusher.userData.baseY = heightAt(Math.min(RX1, x+.95), -10); pusher.rotation.y = -Math.PI/2;
+    const gap = cart ? .71 : 1.14;
+    pusher.position.x = x + gap; pusher.userData.baseY = heightAt(Math.min(RX1, x+gap), -10); pusher.rotation.y = -Math.PI/2;
+    pusher.rotation.x = cart ? .1 : .5;
     pusher.userData.moving = rt < 7.5;
-    load.position.set(x, y + (cart ? 0 : .26), -10); load.rotation.z = (x>RX0 && x<RX1) ? -ang : 0;
+    load.position.set(x, y + (cart ? 0 : .38), -10); load.rotation.z = (x>RX0 && x<RX1) ? -ang : 0;
     fRamp.position.set(x+.55, y+.55, -10.9); fRamp.rotation.set(0, Math.PI, (x>RX0 && x<RX1) ? ang : 0);   // up the slope
     lr.position.set(x+.4, y+1.9, -10.9);
   });
@@ -354,9 +359,13 @@ function shsRampScene(scen, cart){
   g7Human(9.5,-.5, 0x1e3a8a);
   humanGroup.rotation.y = -Math.PI*.75;
   if(cart){
-    const c = load.clone(); c.position.set(0,0,.95); humanGroup.add(c);
+    // pushing the loaded cart: handle end just in front of the hands
+    const c = load.clone(); c.rotation.y = Math.PI/2; c.position.set(0,0,.74); humanGroup.add(c);
+    humanGroup.userData.pose = 'cart';
   } else {
-    const b = shsReliefBox(.9); b.position.set(0,1.02,.36); humanGroup.add(b);
+    // carrying the box in front, both hands on its sides
+    const b = shsReliefBox(.82); b.position.set(0,1.06,.42); humanGroup.add(b);
+    humanGroup.userData.pose = 'carry';
   }
   g7Gateway(-6.6,-10,Math.PI/2);
   gatewayGroup.position.y += H;
@@ -401,7 +410,7 @@ function shsLever(scen){
   const fOut = shsVArrow(0xef4444, 2, 1, .11);
   const li = g7Label('Effort F_in (small, far from fulcrum)', {size:.52, fg:'#fdba74'}); scene.add(li);
   const lo = g7Label('Load F_out (large, close to fulcrum)', {size:.52, fg:'#fecaca'}); scene.add(lo);
-  const lma = g7Label('MA = F_out / F_in = r_in / r_out   ·   τ = rF sin θ', {size:.62, fg:'#fde047', border:'#facc15'}); lma.position.set(BX,4.6,3); scene.add(lma);
+  const lma = g7Label('F_effort · d_effort = F_load · d_load', {size:.62, fg:'#fde047', border:'#facc15'}); lma.position.set(BX,4.6,3); scene.add(lma);
   const zone = g7Decal(g7SoftTex('g7-danger','rgba(239,68,68,.55)','rgba(239,68,68,0)'), 9, 9, BX, .05, WZ);
   zone.material.toneMapped = false;
   g7Tag('WORK AREA · responders only', BX-3.4, 1.4, WZ+3.2, {size:.55, fg:'#fecaca', border:'#ef4444'});
@@ -566,9 +575,9 @@ function shsPanel(scen){
   g7Tag('POSSIBLE LANDING AREA', LX, 1, LZ+2.4, {size:.55, fg:'#fecaca', border:'#ef4444'});
   const hLine = new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,1,6), new THREE.MeshBasicMaterial({color:0xfacc15, transparent:true, opacity:.8, toneMapped:false})); scene.add(hLine);
   const lh = g7Label('h', {size:.6, fg:'#fde047'}); scene.add(lh);
-  const lp = g7Label('U = mgh', {size:.62, fg:'#fde047', border:'#facc15'}); scene.add(lp);
-  const lk = g7Label('Falling: U → K = ½mv²', {size:.62, fg:'#fecaca', border:'#ef4444'}); lk.visible = false; scene.add(lk);
-  const bars = shsBars(-16.5,-1.6,-.45, ['U','K'], [0xfacc15, 0xef4444]);
+  const lp = g7Label('PE = mgh', {size:.62, fg:'#fde047', border:'#facc15'}); scene.add(lp);
+  const lk = g7Label('Falling: PE → KE = ½mv²', {size:.62, fg:'#fecaca', border:'#ef4444'}); lk.visible = false; scene.add(lk);
+  const bars = shsBars(-16.5,-1.6,-.45, ['PE','KE'], [0xfacc15, 0xef4444]);
   const H0 = 5.2;
   let pt = 0;
   animCallbacks.push((t,dt)=>{
@@ -620,10 +629,10 @@ function shsMomentum(scen, mode){
   else { const cm = new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.5,18), pbr({color:0xf59e0b, roughness:.4})); cm.rotation.z = Math.PI/2; cm.castShadow = true; can.add(cm); }
   const pLog = g7Arrow(0xef4444, 3.4, .11); pLog.rotation.y = -Math.PI/2; scene.add(pLog);
   const pCan = g7Arrow(0xfacc15, .45, .07); pCan.rotation.y = -Math.PI/2; scene.add(pCan);
-  const ll = g7Label(ke ? 'LOG: large m → large K = ½mv²' : 'LOG: large m → large p = mv', {size:.6, fg:'#fecaca', border:'#ef4444'}); scene.add(ll);
-  const lc = g7Label(ke ? 'Bottle: small m → small K' : 'Container: small m → small p', {size:.54, fg:'#fde047'}); scene.add(lc);
+  const ll = g7Label(ke ? 'LOG: large m → large KE = ½mv²' : 'LOG: large m → large p = mv', {size:.6, fg:'#fecaca', border:'#ef4444'}); scene.add(ll);
+  const lc = g7Label(ke ? 'Bottle: small m → small KE' : 'Container: small m → small p', {size:.54, fg:'#fde047'}); scene.add(lc);
   const lv = g7Label('Same velocity v', {size:.55}); scene.add(lv);
-  const bars = shsBars(7,1.5,-1, ke ? ['K log','K bottle'] : ['p log','p can'], [0xef4444, 0xfacc15]); bars.userData.set(1, ke ? .04 : .1);
+  const bars = shsBars(7,1.5,-1, ke ? ['KE log','KE bottle'] : ['p log','p can'], [0xef4444, 0xfacc15]); bars.userData.set(1, ke ? .04 : .1);
   let z = -24, away = 0;
   animCallbacks.push((t,dt)=>{
     if(ctrl.on) away = Math.min(1, away + dt*.35);           // the decision: the boat moves out of the log's path
@@ -636,7 +645,7 @@ function shsMomentum(scen, mode){
     ll.position.set(-1.6, 2.2, z); lc.position.set(2.6, 1.5, z); lv.position.set(.4, 3, z);
     boat.position.x = -1.8 - away*1.9; boat.position.z = BZ + away*2; boat.position.y = .1 + Math.sin(t*1.3)*.04;
   });
-  g7Tag(ke ? 'Kinetic energy K = ½mv²' : 'Momentum p = mv', 7, 4, 1.5, {size:.5});
+  g7Tag(ke ? 'Kinetic energy KE = ½mv²' : 'Momentum p = mv', 7, 4, 1.5, {size:.5});
 
   g7SafePad(-11,-6,'SAFE SPOT · away from the river');
   g7Human(-5.9,3.2);

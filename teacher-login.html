@@ -3,37 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Click to Survive — Teacher Login</title>
-<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="css/auth.css?v=20261018logo">
+<title>Click to Survive — Log In</title>
+<!-- Teachers and the Super Admin now share one login form on the main page; this old
+     address (on printed handouts and bookmarks) just forwards there. -->
+<meta http-equiv="refresh" content="0; url=index.html?role=staff">
+<script>location.replace('index.html?role=staff');</script>
 </head>
-<body>
-<div class="card">
-  <img class="brand-logo" src="icons/logo-mark.svg" alt="" width="76" height="76">
-  <div class="brand">Click to <em>Survive</em></div>
-  <div class="tag">Teacher Dashboard</div>
-
-  <div class="panel active" id="panel-login">
-    <label for="login-id">Username or Email</label>
-    <input id="login-id" type="text" placeholder="msantos" autocomplete="username">
-    <label for="login-pass">Password</label>
-    <div class="pw-wrap">
-      <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
-      <button type="button" class="pw-toggle" aria-label="Show password" onclick="togglePasswordVisibility('login-pass',this)">👁</button>
-    </div>
-    <button class="btn" id="login-btn" onclick="doTeacherLogin()">Log In</button>
-    <div class="msg" id="login-msg"></div>
-  </div>
-
-  <div class="foot">Accounts are created by your Super Admin — ask them for your username and password if you don't have one. · <a href="index.html">Student Login →</a> · <a href="superadmin-login.html">Super Admin →</a></div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="js/firebase-init.js"></script>
-<script src="js/session.js?v=20261018rm"></script>
-<script src="js/teacher-login.js"></script>
+<body style="background:#000510;color:#fff;font-family:system-ui;text-align:center;padding-top:20vh">
+<a href="index.html?role=staff" style="color:#38bdf8">Continue to the Teacher / Admin login →</a>
 </body>
 </html>

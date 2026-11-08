@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap">
 <title>Click to Survive — Disaster Preparedness Simulation</title>
-<link rel="stylesheet" href="css/game.css?v=20261108xv">
+<link rel="stylesheet" href="css/game.css?v=20261108ui">
 <style>
 #topbar{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.25rem;pointer-events:none}
 #topbar.hidden{display:none}
@@ -244,11 +244,13 @@
     </div>
 
     <div id="fb-wrap">
-      <!-- Full-screen, game-style result card: verdict + conditions + explanation on the
-           left, physics + the big action button on the right. fitFeedback() sizes the
-           text to the screen so nothing ever needs scrolling. -->
+      <!-- Full-screen result card: verdict + conditions across the top; the decision
+           feedback (English + Bikol) on the left; the animated diagram, its steps and the
+           physics explanation (English + Bikol) on the right; the action button below.
+           fitFeedback() picks the largest readable size; anything longer scrolls inside
+           its own column (with a "scroll for more" hint) instead of being cut off. -->
       <div class="fb-card">
-        <div class="fb-col fb-col-a">
+        <header class="fb-head">
           <div class="fbv-row">
             <div class="fbv-ico ok" id="fb-ico">✓</div>
             <div>
@@ -257,23 +259,26 @@
             </div>
           </div>
           <div id="fb-chips" class="chips"></div>
+        </header>
+        <section class="fb-col fb-col-a" aria-label="Your decision">
+          <div class="fb-sec-h">📝 Your decision · An saimong desisyon</div>
           <div class="fb-txt" id="fb-text"></div>
-        </div>
-        <div class="fb-col fb-col-b">
-          <div class="fb-phys" data-view="visual">
-            <div class="fbp-top">
-              <div class="fbp-h">⚛ Physics Explanation</div>
-              <!-- Shown only on small screens (fb-compact), where the diagram and the text take turns -->
-              <div class="fbp-tabs" role="tablist" aria-label="Explanation view">
-                <button type="button" role="tab" data-view="visual" aria-selected="true">🎬 Visual</button>
-                <button type="button" role="tab" data-view="text" aria-selected="false">📖 Read</button>
-              </div>
+        </section>
+        <section class="fb-col fb-col-b fb-phys" data-view="visual" aria-label="Physics explanation">
+          <div class="fbp-top">
+            <div class="fbp-h">⚛ Physics Explanation</div>
+            <!-- Shown only on small screens (fb-compact), where the diagram and the text take turns -->
+            <div class="fbp-tabs" role="tablist" aria-label="Explanation view">
+              <button type="button" role="tab" data-view="visual" aria-selected="true">🎬 Visual</button>
+              <button type="button" role="tab" data-view="text" aria-selected="false">📖 Read</button>
             </div>
-            <div class="xv" id="fb-visual" hidden></div>
-            <div class="fbp-t" id="fb-physics"></div>
           </div>
+          <div class="xv" id="fb-visual" hidden></div>
+          <div class="fbp-t" id="fb-physics"></div>
+        </section>
+        <footer class="fb-foot">
           <button class="next-btn" id="next-btn" onclick="nextScenario()">Steer through Gateway →</button>
-        </div>
+        </footer>
       </div>
     </div>
   </div>
@@ -315,15 +320,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js?v=20261011q"></script>
-<script src="js/session.js?v=20261018rm"></script>
+<script src="js/session.js?v=20261108login"></script>
 <script src="js/audio-sys.js?v=20261011q"></script>
-<script src="js/game-data.js?v=20261108jhs"></script>
-<script src="js/game-engine.js?v=20261108jhs"></script>
+<script src="js/game-data.js?v=20261108ui"></script>
+<script src="js/game-engine.js?v=20261108ui"></script>
 <script src="js/grade7-scenes.js?v=20261108g11"></script>
-<script src="js/shs-scenes.js?v=20261108jhs"></script>
-<script src="js/jhs-scenes.js?v=20261108jhs"></script>
-<script src="js/explain-visuals.js?v=20261108jhs"></script>
-<script src="js/game-logic.js?v=20261108jhs"></script>
+<script src="js/shs-scenes.js?v=20261108ui"></script>
+<script src="js/jhs-scenes.js?v=20261108ui"></script>
+<script src="js/explain-visuals.js?v=20261108ui"></script>
+<script src="js/game-logic.js?v=20261108ui"></script>
 <script src="js/tutorial.js?v=20261011q"></script>
 <script src="js/app-shell.js?v=20261011q"></script>
 </body>

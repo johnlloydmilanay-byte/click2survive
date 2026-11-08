@@ -719,6 +719,7 @@ function fitFeedback(){
   // behind the Visual / Read tabs.
   const hasVisual = !document.getElementById('fb-visual').hidden;
   card.classList.remove('fb-compact');
+  card.querySelectorAll('.fb-col').forEach(c=>{ c.classList.remove('more'); c.scrollTop = 0; });
   const cols = [...card.querySelectorAll('.fb-col')];
   const phys = card.querySelector('.fbp-t');
   wrap.classList.add('measuring');
@@ -735,17 +736,30 @@ function fitFeedback(){
   };
   const set = (px)=>{ card.style.fontSize = px + 'px'; };
   const top = Math.max(15, Math.min(28, Math.min(innerWidth/42, innerHeight/22)));
+  // Never shrink below a readable size: past this floor the columns scroll instead.
+  const floor = innerHeight < 520 ? 11.5 : 14;
   let lo, hi;
-  const search = ()=>{ lo = 8; hi = top; set(hi); if(!ok()){ for(let k=0;k<14;k++){ const m=(lo+hi)/2; set(m); if(ok()) lo=m; else hi=m; } set(lo); } else lo = hi; };
+  const search = ()=>{ lo = floor; hi = top; set(hi); if(!ok()){ for(let k=0;k<12;k++){ const m=(lo+hi)/2; set(m); if(ok()) lo=m; else hi=m; } set(lo); } else lo = hi; };
   search();
-  if(hasVisual && lo < 13){ card.classList.add('fb-compact'); search(); }
+  if(hasVisual && (lo < 13 || !ok())){ card.classList.add('fb-compact'); search(); }
   void card.offsetHeight;
   wrap.classList.remove('measuring');
+  updateFeedbackMore();
 }
+// "↓ scroll for more" on any column that still has content below its visible part.
+function updateFeedbackMore(){
+  document.querySelectorAll('#fb-wrap .fb-col').forEach(c=>{
+    c.classList.toggle('more', c.scrollHeight - c.scrollTop - c.clientHeight > 4);
+  });
+}
+document.querySelectorAll('#fb-wrap .fb-col').forEach(c=> c.addEventListener('scroll', updateFeedbackMore, { passive:true }));
+addEventListener('resize', ()=>{ if(document.getElementById('fb-wrap').classList.contains('on')) fitFeedback(); });
 function setExplainView(view){
   const phys = document.querySelector('#fb-wrap .fb-phys');
   phys.dataset.view = view;
   phys.querySelectorAll('.fbp-tabs button').forEach(b=> b.setAttribute('aria-selected', String(b.dataset.view === view)));
+  phys.scrollTop = 0;
+  if(typeof updateFeedbackMore === 'function') updateFeedbackMore();
 }
 document.querySelectorAll('#fb-wrap .fbp-tabs button').forEach(b=> b.addEventListener('click', ()=> setExplainView(b.dataset.view)));
 function showFeedback(ok, scen){
@@ -787,7 +801,7 @@ function showFeedback(ok, scen){
     physEl.classList.add('fbp-rich');
     physEl.innerHTML = (scen.phy_title ? `<div class="fbp-title">${scen.phy_title}</div>` : '')
       + `<div class="fbp-en">${scen.phy_html}</div>`
-      + (scen.phy_bi_html ? `<div class="fbp-bi">${scen.phy_bi_html}</div>` : '');
+      + (scen.phy_bi_html ? `<div class="fbp-bi"><span class="fbp-lang">Paliwanag sa Pisika · Bikol</span>${scen.phy_bi_html}</div>` : '');
     physHead.textContent = '⚛ Physics Explanation · Paliwanag sa Pisika';
   } else {
     physEl.classList.remove('fbp-rich');

@@ -77,3 +77,21 @@ body{min-height:100vh;min-height:100dvh}
   .card.split .tabs{margin-bottom:.5rem}
   .card.split .btn{margin-top:.55rem;padding:10px}
 }
+
+/* ═══ Role switch: Student · Teacher / Admin (index.html) ═══ */
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+.role{display:flex;align-items:center;justify-content:center;gap:.45rem;padding:11px 8px;border-radius:13px;border:1px solid var(--bord);
+  background:rgba(255,255,255,.04);color:var(--txm);font:600 .86rem/1.1 inherit;font-family:inherit;cursor:pointer;transition:all .2s;min-height:44px}
+.role:hover{color:#fff;border-color:rgba(56,189,248,.5)}
+.role.active{color:#fff;border-color:#38bdf8;background:linear-gradient(135deg,rgba(14,165,233,.28),rgba(99,102,241,.28));box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+.role span{font-size:1.1rem}
+.mode{display:none}
+.mode.active{display:block}
+.hint{margin-top:.8rem;font-size:.72rem;line-height:1.45;color:var(--txd);text-align:center}
+.link-btn{display:block;margin:.8rem auto 0;background:none;border:none;color:var(--acc);font:600 .74rem inherit;font-family:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.link-btn[hidden]{display:none}
+@media (orientation:landscape) and (max-height:560px){
+  .roles{margin-bottom:.6rem}
+  .role{padding:8px 6px;min-height:40px;font-size:.8rem}
+  .hint{margin-top:.45rem;font-size:.66rem}
+}

@@ -122,7 +122,7 @@ function jRoofSlide(scen){
   const vA = g7Arrow(0xfacc15, 1, .08); vA.rotation.y = Math.PI/2; scene.add(vA);       // points −z
   const wA = g7Arrow(0xe2e8f0, 1.4, .07); wA.rotation.y = Math.PI/2; scene.add(wA);
   const lw = g7Label('wind gusts', {size:.55}); scene.add(lw);
-  const la = g7Label('Speeding up: a = Δv/Δt > 0', {size:.7, fg:'#fde047', border:'#facc15'}); la.position.set(SX,4,4); scene.add(la);
+  const la = g7Label('Speeding up: a = Δv/Δt · ΣF = ma', {size:.7, fg:'#fde047', border:'#facc15'}); la.position.set(SX,4,4); scene.add(la);
   g7Tag('LOOSE ROOFING SHEET', SX, 2.2, 9.3, {size:.55});
   const mk = jMarkers(0xfacc15);
   let z = 9.5, v = .5, since = 0;
@@ -166,7 +166,7 @@ function jFlowerpot(scen){
   g7Tag('fall zone', WX+1.2, .8, WZ-2.6, {size:.5, fg:'#fecaca', border:'#ef4444'});
   const hLine = new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,1,6), new THREE.MeshBasicMaterial({color:0xfacc15, toneMapped:false})); scene.add(hLine);
   const lh = g7Label('h', {size:.65, fg:'#fde047'}); scene.add(lh);
-  const lu = g7Label('High up: U = mgh (large h)', {size:.66, fg:'#fde047', border:'#facc15'}); scene.add(lu);
+  const lu = g7Label('High up: PE = mgh (large h)', {size:.66, fg:'#fde047', border:'#facc15'}); scene.add(lu);
   let moved = 0, relabelled = false;
   animCallbacks.push((t,dt)=>{
     if(ctrl.on) moved = Math.min(1, moved + dt*.45);                      // the decision: move it low and secure
@@ -177,7 +177,7 @@ function jFlowerpot(scen){
     hLine.position.set(p.x+.55, p.y/2, p.z); hLine.scale.y = Math.max(.01, p.y);
     lh.position.set(p.x+.85, p.y/2, p.z); lu.position.set(p.x, p.y+1.6, p.z);
     zone.visible = e < .5;
-    if(e > .98 && !relabelled){ relabelled = true; g7Relabel(lu, 'Low & secure: small h → small U', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); }
+    if(e > .98 && !relabelled){ relabelled = true; g7Relabel(lu, 'Low & secure: small h → small PE', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); }
   });
   g7SafePad(-17,-5.5,'SAFE SPOT');
   g7Human(-9,-3.5, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2;
@@ -203,28 +203,31 @@ function jStuckBox(scen){
   tent.position.set(-10.5,0,1.8); scene.add(tent);
   g7Tag('DRY WAITING AREA', -10.5, 4.6, 1.8, {bg:'rgba(20,83,45,.92)', border:'#4ade80', size:.75});
   // stuck: push, no displacement
-  const sBox = shsReliefBox(1.2); sBox.position.set(4.6,.26,5.2); scene.add(sBox);
-  const pusher = makeHuman(5.5,0,5.2,0x0f766e); pusher.rotation.y = -Math.PI/2; scene.add(pusher);
+  const sBox = shsReliefBox(1.78); sBox.position.set(4.6,.38,5.2); scene.add(sBox);
+  const pusher = makeHuman(5.74,0,5.2,0x0f766e); pusher.rotation.order = 'YXZ'; pusher.rotation.y = -Math.PI/2; scene.add(pusher);
+  pusher.userData.pose = 'push';                     // hands on the box, leaning in
   const fS = g7Arrow(0xfb923c, .9, .08); fS.rotation.y = Math.PI; scene.add(fS); fS.position.set(5.6,.9,5.6);
   const lS = g7Label('Pushing, but d = 0 → W = 0', {size:.62, fg:'#fecaca', border:'#ef4444'}); lS.position.set(4.6,2.6,5.2); scene.add(lS);
   // clear path: push and it moves
-  const mBox = shsReliefBox(1.2); scene.add(mBox);
-  const mover = makeHuman(0,0,-1.5,0xb45309); mover.rotation.y = -Math.PI/2; mover.userData.baseY = 0; scene.add(mover);
+  const mBox = shsReliefBox(1.78); scene.add(mBox);
+  const mover = makeHuman(0,0,-1.5,0xb45309); mover.rotation.order = 'YXZ'; mover.rotation.y = -Math.PI/2; mover.userData.baseY = 0; scene.add(mover);
+  mover.userData.pose = 'push';
   const fM = g7Arrow(0xfb923c, .9, .08); fM.rotation.y = Math.PI; scene.add(fM);
   const dA = g7Arrow(0xfacc15, 1, .06); dA.rotation.y = Math.PI; scene.add(dA);
   const lM = g7Label('Moves with the push: W = F·d', {size:.62, fg:'#bbf7d0', border:'#22c55e'}); scene.add(lM);
   let mt = 0;
   animCallbacks.push((t,dt)=>{
     const strain = Math.sin(t*6)*.04;
-    pusher.rotation.x = .18 + strain; sBox.position.x = 4.6 + strain*.15;
+    pusher.rotation.x = .5 + strain; sBox.position.x = 4.6 + strain*.15;
     mt = (mt + dt) % 7;
     const f = Math.min(1, mt/6), x = 10 - f*15;
-    mBox.position.set(x, .26, -1.5); mover.position.x = x + .95; mover.userData.moving = mt < 6; mover.rotation.x = .12;
+    mBox.position.set(x, .38, -1.5); mover.position.x = x + 1.14; mover.userData.moving = mt < 6; mover.rotation.x = .5;
     fM.position.set(x+1.1, .9, -1.1); dA.position.set(10, .12, -2.9); dA.userData.setLen(Math.max(.05, 10 - x));
     lM.position.set(x, 2.6, -1.5);
   });
   g7Human(11,-4.2, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2;
-  const b = shsReliefBox(.9); b.position.set(0,1.02,.36); humanGroup.add(b);
+  const b = shsReliefBox(.82); b.position.set(0,1.06,.42); humanGroup.add(b);
+  humanGroup.userData.pose = 'carry';                // both hands on the box's sides
   g7Gateway(-9.4,-1.5,Math.PI/2);
   G7 = { bounds:[-12,12,-12,8], camOff:[6,4.5,-4],
     hazards:[{test:(x,z)=> z > 3.4, msg:'⚠ That path is blocked by the raised portion — use the clear path.'},
@@ -253,8 +256,8 @@ function jPlatform(scen){
   objs.forEach((o,i)=>{ o.m.castShadow = true; scene.add(o.m); o.a = new THREE.Vector3(PX+o.from[0], H+.08+o.from[1], PZ+o.from[2]);
     o.b = new THREE.Vector3(-15 + (i%2?.45:-.45), .55 + (i>1?.1:0), 5.2 + (i<2?.3:-.3)); o.delay = i*.35; });
   jDanger(5, 5.5, PX, PZ-1.8, .65);
-  const lu = g7Label('Elevated & loose: U = mgh', {size:.66, fg:'#fde047', border:'#facc15'}); lu.position.set(PX,H+2,PZ); scene.add(lu);
-  const lk = g7Label('wind can turn U → K', {size:.58, fg:'#fecaca'}); lk.position.set(PX,H+1.25,PZ); scene.add(lk);
+  const lu = g7Label('Elevated & loose: PE = mgh', {size:.66, fg:'#fde047', border:'#facc15'}); lu.position.set(PX,H+2,PZ); scene.add(lu);
+  const lk = g7Label('wind can turn PE → KE', {size:.58, fg:'#fecaca'}); lk.position.set(PX,H+1.25,PZ); scene.add(lk);
   const wA = g7Arrow(0xe2e8f0, 1.6, .07); wA.position.set(PX-3.4,H+.6,PZ); scene.add(wA);
   let s = 0, done = false;
   animCallbacks.push((t,dt)=>{
@@ -269,7 +272,7 @@ function jPlatform(scen){
     });
     const all = s > objs[objs.length-1].delay + 1;
     lidPivot.rotation.x = all ? Math.max(0, lidPivot.rotation.x - dt*1.5) : -1.2;
-    if(all && !done){ done = true; g7Relabel(lu, 'Secured low & enclosed: little U', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); lk.visible = false; }
+    if(all && !done){ done = true; g7Relabel(lu, 'Secured low & enclosed: little PE', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); lk.visible = false; }
   });
   g7SafePad(-17,-5.5,'SAFE SPOT');
   g7Human(-9,-3.5, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2;
@@ -389,7 +392,7 @@ function jTwoContainers(scen){
   const lE = g7Label('EMPTY: small m → large a', {size:.6, fg:'#fecaca', border:'#ef4444'}); scene.add(lE);
   const lF = g7Label('FILLED: large m → small a', {size:.6, fg:'#bbf7d0'}); scene.add(lF);
   const lf = g7Label('same push F', {size:.55, fg:'#7dd3fc'}); scene.add(lf);
-  const lm = g7Label('a = F / m', {size:.85, fg:'#fde047', border:'#facc15'}); lm.position.set(0,4.4,3); scene.add(lm);
+  const lm = g7Label('a = Fnet / m', {size:.85, fg:'#fde047', border:'#facc15'}); lm.position.set(0,4.4,3); scene.add(lm);
   const ZE = 1.4, ZF = 4.8, aEmpty = 1.6, aFull = .45;
   let tt = 0;
   animCallbacks.push((t,dt)=>{
@@ -455,7 +458,7 @@ function jBoatStep(scen){
   const rope = jRope();
   const fB = g7Arrow(0xef4444,1.3,.09), fP = g7Arrow(0xfb923c,1.3,.09); fP.rotation.y = Math.PI; scene.add(fB, fP);
   const lB = g7Label('force on boat', {size:.5, fg:'#fecaca'}), lP = g7Label('force on learner', {size:.5, fg:'#fdba74'}); scene.add(lB, lP);
-  const lEq = g7Label('Equal and opposite: F_A→B = −F_B→A', {size:.66, fg:'#fde047', border:'#facc15'}); lEq.position.set(-1.6,3.9,BZ); scene.add(lEq);
+  const lEq = g7Label('F learner on boat = −F boat on learner', {size:.66, fg:'#fde047', border:'#facc15'}); lEq.position.set(-1.6,3.9,BZ); scene.add(lEq);
   const l1 = g7Label('Hard step → boat pushed away ✗', {size:.62, fg:'#fecaca', border:'#ef4444'}); l1.position.set(-1.6,3,BZ); scene.add(l1);
   const l2 = g7Label('Boat held + slow step → boat stays ✓', {size:.62, fg:'#bbf7d0', border:'#22c55e'}); l2.position.set(-1.6,3,BZ); scene.add(l2);
   let tt = 0;
@@ -510,7 +513,7 @@ function jBranchSpring(scen){
   fOnB.position.copy(contact).add(new THREE.Vector3(0,.45,0)); fOnB.rotation.y = Math.atan2(u.z, -u.x); scene.add(fOnB);
   const lS = g7Label('branch pushes support', {size:.5, fg:'#fecaca'}); lS.position.set(SX-1.6,2.5,SZ+1.6); scene.add(lS);
   const lB = g7Label('support pushes back', {size:.5, fg:'#fdba74'}); lB.position.set(SX-.2,2.6,SZ-.6); scene.add(lB);
-  const lEq = g7Label('Equal and opposite forces hold it bent', {size:.64, fg:'#fde047', border:'#facc15'}); lEq.position.set(-10.2,4.4,3.5); scene.add(lEq);
+  const lEq = g7Label('Equal & opposite forces · stores elastic PE', {size:.64, fg:'#fde047', border:'#facc15'}); lEq.position.set(-10.2,4.4,3.5); scene.add(lEq);
   const zone = jDanger(4.6, 4.6, -10.2, 2.2, .7);
   g7Tag('springs this way if released', -10.4, .9, .6, {size:.5, fg:'#fecaca', border:'#ef4444'});
   // trained adults with equipment, standing to the side
@@ -567,7 +570,7 @@ function jRopeThrow(scen){
   const splash = g7Decal(g7SoftTex('g7-wake','rgba(240,236,224,.85)','rgba(240,236,224,0)', true), 1.8, 1.8, missPts[missPts.length-1][0], .1, 0);
   const l1 = g7Label('No aim: too low, too slow → falls short ✗', {size:.6, fg:'#fecaca', border:'#ef4444'}); scene.add(l1);
   const l2 = g7Label('Adjusted angle θ and speed v₀ → lands on target ✓', {size:.6, fg:'#bbf7d0', border:'#22c55e'}); scene.add(l2);
-  const lEq = g7Label('x = x₀ + (v₀cos θ)t     y = y₀ + (v₀sin θ)t − ½gt²', {size:.62, fg:'#fde047', border:'#facc15'}); lEq.position.set(0,7.2,0); scene.add(lEq);
+  const lEq = g7Label('x = v₀cos θ · t     y = y₀ + v₀sin θ · t − ½gt²', {size:.62, fg:'#fde047', border:'#facc15'}); lEq.position.set(0,7.2,0); scene.add(lEq);
   let tt = 0;
   animCallbacks.push((t,dt)=>{
     tt = (tt + dt) % 9;
@@ -607,7 +610,7 @@ function jRoofProj(scen){
   jDanger(4, 4, end[0], end[2], .75);
   g7Tag('possible landing area', end[0], 1, end[2]-1.6, {size:.55, fg:'#fecaca', border:'#ef4444'});
   const piece = jSheet(1.4,.9); scene.add(piece);
-  const lEq = g7Label('Projectile: x = x₀ + (v₀cos θ)t,  y = y₀ + (v₀sin θ)t − ½gt²', {size:.6, fg:'#fde047', border:'#facc15'}); lEq.position.set(-12,6.4,3); scene.add(lEq);
+  const lEq = g7Label('Projectile: x = v₀ₓt,  y = y₀ + v₀ᵧt − ½gt²', {size:.6, fg:'#fde047', border:'#facc15'}); lEq.position.set(-12,6.4,3); scene.add(lEq);
   let tt = 0;
   animCallbacks.push((t,dt)=>{
     tt = (tt + dt) % 5.5;
@@ -665,8 +668,8 @@ function jInelastic(scen){
   const cont = jContainer(false); cont.scale.setScalar(1.1); scene.add(cont);
   const p1 = g7Arrow(0xfacc15,1.8,.09), p2 = g7Arrow(0xfacc15,1.8,.09); scene.add(p1, p2);
   const l1 = g7Label('Before: p = m₁v₁ (board)', {size:.58, fg:'#fde047'}); scene.add(l1);
-  const l2 = g7Label('After: they move together, p = (m₁+m₂)v′ — same total', {size:.58, fg:'#fde047', border:'#facc15'}); scene.add(l2);
-  const lI = g7Label('INELASTIC collision — momentum conserved', {size:.66, fg:'#fecaca', border:'#ef4444'}); lI.position.set(-13,4.4,3.6); scene.add(lI);
+  const l2 = g7Label('After: one common velocity, m₁u₁ + m₂u₂ = (m₁+m₂)v', {size:.58, fg:'#fde047', border:'#facc15'}); scene.add(l2);
+  const lI = g7Label('PERFECTLY INELASTIC collision — momentum conserved', {size:.66, fg:'#fecaca', border:'#ef4444'}); lI.position.set(-13,4.4,3.6); scene.add(lI);
   const C0 = new THREE.Vector3(-13.2,0,4.4), dirv = new THREE.Vector3(1,0,-.55).normalize(), ang = Math.atan2(-dirv.z, dirv.x);
   jDanger(3.6, 6.5, -11.6, 3.4, .65);
   let tt = 0;

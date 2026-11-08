@@ -590,42 +590,65 @@ body.q-open #joy-zone, body.q-open #act-pad, body.q-open #tutorial{opacity:0;poi
   #story-overlay.big .story-bi{font-size:.98rem}
 }
 
-/* ═══ RESULT CARD — full-screen, game-style, never scrolls ═══
-   Two columns sized to the screen; fitFeedback() in game-logic.js picks the largest
-   font size at which both columns fit (all sizes below are em of that size). */
+/* ═══ RESULT CARD — full-screen: header, two scrollable columns, footer ═══
+   fitFeedback() in game-logic.js picks the largest font at which everything fits, but
+   never below a readable floor; past that, each column scrolls on its own with a
+   "scroll for more" hint, so nothing is ever clipped (all sizes are em of that font). */
 #fb-wrap{padding:calc(.5rem + env(safe-area-inset-top,0px)) calc(.5rem + env(safe-area-inset-right,0px))
   calc(.5rem + env(safe-area-inset-bottom,0px)) calc(.5rem + env(safe-area-inset-left,0px));box-sizing:border-box}
 #fb-wrap .fb-card{
-  width:min(1180px,100%); height:min(760px,100%); max-width:none; max-height:none; box-sizing:border-box;
-  display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:1em 1.4em;
-  padding:1.1em 1.3em; font-size:18px; overflow:hidden; border-radius:22px;
+  width:min(1240px,100%); height:min(860px,100%); max-width:none; max-height:none; box-sizing:border-box;
+  display:grid; grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr); grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:"head head" "a b" ". foot"; gap:.8em 1.3em;
+  padding:1em 1.2em; font-size:18px; overflow:hidden; border-radius:22px;
 }
-#fb-wrap .fb-col{display:flex;flex-direction:column;min-height:0;overflow:hidden}
-#fb-wrap .fb-col-b{gap:.8em}
-#fb-wrap .fbv-row{gap:.7em;margin-bottom:.6em;flex:0 0 auto}
-#fb-wrap .fbv-ico{width:2.6em;height:2.6em;border-radius:.7em;font-size:1em}
-#fb-wrap .fbv-ico{font-size:1.25em}
-#fb-wrap .fbv-t{font-size:1.45em}
-#fb-wrap .fb-out{font-size:.72em;padding:.3em .9em;margin:.3em 0 0;letter-spacing:.1em}
-#fb-wrap .chips{grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:.45em;margin:0 0 .75em;flex:0 0 auto}
-#fb-wrap .chip{padding:.5em .4em;border-radius:.7em}
-#fb-wrap .chip-l{font-size:.62em;margin-bottom:.2em}
-#fb-wrap .chip-v{font-size:.95em;line-height:1.15}
-#fb-wrap .chip-s{font-size:.62em;margin-top:.25em}
-#fb-wrap .fb-txt{font-size:1em;line-height:1.45;margin:0;flex:0 0 auto}
-#fb-wrap .fb-txt .bikol-text{font-size:.84em;margin-top:.35em;line-height:1.38}
-#fb-wrap .fb-phys{flex:1 1 auto;min-height:0;margin:0;padding:.8em 1em;border-radius:.8em;display:flex;flex-direction:column}
-#fb-wrap .fbp-h{font-size:.68em;margin-bottom:.45em}
-#fb-wrap .fbp-t{font-size:.9em;line-height:1.5}
-#fb-wrap .next-btn{flex:0 0 auto;font-size:1.05em;padding:.9em 1em;border-radius:.8em;min-height:48px}
+#fb-wrap .fb-head{grid-area:head;display:flex;align-items:center;gap:1em;min-width:0}
+#fb-wrap .fb-head .fbv-row{flex:0 0 auto;margin:0}
+#fb-wrap .fb-head .chips{flex:1 1 auto;margin:0;min-width:0}
+#fb-wrap .fb-col-a{grid-area:a}
+#fb-wrap .fb-col-b{grid-area:b}
+#fb-wrap .fb-foot{grid-area:foot;display:flex}
+#fb-wrap .fb-col{display:flex;flex-direction:column;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:rgba(167,139,250,.55) transparent}
+#fb-wrap .fb-col::-webkit-scrollbar{width:6px}
+#fb-wrap .fb-col::-webkit-scrollbar-thumb{background:rgba(167,139,250,.5);border-radius:6px}
+/* "scroll for more" hint, pinned to the bottom of a column that still has content below */
+#fb-wrap .fb-col.more::after{content:'↓ scroll for more';position:sticky;bottom:0;align-self:center;flex:0 0 auto;margin-top:.4em;
+  font-size:.62em;font-weight:700;letter-spacing:.08em;color:#e9d5ff;background:rgba(76,29,149,.92);border:1px solid #a78bfa;
+  border-radius:999px;padding:.3em .9em;box-shadow:0 -6px 14px rgba(8,15,30,.9)}
+#fb-wrap .fbv-row{gap:.7em}
+#fb-wrap .fbv-ico{width:2.5em;height:2.5em;border-radius:.7em;font-size:1.2em}
+#fb-wrap .fbv-t{font-size:1.4em}
+#fb-wrap .fb-out{font-size:.7em;padding:.3em .9em;margin:.3em 0 0;letter-spacing:.1em}
+#fb-wrap .chips{grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:.45em}
+#fb-wrap .chip{padding:.45em .4em;border-radius:.7em}
+#fb-wrap .chip-l{font-size:.6em;margin-bottom:.2em}
+#fb-wrap .chip-v{font-size:.9em;line-height:1.15}
+#fb-wrap .chip-s{font-size:.6em;margin-top:.25em}
+#fb-wrap .fb-sec-h{font-size:.66em;color:#93c5fd;text-transform:uppercase;letter-spacing:.16em;font-weight:700;margin-bottom:.5em;flex:0 0 auto}
+#fb-wrap .fb-col-a{background:rgba(255,255,255,.03);border:1px solid var(--bord);border-radius:.8em;padding:.8em 1em}
+#fb-wrap .fb-txt{font-size:1em;line-height:1.5;margin:0;flex:0 0 auto}
+#fb-wrap .fb-txt .bikol-text{font-size:.88em;margin-top:.6em;line-height:1.45;padding-top:.55em;border-top:1px dashed rgba(255,255,255,.14)}
+#fb-wrap .fb-phys{margin:0;padding:.8em 1em;border-radius:.8em}
+#fb-wrap .fbp-h{font-size:.66em;margin-bottom:0}
+#fb-wrap .fbp-t{font-size:.92em;line-height:1.55;flex:0 0 auto}
+#fb-wrap .fbp-rich .fbp-title{font-size:1.06em;margin:.2em 0 .35em}
+#fb-wrap .fbp-rich .fbp-bi{margin-top:.6em;padding-top:.55em;border-top:1px dashed rgba(255,255,255,.14);font-size:.94em}
+#fb-wrap .fbp-rich .fbp-lang{display:block;font-style:normal;font-size:.62em;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a5b4fc;margin-bottom:.15em}
+#fb-wrap .next-btn{flex:1 1 auto;font-size:1.05em;padding:.85em 1em;border-radius:.8em;min-height:48px}
 #fb-wrap.measuring .fb-card *{transition:none!important}   /* measure final sizes (the card's own fade-in is left alone) */
-/* Short landscape phones: edge-to-edge, tighter spacing */
+/* Short landscape phones: edge-to-edge, tighter spacing, chips under the verdict */
 @media (max-height:500px){
   #fb-wrap{padding:calc(.3rem + env(safe-area-inset-top,0px)) calc(.3rem + env(safe-area-inset-right,0px))
     calc(.3rem + env(safe-area-inset-bottom,0px)) calc(.3rem + env(safe-area-inset-left,0px))}
-  #fb-wrap .fb-card{padding:.7em .9em;gap:.6em 1em;border-radius:16px}
-  #fb-wrap .fbv-row{margin-bottom:.4em}
-  #fb-wrap .chips{margin-bottom:.5em}
+  #fb-wrap .fb-card{padding:.6em .8em;gap:.5em .9em;border-radius:16px}
+  #fb-wrap .fb-col-a,#fb-wrap .fb-phys{padding:.6em .75em}
+}
+/* Narrow portrait screens: one column — head, decision, physics, button */
+@media (max-width:640px) and (orientation:portrait){
+  #fb-wrap .fb-card{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"head" "a" "b" "foot"}
+  #fb-wrap .fb-head{flex-direction:column;align-items:stretch}
+  #fb-wrap .fb-col-a{max-height:34vh}
 }
 
 /* ═══ FIRST-TIME TUTORIAL (js/tutorial.js) ═══ */
@@ -818,3 +841,16 @@ body.tut-on #tutorial{display:none!important}   /* the old one-line hint; the tu
 #fb-wrap .fb-compact .xv-steps li{display:none;min-height:2.75em;align-items:center}
 #fb-wrap .fb-compact .xv-steps li.now{display:flex}
 @media (prefers-reduced-motion: reduce){ .xv-steps li{transition:none} }
+
+/* timeline under the diagram: play/pause · progress with step ticks · step counter */
+.xv-bar{display:flex;align-items:center;gap:.55em;margin:.45em 0 0;flex:0 0 auto}
+.xv-play{flex:0 0 auto;width:2em;height:2em;min-width:32px;min-height:32px;border-radius:50%;border:1px solid rgba(167,139,250,.6);
+  background:rgba(76,29,149,.55);color:#ede9fe;font-size:.7em;cursor:pointer;line-height:1}
+.xv-play:hover{background:#7c3aed}
+.xv-prog{position:relative;flex:1 1 auto;height:.42em;border-radius:999px;background:rgba(148,163,184,.22);overflow:visible}
+.xv-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;background:linear-gradient(90deg,#38bdf8,#a78bfa);transition:width .15s linear}
+.xv-tick{position:absolute;top:50%;width:.62em;height:.62em;margin:-.31em 0 0 -.31em;border-radius:50%;background:#1e1b4b;border:2px solid #a78bfa}
+.xv-count{flex:0 0 auto;font-size:.66em;font-weight:700;color:#c4b5fd;letter-spacing:.06em;min-width:3.2em;text-align:right}
+.xv-steps li.now{animation:xvPulse 1.6s ease-in-out infinite}
+@keyframes xvPulse{0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,0)}50%{box-shadow:0 0 0 3px rgba(167,139,250,.28)}}
+@media (prefers-reduced-motion: reduce){ .xv-steps li.now{animation:none} .xv-fill{transition:none} }

@@ -373,7 +373,7 @@ async function onAssignmentsChanged(newIds){
 
 (async () => {
   TEACHER_SESSION = await requireTeacherSession();
-  if (!TEACHER_SESSION) return; // already redirected to teacher-login.html
+  if (!TEACHER_SESSION) return; // already redirected to the login page
   document.getElementById('teacher-name').textContent = TEACHER_SESSION.name;
   document.getElementById('teacher-user').textContent = '@' + TEACHER_SESSION.username;
   document.getElementById('avatar').textContent = initials(TEACHER_SESSION.name);

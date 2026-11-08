@@ -12,8 +12,8 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<title>Click to Survive — Student Login</title>
-<link rel="stylesheet" href="css/auth.css?v=20261018logo">
+<title>Click to Survive — Log In</title>
+<link rel="stylesheet" href="css/auth.css?v=20261108login">
 </head>
 <body>
 <!-- .split: on short landscape phones the card becomes two columns (brand | form) so
@@ -23,10 +23,17 @@
     <img class="brand-logo" src="icons/logo-mark.svg" alt="" width="76" height="76">
     <div class="brand">Click to <em>Survive</em></div>
     <div class="tag">DepEd · Disaster Risk Education</div>
-    <div class="foot">Are you a teacher? <a href="teacher-login.html">Teacher Login →</a></div>
   </div>
 
   <div class="card-form">
+    <!-- Who is logging in: students use their Student ID; teachers and the Super Admin
+         share one username/password form, and the system works out which they are. -->
+    <div class="roles" role="tablist" aria-label="I am a">
+      <button type="button" class="role active" id="role-student" role="tab" aria-selected="true" onclick="switchRole('student')"><span aria-hidden="true">🎒</span> Student</button>
+      <button type="button" class="role" id="role-staff" role="tab" aria-selected="false" onclick="switchRole('staff')"><span aria-hidden="true">🧑‍🏫</span> Teacher / Admin</button>
+    </div>
+
+    <div class="mode active" id="mode-student">
     <div class="tabs">
       <div class="tab active" id="tab-login" onclick="switchTab('login')">Log In</div>
       <div class="tab" id="tab-register" onclick="switchTab('register')">Register</div>
@@ -73,6 +80,38 @@
       <button class="btn" id="reg-btn" onclick="doRegister()">Register</button>
       <div class="msg" id="reg-msg"></div>
     </div>
+    </div>
+
+    <div class="mode" id="mode-staff">
+      <div class="panel active" id="panel-staff">
+        <label for="staff-id">Username or Email</label>
+        <input id="staff-id" type="text" placeholder="e.g. maria.santos4kq" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('staff-pass').focus()">
+        <label for="staff-pass">Password</label>
+        <div class="pw-wrap">
+          <input id="staff-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doStaffLogin()">
+          <button type="button" class="pw-toggle" aria-label="Show password" onclick="togglePasswordVisibility('staff-pass',this)">👁</button>
+        </div>
+        <button class="btn" id="staff-btn" onclick="doStaffLogin()">Log In</button>
+        <div class="msg" id="staff-msg"></div>
+        <div class="hint">Teachers and the Super Admin use the same form — you'll be taken to your own dashboard. Teacher accounts are created by the Super Admin.</div>
+        <button type="button" class="link-btn" id="setup-link" hidden onclick="showSetup(true)">First-time setup: create the Super Admin account →</button>
+      </div>
+      <div class="panel" id="panel-setup">
+        <div class="msg ok" style="margin:0 0 .4rem">No Super Admin exists yet. Create it once — this option then disappears.</div>
+        <label for="setup-name">Full Name</label>
+        <input id="setup-name" type="text" placeholder="Your name">
+        <label for="setup-user">Username</label>
+        <input id="setup-user" type="text" placeholder="superadmin">
+        <label for="setup-pass">Password</label>
+        <div class="pw-wrap">
+          <input id="setup-pass" type="password" placeholder="At least 6 characters">
+          <button type="button" class="pw-toggle" aria-label="Show password" onclick="togglePasswordVisibility('setup-pass',this)">👁</button>
+        </div>
+        <button class="btn" id="setup-btn" onclick="doSuperAdminSetup()">Create Super Admin Account</button>
+        <div class="msg" id="setup-msg"></div>
+        <button type="button" class="link-btn" onclick="showSetup(false)">← Back to log in</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -80,8 +119,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js"></script>
-<script src="js/session.js?v=20261018rm"></script>
-<script src="js/auth-page.js?v=20261018rm"></script>
+<script src="js/session.js?v=20261108login"></script>
+<script src="js/auth-page.js?v=20261108login"></script>
+<script src="js/staff-login.js?v=20261108login"></script>
 <script src="js/app-shell.js?v=20261011e"></script>
 </body>
 </html>

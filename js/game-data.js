@@ -28,10 +28,11 @@ const GRADES = {
                 "Dai kayang baguhon kan tubig an hiro kan basurahan, kaipo ining hiruon kan estudyante gamit an saiyang kamot."],
        fb:"The moving floodwater exerts an unbalanced force that changes the motion of the trash bin. Staying away from its path prevents the learner from being struck.",
        fb_bi:"An sulog kan tubig-baha nagtatao nin bakong balanseng puwersang nagbabago sa hiro kan basurahan. An pagparayo sa agihan kaini nagpupugol sa estudyante na matamaan.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
        phy_title:"Balanced and Unbalanced Forces in Floodwater",
        phy:"The net force acting on the bin is expressed as F_net = F_water - F_friction. When F_net ≠ 0, the forces are unbalanced, causing the bin to accelerate in the direction of the net force. When F_net = 0, the forces are balanced; therefore, a bin initially at rest remains at rest.",
        phy_html:"The net force acting on the bin is expressed as <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = <i>F</i><sub><i>water</i></sub> - <i>F</i><sub><i>friction</i></sub></span>. When <span class=\"mth\"><i>F</i><sub><i>net</i></sub> ≠ 0</span>, the forces are unbalanced, causing the bin to accelerate in the direction of the net force. When <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = 0</span>, the forces are balanced; therefore, a bin initially at rest remains at rest.",
-       phy_bi_html:"(An net force na nag-aapekto sa basurahan ipinapahiling kan pormulang <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = <i>F</i><sub><i>water</i></sub> - <i>F</i><sub><i>friction</i></sub></span>. Kun <span class=\"mth\"><i>F</i><sub><i>net</i></sub> ≠ 0</span>, dai balanse an mga puwersa, kaya nagkakaigwa nin acceleration an basurahan pasiring sa direksyon kan net force. Kun <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = 0</span>, balanse an mga puwersa; kaya, kun dai naghihiro an basurahan sa kapinonan, magpapadagos ining dai naghihiro.)",
+       phy_bi_html:"An net force na nag-aakto sa basurahan ipinapahiling kan pormulang <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = <i>F</i><sub><i>water</i></sub> - <i>F</i><sub><i>friction</i></sub></span>. Kun <span class=\"mth\"><i>F</i><sub><i>net</i></sub> ≠ 0</span>, dai balanse an mga puwersa, kaya nagkakaigwa nin acceleration an basurahan pasiring sa direksyon kan net force. Kun <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = 0</span>, balanse an mga puwersa; kaya, kun dai naghihiro an basurahan sa kapinonan, magpapadagos ining dai naghihiro.",
        live:[{l:"Floodwater",v:"Moving",s:"risky"},{l:"Forces on bin",v:"Unbalanced",s:"unsafe"},{l:"Bin motion",v:"Toward the pathway",s:"unsafe"}],
        mission:"Stay away from the trash bin’s path — walk to the safe spot on higher ground",
        narr:{ sit:["audio/narr/g7s1-sit-en.mp3?v=2"], q:["audio/narr/g7s1-q-en.mp3?v=2"] }},
@@ -51,10 +52,11 @@ const GRADES = {
                 "Magdalagan sa irarom kan karatula bago pa man magkusog an duros."],
        fb:"The unbalanced force of the strong wind may cause the hanging sign to tilt or fall. The learner should stay away from the sign and its possible falling path.",
        fb_bi:"An dai balanseng puwersa kan makusog na duros pwedeng magin kawsa na an nakasabit na karatula magtiklop o mahulog. Dapat magrayo an estudyante sa karatula asin sa posibleng babagsakan kaini.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
        phy_title:"Unbalanced Forces on a Hanging Sign",
        phy:"The net force acting on the sign is expressed as F_net = F_wind - F_holding. When F_wind > F_holding, F_net ≠ 0; therefore, the forces are unbalanced and the sign tilts. If the strong wind continues, the fasteners may give way, allowing gravity to pull the sign down onto the pathway.",
        phy_html:"The net force acting on the sign is expressed as <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = <i>F</i><sub><i>wind</i></sub> - <i>F</i><sub><i>holding</i></sub></span>. When <span class=\"mth\"><i>F</i><sub><i>wind</i></sub> &gt; <i>F</i><sub><i>holding</i></sub></span>, <span class=\"mth\"><i>F</i><sub><i>net</i></sub> ≠ 0</span>; therefore, the forces are unbalanced and the sign tilts. If the strong wind continues, the fasteners may give way, allowing gravity to pull the sign down onto the pathway.",
-       phy_bi_html:"(An net force na nag-aapekto sa karatula ipinapahiling kan pormulang <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = <i>F</i><sub><i>wind</i></sub> - <i>F</i><sub><i>holding</i></sub></span>. Kun <span class=\"mth\"><i>F</i><sub><i>wind</i></sub> &gt; <i>F</i><sub><i>holding</i></sub></span>, <span class=\"mth\"><i>F</i><sub><i>net</i></sub> ≠ 0</span>; kaya, dai balanse an mga puwersa asin nagkakiling an karatula. Kun magpadagos an makusog na duros, puwedeng bumigay an mga pangkabit asin hilahon kan grabidad an karatula pababa sa agihan.)",
+       phy_bi_html:"An net force na nag-aapekto sa karatula ipinapahiling kan pormulang <span class=\"mth\"><i>F</i><sub><i>net</i></sub> = <i>F</i><sub><i>wind</i></sub> - <i>F</i><sub><i>holding</i></sub></span>. Kun <span class=\"mth\"><i>F</i><sub><i>wind</i></sub> &gt; <i>F</i><sub><i>holding</i></sub></span>, <span class=\"mth\"><i>F</i><sub><i>net</i></sub> ≠ 0</span>; kaya, dai balanse an mga puwersa asin nagkakiling an karatula. Kun magpadagos an makusog na duros, puwedeng bumigay an mga pangkabit asin hilahon kan grabidad an karatula pababa sa agihan.",
        live:[{l:"Wind",v:"Strong, repeated gusts",s:"unsafe"},{l:"Forces on sign",v:"Unbalanced",s:"unsafe"},{l:"Sign",v:"Tilting toward pathway",s:"unsafe"}],
        mission:"Stay away from the tilting sign — go to the safe spot clear of its falling path"},
 
@@ -73,10 +75,11 @@ const GRADES = {
                 "Arin man sa duwang ruta nin huli ta mayo man nin epekto an distansya sa pagbiyahe."],
        fb:"Although Route B is longer, it avoids the flooded area and provides a safer path to the evacuation area. The shortest route is not always the safest route.",
        fb_bi:"Dawa mas halawig an Rutang B, ini nakakalikay sa lugar na binabaha asin nagtatao nin mas ligtas na agihan pasiring sa lugar nin pag-ebakwar. An pinakahalipot na ruta bako pirming pinakaligtas na ruta.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
        phy_title:"Distance and Displacement in Route Selection",
        phy:"Both routes have the same starting and ending points; therefore, their displacement is the same, as expressed by Δx = x_f - x_i. However, the distance traveled, d = l_1 + l_2 + ⋯ + l_n, depends on the total length of the chosen path. Thus, the longer route on dry ground is the safer decision than the shorter route through floodwater.",
        phy_html:"Both routes have the same starting and ending points; therefore, their displacement is the same, as expressed by <span class=\"mth\">Δ<i>x</i> = <i>x</i><sub><i>f</i></sub> - <i>x</i><sub><i>i</i></sub></span>. However, the distance traveled, <span class=\"mth\"><i>d</i> = <i>l</i><sub>1</sub> + <i>l</i><sub>2</sub> + ⋯ + <i>l</i><sub><i>n</i></sub></span>, depends on the total length of the chosen path. Thus, the longer route on dry ground is the safer decision than the shorter route through floodwater.",
-       phy_bi_html:"(Pareho an pinaghalian asin destinasyon kan duwang ruta; kaya, pareho an displacement ninda, na ipinapahiling kan pormulang <span class=\"mth\">Δ<i>x</i> = <i>x</i><sub><i>f</i></sub> - <i>x</i><sub><i>i</i></sub></span>. Alagad, an distansyang binaklay, <span class=\"mth\"><i>d</i> = <i>l</i><sub>1</sub> + <i>l</i><sub>2</sub> + ⋯ + <i>l</i><sub><i>n</i></sub></span>, nakadepende sa kabuuang haba kan piniling agihan. Kaya, mas ligtas pilion an mas halabang ruta sa tuyong daga kaysa sa mas haraning ruta na may tubig-baha.)",
+       phy_bi_html:"Pareho an pinaghalian asin destinasyon kan duwang ruta; kaya, pareho an displacement ninda, na ipinapahiling kan pormulang <span class=\"mth\">Δ<i>x</i> = <i>x</i><sub><i>f</i></sub> - <i>x</i><sub><i>i</i></sub></span>. Alagad, an distansyang binaklay, <span class=\"mth\"><i>d</i> = <i>l</i><sub>1</sub> + <i>l</i><sub>2</sub> + ⋯ + <i>l</i><sub><i>n</i></sub></span>, nakadepende sa kabuuang haba kan piniling agihan. Kaya, mas ligtas pilion an mas halabang ruta sa tuyong daga kaysa sa mas haraning ruta na may tubig-baha.",
        live:[{l:"Route A",v:"Shorter · flooded",s:"unsafe"},{l:"Route B",v:"Longer · dry & passable",s:"safe"},{l:"Displacement",v:"Same for both routes",s:"safe"}],
        mission:"Take Route B — follow the dry path to the evacuation area"},
 
@@ -95,10 +98,11 @@ const GRADES = {
                 "Maglakaw sa kontrang direksyon ta may harang an direktang dalan."],
        fb:"The learners should follow the longer marked route because the direct path is blocked by a fallen tree. A longer distance is acceptable when it provides a safer route.",
        fb_bi:"An mga estudyante dapat magsunod sa mas halawig na markadong ruta huli ta an direktang agihan ay naharang nin sarong natumbang kahoy. An mas halawig na distansya mas marhay kun ini nagtatao nin mas ligtas na ruta.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
        phy_title:"Displacement and Safe Route",
        phy:"Displacement is the straight-line change in position, expressed as Δx = x_f - x_i = +100 m, or 100 m east, regardless of the path taken. Although the marked route covers a longer distance, d = l_1 + l_2 + ⋯ + l_n, it has the same displacement and provides the safer path.",
        phy_html:"Displacement is the straight-line change in position, expressed as <span class=\"mth\">Δ<i>x</i> = <i>x</i><sub><i>f</i></sub> - <i>x</i><sub><i>i</i></sub> = +100 m</span>, or 100 m east, regardless of the path taken. Although the marked route covers a longer distance, <span class=\"mth\"><i>d</i> = <i>l</i><sub>1</sub> + <i>l</i><sub>2</sub> + ⋯ + <i>l</i><sub><i>n</i></sub></span>, it has the same displacement and provides the safer path.",
-       phy_bi_html:"(An displacement iyo an diretsong pagbabago sa posisyon, na ipinapahiling kan pormulang <span class=\"mth\">Δ<i>x</i> = <i>x</i><sub><i>f</i></sub> - <i>x</i><sub><i>i</i></sub> = +100 m</span>, o 100 m pasiring sa sirangan, maski arin na agihan an pilion. Maski mas halaba an distansya kan minarkahang ruta, <span class=\"mth\"><i>d</i> = <i>l</i><sub>1</sub> + <i>l</i><sub>2</sub> + ⋯ + <i>l</i><sub><i>n</i></sub></span>, pareho man giraray an displacement asin ini an mas ligtas na agihan.)",
+       phy_bi_html:"An displacement iyo an diretsong pagbabago sa posisyon, na ipinapahiling kan pormulang <span class=\"mth\">Δ<i>x</i> = <i>x</i><sub><i>f</i></sub> - <i>x</i><sub><i>i</i></sub> = +100 m</span>, o 100 m pasiring sa sirangan, maski arin na agihan an pilion. Maski mas halaba an distansya kan minarkahang ruta, <span class=\"mth\"><i>d</i> = <i>l</i><sub>1</sub> + <i>l</i><sub>2</sub> + ⋯ + <i>l</i><sub><i>n</i></sub></span>, pareho man giraray an displacement asin ini an mas ligtas na agihan.",
        live:[{l:"Displacement to shelter",v:"100 m East",s:"safe"},{l:"Direct path",v:"Blocked by fallen tree",s:"unsafe"},{l:"Marked route",v:"Longer · passable",s:"safe"}],
        mission:"Follow the longer marked route around the fallen tree to the evacuation shelter"},
 
@@ -117,10 +121,11 @@ const GRADES = {
                 "An paghiro kan botelya mayong ipinapahiling na impormasyon manungod sa tubig."],
        fb:"The bottle covering greater distances during equal time intervals shows that the water’s speed is increasing. The learner should avoid crossing because the faster current may affect balance and movement.",
        fb_bi:"An pag-abot kan botelya sa mas harayong distansya sa magkaparehong lawig nin oras nagpapahiling na nagririkas an bulos kan tubig. An estudyante dapat na likayan an pagbalyo huli ta an mas marikas na sulog pwedeng makaapektar sa balanse asin paghiro.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
        phy_title:"Speed and Acceleration of River Current",
-       phy:"Speed is expressed as v = (d)/(t). When the bottle travels greater distances during equal time intervals, its speed increases. This represents positive acceleration, a = (v_f - v_i)/(Δt) > 0. Because the floating bottle moves with the water, its increasing speed indicates that the river current is becoming faster, making crossing unsafe.",
+       phy:"Speed is expressed as v = (d)/(t. When the bottle travels greater distances during equal time intervals, its speed increases. This represents positive acceleration, a = (v_f - v_i)/(Δt > 0. Because the floating bottle moves with the water, its increasing speed indicates that the river current is becoming faster, making crossing unsafe.",
        phy_html:"Speed is expressed as <span class=\"mth\"><i>v</i> = <span class=\"mf\"><span class=\"mfn\"><i>d</i></span><span class=\"mfd\"><i>t</i></span></span></span>. When the bottle travels greater distances during equal time intervals, its speed increases. This represents positive acceleration, <span class=\"mth\"><i>a</i> = <span class=\"mf\"><span class=\"mfn\"><i>v</i><sub><i>f</i></sub> - <i>v</i><sub><i>i</i></sub></span><span class=\"mfd\">Δ<i>t</i></span></span> &gt; 0</span>. Because the floating bottle moves with the water, its increasing speed indicates that the river current is becoming faster, making crossing unsafe.",
-       phy_bi_html:"(An speed ipinapahiling kan pormulang <span class=\"mth\"><i>v</i> = <span class=\"mf\"><span class=\"mfn\"><i>d</i></span><span class=\"mfd\"><i>t</i></span></span></span>. Kun mas halabang distansya an nalalampasan kan botelya sa magkakaparehong agwat nin oras, nagdadakula an speed kaini. Ipinapahiling kaini an positive acceleration, <span class=\"mth\"><i>a</i> = <span class=\"mf\"><span class=\"mfn\"><i>v</i><sub><i>f</i></sub> - <i>v</i><sub><i>i</i></sub></span><span class=\"mfd\">Δ<i>t</i></span></span> &gt; 0</span>. Dahil an naglalataw na botelya inaanod kan tubig, an pagdagdag kan speed kaini nagpapahiling na nagmamarikas an bulos kan salog, kaya dai ligtas an pagbalyo.)",
+       phy_bi_html:"An speed ipinapahiling kan pormulang <span class=\"mth\"><i>v</i> = <span class=\"mf\"><span class=\"mfn\"><i>d</i></span><span class=\"mfd\"><i>t</i></span></span></span>. Kun mas halabang distansya an nalalampasan kan botelya sa magkakaparehong agwat nin oras, nagdadakula an speed kaini. Ipinapahiling kaini an positive acceleration, <span class=\"mth\"><i>a</i> = <span class=\"mf\"><span class=\"mfn\"><i>v</i><sub><i>f</i></sub> - <i>v</i><sub><i>i</i></sub></span><span class=\"mfd\">Δ<i>t</i></span></span> &gt; 0</span>. Dahil an naglalataw na botelya inaanod kan tubig, an pagdagdag kan speed kaini nagpapahiling na nagmamarikas an bulos kan salog, kaya dai ligtas an pagbalyo.",
        live:[{l:"Time intervals",v:"Equal",s:"safe"},{l:"Distance per interval",v:"Increasing",s:"unsafe"},{l:"Water speed",v:"Increasing",s:"unsafe"}],
        mission:"Do not cross — move back from the riverbank to the safe spot"},
 
@@ -139,10 +144,11 @@ const GRADES = {
                 "Kaipo nang magbalyo kan estudyante bago makaresibe nin sunod na bareta manungod sa panahon."],
        fb:"The reported increase in wind speed shows that the wind is becoming stronger. The learner should postpone crossing the hanging bridge and remain in a safe place.",
        fb_bi:"An pagbilis kan rikas kan duros nagpapahiling na nagkukusog ini. Dapat ipagpaliban kan estudyante an pagbalyo sa hanging bridge asin magpirmi sa ligtas na lugar.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
        phy_title:"Increasing Wind Speed and Bridge Safety",
-       phy:"The wind-speed readings increase from 40 to 65 to 90 km/h. Since Δv > 0, the wind has positive acceleration, expressed as a = (Δv)/(Δt) > 0. Wind force also increases approximately with the square of wind speed, F_wind ∝ v^2. Therefore, the faster wind exerts greater force on the hanging bridge and the learner, increasing swaying and making crossing unsafe.",
+       phy:"The wind-speed readings increase from 40 to 65 to 90 km/h. Since Δv > 0, the wind has positive acceleration, expressed as a = (Δv)/(Δt > 0. Wind force also increases approximately with the square of wind speed, F_wind ∝ v^2. Therefore, the faster wind exerts greater force on the hanging bridge and the learner, increasing swaying and making crossing unsafe.",
        phy_html:"The wind-speed readings increase from 40 to 65 to 90 km/h. Since <span class=\"mth\">Δ<i>v</i> &gt; 0</span>, the wind has positive acceleration, expressed as <span class=\"mth\"><i>a</i> = <span class=\"mf\"><span class=\"mfn\">Δ<i>v</i></span><span class=\"mfd\">Δ<i>t</i></span></span> &gt; 0</span>. Wind force also increases approximately with the square of wind speed, <span class=\"mth\"><i>F</i><sub><i>wind</i></sub> ∝ <i>v</i><sup>2</sup></span>. Therefore, the faster wind exerts greater force on the hanging bridge and the learner, increasing swaying and making crossing unsafe.",
-       phy_bi_html:"(Nagtataas an mga rekord kan speed kan duros hali 40, pasiring 65, sagkod 90 km/h. Dahil <span class=\"mth\">Δ<i>v</i> &gt; 0</span>, may positive acceleration an duros, na ipinapahiling kan pormulang <span class=\"mth\"><i>a</i> = <span class=\"mf\"><span class=\"mfn\">Δ<i>v</i></span><span class=\"mfd\">Δ<i>t</i></span></span> &gt; 0</span>. An puwersa kan duros nagtataas man kasabay kan kuwadrado kan speed, <span class=\"mth\"><i>F</i><sub><i>wind</i></sub> ∝ <i>v</i><sup>2</sup></span>. Kaya, an mas marikas na duros nagtatao nin mas dakulang puwersa sa hanging bridge asin sa estudyante, na nagpapakusog kan pag-uyog asin nagpapadelikado sa pagbalyo.)",
+       phy_bi_html:"Nagtataas an mga rekord kan speed kan duros hali 40, pasiring 65, sagkod 90 km/h. Dahil <span class=\"mth\">Δ<i>v</i> &gt; 0</span>, may positive acceleration an duros, na ipinapahiling kan pormulang <span class=\"mth\"><i>a</i> = <span class=\"mf\"><span class=\"mfn\">Δ<i>v</i></span><span class=\"mfd\">Δ<i>t</i></span></span> &gt; 0</span>. An puwersa kan duros nagtataas man kasabay kan kuwadrado kan speed, <span class=\"mth\"><i>F</i><sub><i>wind</i></sub> ∝ <i>v</i><sup>2</sup></span>. Kaya, an mas marikas na duros nagtatao nin mas dakulang puwersa sa hanging bridge asin sa estudyante, na nagpapakusog kan pag-uyog asin nagpapadelikado sa pagbalyo.",
        live:[{l:"Update 1",v:"40 km/h",s:"risky"},{l:"Update 2",v:"65 km/h",s:"unsafe"},{l:"Update 3",v:"90 km/h",s:"unsafe"}],
        mission:"Postpone crossing — stay off the bridge and go to the safe place"}
     ]},
@@ -168,9 +174,11 @@ const GRADES = {
                 "Pinundo kan hayakpit na parte kan kali an paghiro nin tubig-baha."],
        fb:"The increasing speed of the container indicates acceleration and faster-moving floodwater. The learner should stay away from the narrow drainage channel.",
        fb_bi:"An nagdadakulang rikas kan lalagan nagpapahiling nin pagparikas asin mas marikas na paghiro kan tubig baha. An estudyante dapat na magrayo sa hayakpit na agihan nin kanal.",
-       phy_title:"Acceleration in a Narrowing Channel",
-       phy:"Acceleration is the change in velocity per unit time, a_avg = (Δv)/(Δt). Where the channel narrows, the same amount of water must squeeze through a smaller opening, so it flows faster. The floating container speeds up as it enters the narrow part (Δv > 0), showing that it — and the water carrying it — is accelerating. Faster water pushes harder, so stay away from the channel.",
-       phy_html:"Acceleration is the change in velocity per unit time, <span class=\"mth\"><i>a</i><sub><i>avg</i></sub> = <span class=\"mf\"><span class=\"mfn\">Δ<i>v</i></span><span class=\"mfd\">Δ<i>t</i></span></span></span>. Where the channel narrows, the same amount of water must squeeze through a smaller opening, so it flows faster. The floating container speeds up as it enters the narrow part (<span class=\"mth\">Δ<i>v</i> &<i>gt</i>; 0</span>), showing that it — and the water carrying it — is accelerating. Faster water pushes harder, so stay away from the channel.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Acceleration of a Floating Container",
+       phy:"Acceleration is the change in velocity per unit time, a = Δv/Δt. As the container's speed rises in the narrow channel, it has nonzero acceleration. Its motion suggests a faster local current; the learner should keep away from the channel.",
+       phy_html:"Acceleration is the change in velocity per unit time, a = Δv/Δt. As the container's speed rises in the narrow channel, it has nonzero acceleration. Its motion suggests a faster local current; the learner should keep away from the channel.",
+       phy_bi_html:"An acceleration iyo an pagbabago kan velocity kada oras, a = Δv/Δt. Kun nagririkas an laagan sa hayakpit na kali, may acceleration ini. Nagpapahiling ini nin mas marikas na bulos; dapat magrayo sa kali.",
        live:[{l:"Channel",v:"Narrowing",s:"risky"},{l:"Container speed",v:"Increasing",s:"unsafe"},{l:"Floodwater",v:"Moving faster",s:"unsafe"}],
        mission:"Stay away from the drainage channel — walk to the safe spot"},
 
@@ -189,9 +197,11 @@ const GRADES = {
                 "Mayo nin epekto an duros sa paghiro kan yero."],
        fb:"The roofing sheet is accelerating because its speed is increasing. The learner should stay away from its possible path because it may cause injury.",
        fb_bi:"Nag-a-accelerate an yero ta nagdadagdag an rikas kan paghiro kaini. Dapat magrayo an estudyante sa posibleng agihan kaini ta puwede ining makapinsala.",
-       phy_title:"An Accelerating Roofing Sheet",
-       phy:"Each gust adds speed to the loose sheet, so its velocity keeps changing: a_avg = (Δv)/(Δt) > 0. An accelerating object covers more distance every second and hits harder the faster it goes, so the path it is speeding along is the danger zone.",
-       phy_html:"Each gust adds speed to the loose sheet, so its velocity keeps changing: <span class=\"mth\"><i>a</i><sub><i>avg</i></sub> = <span class=\"mf\"><span class=\"mfn\">Δ<i>v</i></span><span class=\"mfd\">Δ<i>t</i></span></span> &<i>gt</i>; 0</span>. An accelerating object covers more distance every second and hits harder the faster it goes, so the path it is speeding along is the danger zone.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Accelerating Roofing Sheet",
+       phy:"A roofing sheet that moves faster experiences acceleration, a = Δv/Δt. Strong wind can provide an unbalanced net force, ΣF = ma, that changes its motion. The learner should avoid the sheet's possible path.",
+       phy_html:"A roofing sheet that moves faster experiences acceleration, a = Δv/Δt. Strong wind can provide an unbalanced net force, ΣF = ma, that changes its motion. The learner should avoid the sheet's possible path.",
+       phy_bi_html:"An yero na padagos na nagririkas may acceleration, a = Δv/Δt. An makusog na duros puwedeng magtao nin dai balanseng puwersa, ΣF = ma, na nagbabago kan hiro kaini. Magrayo sa posibleng agihan kan yero.",
        live:[{l:"Wind",v:"Strong gusts",s:"unsafe"},{l:"Roofing sheet",v:"Speeding up",s:"unsafe"},{l:"Its path",v:"Toward the pathway",s:"unsafe"}],
        mission:"Stay away from the roofing sheet’s path — go to the safe spot"},
 
@@ -210,9 +220,11 @@ const GRADES = {
                 "Mayo sa duwa ta an mga bagay na naglalataw mayo nin kinetic energy."],
        fb:"At the same speed, the heavier log has greater kinetic energy than the plastic bottle. Learners should stay away from the path of the log because it can cause a stronger impact.",
        fb_bi:"Sa parehong rikas, an mas magabat na troso igwa nin mas dakulang kinetic energy kaysa sa plastik na bote. An mga estudyante dapat na magrayo sa agihan kan troso huli ta ini puwedeng magkawsa nin mas makusog na pagtama.",
-       phy_title:"Kinetic Energy Depends on Mass",
-       phy:"Kinetic energy is K = ½mv^2. Moving at about the same speed, the heavy log has far more mass than the plastic bottle, so it carries far more kinetic energy and delivers a much stronger impact. Floating does not remove kinetic energy.",
-       phy_html:"Kinetic energy is <span class=\"mth\"><i>K</i> = ½<i>mv</i><sup>2</sup></span>. Moving at about the same speed, the heavy log has far more mass than the plastic bottle, so it carries far more kinetic energy and delivers a much stronger impact. Floating does not remove kinetic energy.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Kinetic Energy of Floodborne Objects",
+       phy:"Kinetic energy is KE = ½mv². If the heavy log and light bottle have approximately the same speed, the more massive log has greater kinetic energy and can transfer more energy during impact. Stay clear of its path.",
+       phy_html:"Kinetic energy is KE = ½mv². If the heavy log and light bottle have approximately the same speed, the more massive log has greater kinetic energy and can transfer more energy during impact. Stay clear of its path.",
+       phy_bi_html:"An kinetic energy iyo an KE = ½mv². Kun halos pareho an speed kan troso asin botelya, mas dakula an kinetic energy kan mas magabat na troso. Mas dakula an posibleng enerhiyang maipasa sa pagbunggo; magrayo sa agihan kaini.",
        live:[{l:"Speed",v:"About the same",s:"risky"},{l:"Heavy log",v:"Large m → large K",s:"unsafe"},{l:"Plastic bottle",v:"Small m → small K",s:"safe"}],
        mission:"Stay away from the log’s path — move back from the landing to the safe spot"},
 
@@ -231,9 +243,11 @@ const GRADES = {
                 "Maghalat hasta sa mag-abot an bagyo bago ini ibalyo."],
        fb:"The elevated flowerpot has gravitational potential energy and may fall when moved by strong wind. Placing it in a lower, secure area reduces the hazard.",
        fb_bi:"An paso na nasa halangkaw na tungtungan may gravitational potential energy asin puwedeng mahulog kun mapalid kan makusog na duros. An pagbalyo kaini sa mas hababa asin segurong lugar nakakapababa kan peligro.",
-       phy_title:"Potential Energy of a Raised Object",
-       phy:"An object raised to height h stores gravitational potential energy U_g = mgh, even while it sits still. If the wind knocks it off, that energy turns into kinetic energy as it falls. Moving the heavy flowerpot to a lower, secure place makes h — and so U_g — small, and keeps it from falling onto the pathway.",
-       phy_html:"An object raised to height <span class=\"mth\"><i>h</i></span> stores gravitational potential energy <span class=\"mth\"><i>U</i>_<i>g</i> = <i>mgh</i></span>, even while it sits still. If the wind knocks it off, that energy turns into kinetic energy as it falls. Moving the heavy flowerpot to a lower, secure place makes <span class=\"mth\"><i>h</i></span> — and so <span class=\"mth\"><i>U</i>_<i>g</i></span> — small, and keeps it from falling onto the pathway.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Gravitational Potential Energy of a Flowerpot",
+       phy:"Gravitational potential energy is PE = mgh. A heavy flowerpot on a high ledge stores energy because of its height; if dislodged, this energy can become kinetic energy. Before strong winds arrive, place it securely at a lower level.",
+       phy_html:"Gravitational potential energy is PE = mgh. A heavy flowerpot on a high ledge stores energy because of its height; if dislodged, this energy can become kinetic energy. Before strong winds arrive, place it securely at a lower level.",
+       phy_bi_html:"An gravitational potential energy iyo an PE = mgh. An magabat na paso sa halangkaw na tungtungan may enerhiya huli sa langkaw kaini; kun mahulog, puwede ining magin kinetic energy. Bago magkusog an duros, ibalyo ini sa mas hababa asin ligtas na lugar.",
        live:[{l:"Flowerpot",v:"Heavy, on a high ledge",s:"unsafe"},{l:"Stored energy",v:"U = mgh (large h)",s:"risky"},{l:"Wind",v:"Getting stronger",s:"risky"}],
        mission:"The pot is now low and secure — walk to the safe spot away from the ledge"},
 
@@ -252,9 +266,11 @@ const GRADES = {
                 "Igwa sanang paggibo hasta mapagal an estudyante."],
        fb:"In the scientific sense, work is done when an applied force causes the box to move in the direction of the force. Pushing without displacement does not result in mechanical work on the box.",
        fb_bi:"Sa siyentipikong kahulugan, may nagigibong work kun an puwersang ginagamit ay nakakawsa nin paghiro sa kahon sa direksyon kan puwersa. Kun dai naghihiro an kahon, mayo nin mechanical work na nag-aakto digdi.",
-       phy_title:"Work Needs Displacement",
-       phy:"Work is W = Fd cos θ: a force does work only when the object moves in the direction of the force. Pushing a box that is caught and does not move gives d = 0, so W = 0, however hard you push. Once the box is freed and slides along a clear path, the push does work on it.",
-       phy_html:"Work is <span class=\"mth\"><i>W</i> = <i>Fd</i> cos θ</span>: a force does work only when the object moves in the direction of the force. Pushing a box that is caught and does not move gives <span class=\"mth\"><i>d</i> = 0</span>, so <span class=\"mth\"><i>W</i> = 0</span>, however hard you push. Once the box is freed and slides along a clear path, the push does work on it.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Mechanical Work on a Box",
+       phy:"Work done by a constant force is W = Fd cos θ. If the box does not move, d = 0 and the applied force does zero mechanical work on the box, even though the learner expends bodily energy. Work occurs when the force produces displacement with a component in its direction.",
+       phy_html:"Work done by a constant force is W = Fd cos θ. If the box does not move, d = 0 and the applied force does zero mechanical work on the box, even though the learner expends bodily energy. Work occurs when the force produces displacement with a component in its direction.",
+       phy_bi_html:"An mechanical work iyo an W = Fd cos θ. Kun dai naghihiro an kahon, d = 0 kaya sero an mechanical work kan puwersa sa kahon maski napapagal an estudyante. May work kun an puwersa may kawsa sa displacement kan kahon.",
        live:[{l:"Box",v:"Caught on a raised part",s:"risky"},{l:"Displacement",v:"d = 0 → W = 0",s:"risky"},{l:"Clear path",v:"d > 0 → W = Fd",s:"safe"}],
        mission:"Carry the relief box along the clear path to the dry waiting area"},
 
@@ -273,9 +289,11 @@ const GRADES = {
                 "Maghalat na pahiruon kan duros an mga gamit bago maggibo nin aksiyon."],
        fb:"Elevated loose objects have potential energy that may be converted into kinetic energy when they fall or move. Securing them or transferring them to a lower enclosed area reduces the hazard.",
        fb_bi:"An mga maluwag na bagay sa halangkaw na lugar may potential energy na puwedeng magin kinetic energy kun mahulog o maghiro. An pagseguro o pagbalyo sa mga ini sa mas hababa asin protektadong lugar ay nakakapababa kan peligro.",
-       phy_title:"Reducing a Mechanical Energy Hazard",
-       phy:"Mechanical energy is E_mech = K + U_g. Loose objects on a high platform store U_g = mgh, and strong wind can turn it into kinetic energy as they fall or fly toward people. Securing them, or moving them to a low, enclosed area, keeps both their height and their motion small, so little energy can be released.",
-       phy_html:"Mechanical energy is <span class=\"mth\"><i>E</i><sub>mech</sub> = <i>K</i> + <i>U</i>_<i>g</i></span>. Loose objects on a high platform store <span class=\"mth\"><i>U</i>_<i>g</i> = <i>mgh</i></span>, and strong wind can turn it into kinetic energy as they fall or fly toward people. Securing them, or moving them to a low, enclosed area, keeps both their height and their motion small, so little energy can be released.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Mechanical Energy of Elevated Loose Objects",
+       phy:"Mechanical energy is the sum of kinetic and potential energy, E_mech = KE + PE. Elevated objects possess gravitational potential energy, PE = mgh, which can convert into kinetic energy if they fall. Secure or lower the objects before the typhoon.",
+       phy_html:"Mechanical energy is the sum of kinetic and potential energy, E<sub>mech</sub> = KE + PE. Elevated objects possess gravitational potential energy, PE = mgh, which can convert into kinetic energy if they fall. Secure or lower the objects before the typhoon.",
+       phy_bi_html:"An mechanical energy iyo an E<sub>mech</sub> = KE + PE. An mga bagay sa halangkaw na lugar may gravitational potential energy, PE = mgh, na puwedeng magin kinetic energy kun mahulog. Igakod o ibalyo ini sa mas hababang ligtas na lugar bago magbagyo.",
        live:[{l:"Objects",v:"Loose and elevated",s:"unsafe"},{l:"Stored energy",v:"U = mgh",s:"risky"},{l:"Wind",v:"Strong",s:"unsafe"}],
        mission:"The objects are being secured low — go to the safe spot away from the platform"}
     ]},
@@ -300,9 +318,11 @@ const GRADES = {
                 "Kaipo sanang kaputan kan mga pasahero an bag pagkatapos nin biglaang pagpundo kan baroto."],
        fb:"Because of inertia, the unsecured bag continues moving forward when the boat suddenly stops. Securing loose objects before travelling reduces the risk of injury.",
        fb_bi:"Huli sa inertia, padagos na naghihiro pasiring sa atubangan an bag na dai nakagakod kan biglang magpundo an baroto. An pagseguro sa mga maluwag na kagamitan bago bumiyahe nakakapababa kan peligro nin aksidente.",
-       phy_title:"Inertia: Objects Keep Moving",
-       phy:"By inertia (Newton’s first law), an object keeps its velocity unless a net force acts on it: ΣF = 0 ⇒ v = constant. The submerged object stops the boat, but nothing holds the loose bag, so it keeps sliding forward. Tying it down lets the boat’s force stop it too.",
-       phy_html:"By inertia (Newton’s first law), an object keeps its velocity unless a net force acts on it: <span class=\"mth\">Σ<i>F</i> = 0 ⇒ <i>v</i> = constant</span>. The submerged object stops the boat, but nothing holds the loose bag, so it keeps sliding forward. Tying it down lets the boat’s force stop it too.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Inertia of Supplies in a Stopping Boat",
+       phy:"Newton's first law states that an object maintains its velocity unless a net external force changes it. When the boat stops suddenly, the unsecured bag tends to keep moving forward because of inertia. Secure supplies before travel to prevent impact injuries.",
+       phy_html:"Newton's first law states that an object maintains its velocity unless a net external force changes it. When the boat stops suddenly, the unsecured bag tends to keep moving forward because of inertia. Secure supplies before travel to prevent impact injuries.",
+       phy_bi_html:"Segun sa enot na law ni Newton, an bagay nagpapadagos sa velocity kaini kun mayong net external force na magbabago digdi. Kun biglang magpundo an baroto, padagos sa inutan an bag huli sa inertia. Igakod an mga suplay bago bumiyahe.",
        live:[{l:"Boat",v:"Stops suddenly",s:"unsafe"},{l:"Unsecured bag",v:"Keeps moving forward",s:"unsafe"},{l:"Secured bag",v:"Stays in place",s:"safe"}],
        mission:"Stay on the bank while the cargo is tied down — go to the safe spot"},
 
@@ -321,9 +341,11 @@ const GRADES = {
                 "Pakaptan sa mga estudyante an gabos na lalagan mantang naghihiro an sakayan."],
        fb:"Because of inertia, unsecured containers continue moving when the vehicle suddenly stops. They should be secured before travelling, and sudden changes in motion should be avoided.",
        fb_bi:"Dahil sa inertia, padagos na naghihiro an mga lalagan na dai nakagakod kun biglang magpundo an sakayan. Dapat seguruhon an mga ini bago bumiyahe asin likayan an biglaang pagbabago kan paghiro.",
-       phy_title:"Inertia in a Sudden Stop",
-       phy:"When the vehicle brakes, the brakes stop the vehicle — but loose containers keep moving at the old speed, ΣF = 0 ⇒ v = constant, until something stops them. Securing them makes the vehicle’s force act on them too, and braking gently (a smaller change in velocity each second) keeps everything steadier.",
-       phy_html:"When the vehicle brakes, the brakes stop the vehicle — but loose containers keep moving at the old speed, <span class=\"mth\">Σ<i>F</i> = 0 ⇒ <i>v</i> = constant</span>, until something stops them. Securing them makes the vehicle’s force act on them too, and braking gently (a smaller change in velocity each second) keeps everything steadier.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Inertia in an Evacuation Vehicle",
+       phy:"Newton's first law explains why loose containers keep their forward velocity when a vehicle brakes suddenly. Restraints provide the force required to slow the containers with the vehicle. Secure them before departure and avoid abrupt maneuvers where possible.",
+       phy_html:"Newton's first law explains why loose containers keep their forward velocity when a vehicle brakes suddenly. Restraints provide the force required to slow the containers with the vehicle. Secure them before departure and avoid abrupt maneuvers where possible.",
+       phy_bi_html:"An enot na law ni Newton nagpapaliwanag kun tano padagos sa inutan an mga daing gakod na laagan kun biglang magpundo an sakayan. An panggakod nagtatao nin puwersa tanganing mapundo man an mga ini. Igakod antes bumiyahe.",
        live:[{l:"Vehicle",v:"Sudden stop",s:"unsafe"},{l:"Loose containers",v:"Keep moving forward",s:"unsafe"},{l:"Secured containers",v:"Stay put",s:"safe"}],
        mission:"Go to the waiting area while the containers are tied down"},
 
@@ -342,9 +364,11 @@ const GRADES = {
                 "Mayo sa duwa huli ta dai man nin puwersa an tubig-baha."],
        fb:"When approximately the same force acts on two objects, the object with less mass has greater acceleration. Therefore, the empty container will accelerate more than the water-filled container.",
        fb_bi:"Kun halos parehong puwersa an nag-aakto sa duwang bagay, mas dakula an acceleration kan bagay na mas sadit an mass. Kaya mas dakula an acceleration kan daing laog na lalagan kaysa sa lalagan na pano nin tubig.",
-       phy_title:"Same Force, Different Mass",
-       phy:"Newton’s second law, ΣF = ma, gives a = (F)/(m). With about the same push from the floodwater, the empty container (small m) gets a large acceleration, while the water-filled one (large m) speeds up slowly.",
-       phy_html:"Newton’s second law, <span class=\"mth\">Σ<i>F</i> = <i>ma</i></span>, gives <span class=\"mth\"><i>a</i> = <span class=\"mf\"><span class=\"mfn\"><i>F</i></span><span class=\"mfd\"><i>m</i></span></span></span>. With about the same push from the floodwater, the empty container (small <span class=\"mth\"><i>m</i></span>) gets a large acceleration, while the water-filled one (large <span class=\"mth\"><i>m</i></span>) speeds up slowly.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Force Mass and Acceleration in Floodwater",
+       phy:"Newton's second law gives a = F_net/m. If approximately equal net forces act on two containers, the lighter empty container accelerates more than the water-filled one. The comparison assumes the forces are indeed approximately equal.",
+       phy_html:"Newton's second law gives a = F<sub>net</sub>/m. If approximately equal net forces act on two containers, the lighter empty container accelerates more than the water-filled one. The comparison assumes the forces are indeed approximately equal.",
+       phy_bi_html:"Segun sa ikaduwang law ni Newton, a = F<sub>net</sub>/m. Kun halos pareho an net force sa duwang laagan, mas dakula an acceleration kan mas magian na daing laog na laagan kaysa sa pano nin tubig. Nakabase ini sa asumsyon na halos pareho an puwersa.",
        live:[{l:"Push of the water",v:"About the same",s:"risky"},{l:"Empty container",v:"Small m → large a",s:"unsafe"},{l:"Filled container",v:"Large m → small a",s:"safe"}],
        mission:"Stay clear of the containers — go to the safe spot"},
 
@@ -361,9 +385,11 @@ const GRADES = {
                 "An magiang yero; kaipong magrayo kan estudyante sa posibleng agi kaini sa paglupad."],
        fb:"Under approximately the same force, the lightweight roofing sheet will have greater acceleration than the heavier board. The learner should stay away from its possible path.",
        fb_bi:"Sa halos parehong puwersa, mas dakula an acceleration kan magian na yero kaysa sa mas magabat na tabla. Dapat magrayo an estudyante sa posibleng agihan kaini.",
-       phy_title:"Same Wind, Different Mass",
-       phy:"By Newton’s second law, a = (ΣF)/(m). The wind pushes on the light roofing sheet and the heavier board with about the same force, so the sheet — with much less mass — accelerates far more and can fly toward the pathway quickly.",
-       phy_html:"By Newton’s second law, <span class=\"mth\"><i>a</i> = <span class=\"mf\"><span class=\"mfn\">Σ<i>F</i></span><span class=\"mfd\"><i>m</i></span></span></span>. The wind pushes on the light roofing sheet and the heavier board with about the same force, so the sheet — with much less mass — accelerates far more and can fly toward the pathway quickly.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Acceleration of Windblown Materials",
+       phy:"With approximately equal net forces, a = F_net/m shows that the lower-mass roofing sheet has greater acceleration than the heavier board. Both can be hazardous, and the learner should avoid the roofing sheet's possible path.",
+       phy_html:"With approximately equal net forces, a = F<sub>net</sub>/m shows that the lower-mass roofing sheet has greater acceleration than the heavier board. Both can be hazardous, and the learner should avoid the roofing sheet's possible path.",
+       phy_bi_html:"Kun halos pareho an net force, a = F<sub>net</sub>/m nagpapahiling na mas dakula an acceleration kan mas magian na yero kaysa sa mas magabat na tabla. Pareho sindang peligroso; magrayo sa posibleng agihan kan yero.",
        live:[{l:"Wind force",v:"About the same on both",s:"risky"},{l:"Roofing sheet",v:"Light → large a",s:"unsafe"},{l:"Wooden board",v:"Heavier → small a",s:"risky"}],
        mission:"Stay away from the roofing sheet’s path — go to the safe spot"},
 
@@ -382,9 +408,11 @@ const GRADES = {
                 "Mayo nin koneksiyon an paghiro kan baroto sa puwersang ginamit kan estudyante."],
        fb:"The learner pushes the boat backward, and the boat exerts an equal and opposite force. Getting off slowly while the boat is held securely reduces sudden movement.",
        fb_bi:"Tinutulod kan estudyante an baroto palikod, asin an baroto nagtatao nin kaparehong puwersa sa kontrang direksyon. Mas ligtas an maluway na pagtukad mientras seguradong nakagapos an baroto.",
-       phy_title:"Action and Reaction When Stepping Off",
-       phy:"Newton’s third law: F_A→B = −F_B→A. When the learner pushes back on the boat, the boat pushes the learner forward with an equal and opposite force — and the boat moves away from the bank. Stepping off slowly while the boat is held steady keeps these forces small and the boat in place.",
-       phy_html:"Newton’s third law: <span class=\"mth\"><i>F</i><sub><i>A</i>→<i>B</i></sub> = −<i>F</i><sub><i>B</i>→<i>A</i></sub></span>. When the learner pushes back on the boat, the boat pushes the learner forward with an equal and opposite force — and the boat moves away from the bank. Stepping off slowly while the boat is held steady keeps these forces small and the boat in place.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Action Reaction While Leaving a Boat",
+       phy:"Newton's third law states that forces between interacting bodies are equal in magnitude and opposite in direction: Flearner on boat = −F_boat on learner. Pushing backward on the boat makes the boat move away. Hold the boat securely and step ashore slowly.",
+       phy_html:"Newton's third law states that forces between interacting bodies are equal in magnitude and opposite in direction: Flearner on boat = −F<sub>b</sub>oat on learner. Pushing backward on the boat makes the boat move away. Hold the boat securely and step ashore slowly.",
+       phy_bi_html:"An ikatolong law ni Newton nagsasabi na an puwersa kan duwang nag-iinterak na bagay magkapareho an dakula alagad magkontra an direksyon: Flearner on boat = −F<sub>b</sub>oat on learner. Kun itulod palikod an baroto, naghihiro ini paparayo. Igakod an baroto asin maluway na magtukad.",
        live:[{l:"Learner pushes boat",v:"Backward",s:"risky"},{l:"Boat pushes learner",v:"Equal and opposite",s:"risky"},{l:"Boat held, slow step",v:"Boat stays put",s:"safe"}],
        mission:"Step off slowly while the boat is held — walk to the safe spot on the bank"},
 
@@ -403,9 +431,11 @@ const GRADES = {
                 "Magtindog sa gilid kan tulay tanganing magkaigwa nin mas makusog na puwersa sa pagbutong."],
        fb:"The trapped branch may suddenly move when the forces acting on it change. Learners should not pull it and should ask trained adults with proper equipment to remove it.",
        fb_bi:"Puwedeng biglang maghiro an nasabit na sanga kun magbago an mga puwersang nag-aakto digdi. Dai ini dapat butungon kan mga estudyante; dapat maghagad nin tabang sa mga bihasang gurang na may tamang kagamitan.",
-       phy_title:"Forces in a Trapped Branch",
-       phy:"The bent branch pushes on the bridge support, and the support pushes back with an equal and opposite force, F_A→B = −F_B→A. The branch is held bent by that push. If it slips or is pulled free, the support’s force is suddenly gone and the branch springs toward whoever is in front of it. Trained adults with proper equipment can release it safely.",
-       phy_html:"The bent branch pushes on the bridge support, and the support pushes back with an equal and opposite force, <span class=\"mth\"><i>F</i><sub><i>A</i>→<i>B</i></sub> = −<i>F</i><sub><i>B</i>→<i>A</i></sub></span>. The branch is held bent by that push. If it slips or is pulled free, the support’s force is suddenly gone and the branch springs toward whoever is in front of it. Trained adults with proper equipment can release it safely.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Forces on a Trapped Branch",
+       phy:"The branch and bridge support exert contact forces on each other in equal and opposite pairs, consistent with Newton's third law. A bent or trapped branch may also store elastic potential energy, U = ½kx² for an ideal spring model. Releasing it can cause sudden motion; trained responders should handle removal.",
+       phy_html:"The branch and bridge support exert contact forces on each other in equal and opposite pairs, consistent with Newton's third law. A bent or trapped branch may also store elastic potential energy, U = ½kx² for an ideal spring model. Releasing it can cause sudden motion; trained responders should handle removal.",
+       phy_bi_html:"An sanga asin suporta nagtatao nin magkapareho an dakula alagad magkakontrang puwersa, segun sa ikatolong law ni Newton. An nabaluktot na sanga puwede man magtipon nin elastic potential energy, U = ½kx² sa simpleng spring model. Kun mabutasan, puwede ining biglang maghiro; bihasang responder an dapat maghali kaini.",
        live:[{l:"Branch",v:"Bent against the support",s:"unsafe"},{l:"Support pushes back",v:"Equal and opposite",s:"risky"},{l:"If released",v:"May spring out",s:"unsafe"}],
        mission:"Leave the branch to trained adults — go to the safe spot"}
     ]},
@@ -430,9 +460,11 @@ const GRADES = {
                 "Gamiton an parehong anggulo asin kaskas maski ano man an distansya."],
        fb:"The landing point of the rope depends on its initial speed, release angle, and the distance to the platform. Adjusting these variables improves the chance that the rope will reach the intended area.",
        fb_bi:"An babagsakan kan lubid nakadepende sa kapinunan na rikas, anggulo kan pag-apon, asin distansya pasiring sa plataporma. An pag-adjust sa mga ini nagpapadakula kan pagkakataon na maabot kan lubid an tamang lugar.",
-       phy_title:"Aiming a Projectile",
-       phy:"Once released, the rope moves as a projectile: x(t) = x_0 + (v_0 cos θ)t and y(t) = y_0 + (v_0 sin θ)t − ½gt^2. Where it lands depends on both the release angle θ and the initial speed v_0, so estimating the distance first and adjusting the angle and speed gives the best chance of reaching the platform.",
-       phy_html:"Once released, the rope moves as a projectile: <span class=\"mth\"><i>x</i>(<i>t</i>) = <i>x</i><sub>0</sub> + (<i>v</i><sub>0</sub> cos θ)<i>t</i></span> and <span class=\"mth\"><i>y</i>(<i>t</i>) = <i>y</i><sub>0</sub> + (<i>v</i><sub>0</sub> sin θ)<i>t</i> − ½<i>gt</i><sup>2</sup></span>. Where it lands depends on both the release angle <span class=\"mth\">θ</span> and the initial speed <span class=\"mth\"><i>v</i><sub>0</sub></span>, so estimating the distance first and adjusting the angle and speed gives the best chance of reaching the platform.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Projectile Motion of a Thrown Rope",
+       phy:"For ideal projectile motion without air resistance, horizontal and vertical motions follow x = v₀ cosθ · t and y = y₀ + v₀ sinθ · t − ½gt². Launch speed, angle, and relative height determine where the rope lands. A trained rescue worker should estimate the gap and adjust the throw accordingly.",
+       phy_html:"For ideal projectile motion without air resistance, horizontal and vertical motions follow x = v₀ cosθ · t and y = y₀ + v₀ sinθ · t − ½gt². Launch speed, angle, and relative height determine where the rope lands. A trained rescue worker should estimate the gap and adjust the throw accordingly.",
+       phy_bi_html:"Sa ideal projectile motion na mayong air resistance, x = v₀ cosθ · t asin y = y₀ + v₀ sinθ · t − ½gt². An kapinunan na speed, anggulo, asin langkaw nagdedeterminar kan babagsakan kan lubid. An bihasang rescuer dapat mag-estimar kan distansya asin i-adjust an pag-apon.",
        live:[{l:"Gap",v:"Flooded",s:"unsafe"},{l:"Landing point",v:"Depends on angle and speed",s:"risky"},{l:"Aim",v:"Adjusted to the distance",s:"safe"}],
        mission:"Stay back from the flooded gap — go to the safe spot"},
 
@@ -451,9 +483,11 @@ const GRADES = {
                 "Magtindog sa likod kan sarong estudyante huli ta an parte kan atop daing pahalang na hiro."],
        fb:"The initial speed, direction, and height of the roofing material affect its path and landing area. Moving to a secure shelter and avoiding its possible path reduces the risk of injury.",
        fb_bi:"An kapinunan na rikas, direksyon, asin langkaw kan parte kan atop nakakaapekto sa agihan asin babagsakan kaini. An pagduman sa ligtas na masisirungan asin pagrayo sa posibleng agihan kaini nakakapababa kan peligro nin aksidente.",
-       phy_title:"A Windblown Projectile",
-       phy:"A piece of roofing torn loose moves as a projectile: x(t) = x_0 + (v_0 cos θ)t, y(t) = y_0 + (v_0 sin θ)t − ½gt^2. With a sideways starting speed it travels well past the point below where it started — it does not fall straight down — and its landing area is hard to predict. Shelter away from its possible path.",
-       phy_html:"A piece of roofing torn loose moves as a projectile: <span class=\"mth\"><i>x</i>(<i>t</i>) = <i>x</i><sub>0</sub> + (<i>v</i><sub>0</sub> cos θ)<i>t</i></span>, <span class=\"mth\"><i>y</i>(<i>t</i>) = <i>y</i><sub>0</sub> + (<i>v</i><sub>0</sub> sin θ)<i>t</i> − ½<i>gt</i><sup>2</sup></span>. With a sideways starting speed it travels well past the point below where it started — it does not fall straight down — and its landing area is hard to predict. Shelter away from its possible path.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Projectile Path of Roofing Debris",
+       phy:"After release, windblown roofing material has a horizontal component of velocity and a vertical motion affected by gravity. In the simplest model, x = v_0x t and y = y₀ + v_0y t − ½gt²; actual wind and drag may alter the trajectory. Its landing point is not necessarily directly below its starting point, so seek secure shelter.",
+       phy_html:"After release, windblown roofing material has a horizontal component of velocity and a vertical motion affected by gravity. In the simplest model, x = v<sub>0x</sub> t and y = y₀ + v<sub>0y</sub> t − ½gt²; actual wind and drag may alter the trajectory. Its landing point is not necessarily directly below its starting point, so seek secure shelter.",
+       phy_bi_html:"Pagkabutas, an pinalupad na yero may horizontal velocity asin vertical motion na apektado kan grabidad. Sa simpleng modelo, x = v<sub>0x</sub> t asin y = y₀ + v<sub>0y</sub> t − ½gt²; puwede ining baguhon kan duros asin air resistance. Dai pirming direkta sa irarom an babagsakan; magpasiring sa ligtas na sirungan.",
        live:[{l:"Roofing",v:"Lifted by the wind",s:"unsafe"},{l:"Its path",v:"Curved, travels sideways",s:"unsafe"},{l:"Shelter",v:"Secure",s:"safe"}],
        mission:"Move to the secure shelter, away from the roofing’s path"},
 
@@ -472,9 +506,11 @@ const GRADES = {
                 "Mayo nin momentum an duwang bagay ta pareho sindang naglalataw."],
        fb:"Momentum depends on mass and velocity. At the same velocity, the heavier log has greater momentum, so the boat operator should postpone crossing and avoid its path.",
        fb_bi:"An momentum nakadepende sa mass asin velocity. Sa parehong velocity, mas dakula an momentum kan mas magabat na troso, kaya dapat ipagpaliban kan para-baroto an pagbalyo asin likayan an agihan kaini.",
-       phy_title:"Momentum Depends on Mass and Velocity",
-       phy:"Momentum is p = mv. At the same velocity, the log’s much larger mass gives it much more momentum. Stopping it takes an impulse J = F_avgΔt = Δp, so it would strike a boat far harder than the container would.",
-       phy_html:"Momentum is <span class=\"mth\"><i>p</i> = <i>mv</i></span>. At the same velocity, the log’s much larger mass gives it much more momentum. Stopping it takes an impulse <span class=\"mth\"><i>J</i> = <i>F</i><sub><i>avg</i></sub>Δ<i>t</i> = Δ<i>p</i></span>, so it would strike a boat far harder than the container would.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Momentum of Floodborne Debris",
+       phy:"Linear momentum is p = mv. At the same velocity, the more massive log carries greater momentum than the plastic container. Because stopping or redirecting it may require a large impulse, the boat operator should avoid its path and postpone crossing.",
+       phy_html:"Linear momentum is p = mv. At the same velocity, the more massive log carries greater momentum than the plastic container. Because stopping or redirecting it may require a large impulse, the boat operator should avoid its path and postpone crossing.",
+       phy_bi_html:"An momentum iyo an p = mv. Sa parehong velocity, mas dakula an momentum kan mas magabat na troso kaysa plastik na laagan. Dakulang impulse an puwedeng kaipuhan sa pagpundo kaini, kaya likayan an agihan asin ipagpaliban an pagbalyo.",
        live:[{l:"Velocity",v:"Same for log and container",s:"risky"},{l:"Log momentum",v:"Much larger (more mass)",s:"unsafe"},{l:"Boat",v:"In the log’s path",s:"unsafe"}],
        mission:"Postpone the crossing — move away from the river and the log’s path to the safe spot"},
 
@@ -493,9 +529,11 @@ const GRADES = {
                 "Hinahali kaini an mass kan naghihirong tabla."],
        fb:"Increasing the time over which the panel’s momentum changes reduces the average impact force. The protective barrier should be properly installed, and learners should remain away from the hazard.",
        fb_bi:"An pagpalawig kan oras kan pagbabago kan momentum kan tabla nakakapababa kan average impact force. Dapat tama an pagkakabit kan protective barrier asin magrayo an mga estudyante sa peligro.",
-       phy_title:"Impulse: Longer Stopping Time, Smaller Force",
-       phy:"Impulse equals the change in momentum: J = F_avgΔt = Δp. To stop the panel, Δp = mv is fixed, so a barrier that slows it over a longer time Δt lowers the average force, F_avg = (Δp)/(Δt). The barrier only softens the impact — stay away from the hazard.",
-       phy_html:"Impulse equals the change in momentum: <span class=\"mth\"><i>J</i> = <i>F</i><sub><i>avg</i></sub>Δ<i>t</i> = Δ<i>p</i></span>. To stop the panel, <span class=\"mth\">Δ<i>p</i> = <i>mv</i></span> is fixed, so a barrier that slows it over a longer time <span class=\"mth\">Δ<i>t</i></span> lowers the average force, <span class=\"mth\"><i>F</i><sub><i>avg</i></sub> = <span class=\"mf\"><span class=\"mfn\">Δ<i>p</i></span><span class=\"mfd\">Δ<i>t</i></span></span></span>. The barrier only softens the impact — stay away from the hazard.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Stopping Time and Impact Force",
+       phy:"Impulse is J = F_avg Δt = Δp. For the same change in momentum, increasing the time taken to stop the wooden panel reduces its average impact force, F_avg = Δp/Δt. A properly installed barrier helps, but learners must stay outside the hazard area.",
+       phy_html:"Impulse is J = F<sub>avg</sub> Δt = Δp. For the same change in momentum, increasing the time taken to stop the wooden panel reduces its average impact force, F<sub>avg</sub> = Δp/Δt. A properly installed barrier helps, but learners must stay outside the hazard area.",
+       phy_bi_html:"An impulse iyo an J = F<sub>avg</sub> Δt = Δp. Para sa parehong pagbabago nin momentum, an mas halawig na oras kan pagpundo nagbabawas sa average impact force, F<sub>avg</sub> = Δp/Δt. Nakakatabang an tamang barrier, alagad magrayo giraray sa peligro.",
        live:[{l:"Wooden panel",v:"Blown toward the pathway",s:"unsafe"},{l:"Barrier",v:"Longer Δt → smaller force",s:"safe"},{l:"Collision area",v:"Still keep away",s:"unsafe"}],
        mission:"Stay away from the collision area — go to the safe spot clear of the barrier and pathway"},
 
@@ -514,9 +552,11 @@ const GRADES = {
                 "Pinupugulan kaini an pagkaigwa nin momentum mientras sa pagbunggo."],
        fb:"The rubber fender increases the duration of the collision and absorbs part of the energy, reducing the force and possible damage to the boat.",
        fb_bi:"Pinapalawig kan rubber fender an oras kan pagbunggo asin sinisipsip an parte kan enerhiya, kaya nababawasan an puwersa asin posibleng danyos sa baroto.",
-       phy_title:"How a Rubber Fender Reduces Damage",
-       phy:"In the collision the log’s momentum changes by Δp. Since J = F_avgΔt = Δp, a fender that squashes and lengthens the contact time Δt lowers the average force on the boat. It also absorbs part of the log’s kinetic energy, so less is left to damage the hull.",
-       phy_html:"In the collision the log’s momentum changes by <span class=\"mth\">Δ<i>p</i></span>. Since <span class=\"mth\"><i>J</i> = <i>F</i><sub><i>avg</i></sub>Δ<i>t</i> = Δ<i>p</i></span>, a fender that squashes and lengthens the contact time <span class=\"mth\">Δ<i>t</i></span> lowers the average force on the boat. It also absorbs part of the log’s kinetic energy, so less is left to damage the hull.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Collision Cushioning by a Rubber Fender",
+       phy:"The fender deforms during impact, extending collision time. From F_avg = Δp/Δt, a longer stopping interval can reduce average force for a comparable momentum change. Deformation also dissipates some mechanical energy as heat and internal motion; it does not eliminate momentum.",
+       phy_html:"The fender deforms during impact, extending collision time. From F<sub>avg</sub> = Δp/Δt, a longer stopping interval can reduce average force for a comparable momentum change. Deformation also dissipates some mechanical energy as heat and internal motion; it does not eliminate momentum.",
+       phy_bi_html:"An rubber fender nababaluktot sa pagbunggo kaya humahalawig an oras kan collision. Sa F<sub>avg</sub> = Δp/Δt, an mas halawig na oras puwedeng magbawas sa average force para sa parehong Δp. Parte kan enerhiya nagigin init asin deformation; dai nawawara an momentum.",
        live:[{l:"Floating log",v:"Moving toward the boat",s:"unsafe"},{l:"Rubber fender",v:"Longer impact time",s:"safe"},{l:"Impact force",v:"Reduced",s:"safe"}],
        mission:"Stay off the boat and the landing — go to the safe spot"},
 
@@ -535,9 +575,11 @@ const GRADES = {
                 "Dai delikado an nagging bungguan nin huli ta plastik an sarong bagay."],
        fb:"The objects moving together after the collision indicate an inelastic collision. Momentum is conserved in the system, but learners should remain away from the objects’ possible path.",
        fb_bi:"An magkaibang paghiro kan mga bagay pagkatapos kan pagbunggo nagpapahiling nin inelastic collision. An momentum napreserbar sa sistema, alagad dapat magrayo an mga estudyante sa posibleng agihan kan mga ini.",
-       phy_title:"An Inelastic Collision",
-       phy:"When the board hits the container and they move off together, the collision is inelastic. Total momentum is conserved, Σp_before = Σp_after, so m_1v_1 = (m_1 + m_2)v′. Some kinetic energy is lost, but the joined objects still carry momentum and keep moving — stay out of their path.",
-       phy_html:"When the board hits the container and they move off together, the collision is inelastic. Total momentum is conserved, <span class=\"mth\">Σ<i>p</i><sub>before</sub> = Σ<i>p</i><sub>after</sub></span>, so <span class=\"mth\"><i>m</i><sub>1</sub><i>v</i><sub>1</sub> = (<i>m</i><sub>1</sub> + <i>m</i><sub>2</sub>)<i>v</i>′</span>. Some kinetic energy is lost, but the joined objects still carry momentum and keep moving — stay out of their path.",
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Perfectly Inelastic Collision",
+       phy:"When the board and container stick together and move with one common velocity after impact, the event is a perfectly inelastic collision. If external impulse is negligible during the collision, total momentum is conserved: m₁u₁ + m₂u₂ = (m₁ + m₂)v. Kinetic energy is not generally conserved, and the moving objects remain dangerous.",
+       phy_html:"When the board and container stick together and move with one common velocity after impact, the event is a perfectly inelastic collision. If external impulse is negligible during the collision, total momentum is conserved: m₁u₁ + m₂u₂ = (m₁ + m₂)v. Kinetic energy is not generally conserved, and the moving objects remain dangerous.",
+       phy_bi_html:"Kun an tabla asin laagan nagdikit asin magkasabay na naghiro pagkatapos magbunggo, ini an perfectly inelastic collision. Kun sadit an external impulse, napapanatili an total momentum: m₁u₁ + m₂u₂ = (m₁ + m₂)v. Dai pirming napapanatili an kinetic energy asin peligroso pa man giraray an mga bagay.",
        live:[{l:"Collision",v:"Objects stick together",s:"risky"},{l:"Momentum",v:"Conserved",s:"risky"},{l:"Joined objects",v:"Still moving",s:"unsafe"}],
        mission:"Stay away from the moving objects — go to the safe spot"}
     ]},
@@ -568,9 +610,11 @@ const GRADES = {
                 'Mayo nin paghiro an drum ta dai nagbabago an porma kaini kaya puwedeng magpadagos an mga estudyante sa pagdulok sa baroto.'],
        fb:'The container undergoes translational motion as its center changes position and rotational motion as it turns about its axis. Learners should move away from its path and wait until the area is clear.',
        fb_bi:'An lalagan may translational motion habang nagbabago an kinamumugtakan kan sentro kaini, asin may rotational motion habang nag-iikot ini sa sadiring axis. Dapat magrayo an mga estudyante sa agihan kaini asin maghalat hasta sa magin ligtas an lugar.',
-       phy_title:'Rolling: Translation and Rotation Together',
-       phy:'The container’s center moves along the path, v_cm = Δx_cm/Δt (translation), while the container turns about its axis, ω = Δθ/Δt (rotation). When it rolls without slipping, v_cm = rω. Because the slope keeps accelerating it, a rolling drum carries both kinds of kinetic energy and can strike anyone in its path.',
-       phy_html:'The container’s center moves along the path, <span class="mth"><i>v</i><sub>cm</sub> = <span class="mf"><span class="mfn">Δ<i>x</i><sub>cm</sub></span><span class="mfd">Δ<i>t</i></span></span></span> (translation), while the container turns about its axis, <span class="mth">ω = <span class="mf"><span class="mfn">Δθ</span><span class="mfd">Δ<i>t</i></span></span></span> (rotation). When it rolls without slipping, <span class="mth"><i>v</i><sub>cm</sub> = <i>r</i>ω</span>. Because the slope keeps accelerating it, a rolling drum carries both kinds of kinetic energy and can strike anyone in its path.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Translation and Rotation of a Rolling Container",
+       phy:"A rolling cylindrical container undergoes translational motion of its center of mass and rotational motion about its axis. For rolling without slipping, v_center = ωR. Because the container changes location as it rotates, learners must stay out of its path.",
+       phy_html:"A rolling cylindrical container undergoes translational motion of its center of mass and rotational motion about its axis. For rolling without slipping, v<sub>center</sub> = ωR. Because the container changes location as it rotates, learners must stay out of its path.",
+       phy_bi_html:"An nagrorolyong laagan may translational motion kan sentro asin rotational motion sa axis kaini. Kun nagrorolyo na dai nagdadulas, v<sub>center</sub> = ωR. Huli ta nagbabago an lugar kaini habang nag-iikot, magrayo sa agihan kan laagan.",
        live:[{l:'Container motion',v:'Rolling down the slope',s:'unsafe'},{l:'Translation',v:'Center moving forward',s:'unsafe'},{l:'Rotation',v:'Turning about its axis',s:'unsafe'}],
        mission:'Move away from the rolling container’s path — wait at the safe spot until the area is clear'},
 
@@ -589,9 +633,11 @@ const GRADES = {
                 'Mayo nin paghiro an gulong pagkatapos kaining makakalag kaya puwedeng ranihan asin kuanon ini kan mga estudyante.'],
        fb:'The wheel undergoes translational motion as its center changes position and rotational motion as it turns about its axis. Learners should move away from its path and postpone crossing.',
        fb_bi:'An gulong may translational motion habang nagbabago an kinamumugtakan kan sentro kaini, asin may rotational motion habang nag-iikot ini sa sadiring axis. Dapat magrayo an mga estudyante sa agihan kaini asin ipagpaliban an pagbalyo.',
-       phy_title:'Translational and Rotational Motion of a Rolling Wheel',
-       phy:'The wheel’s center changes position, v_cm = Δx_cm/Δt, while its rim turns, ω = Δθ/Δt. For rolling without slipping the two are linked by v_cm = rω, so the faster the wheel spins, the faster it travels along the pathway. A moving, spinning wheel is not “staying in one place” — its path must be kept clear.',
-       phy_html:'The wheel’s center changes position, <span class="mth"><i>v</i><sub>cm</sub> = <span class="mf"><span class="mfn">Δ<i>x</i><sub>cm</sub></span><span class="mfd">Δ<i>t</i></span></span></span>, while its rim turns, <span class="mth">ω = <span class="mf"><span class="mfn">Δθ</span><span class="mfd">Δ<i>t</i></span></span></span>. For rolling without slipping the two are linked by <span class="mth"><i>v</i><sub>cm</sub> = <i>r</i>ω</span>, so the faster the wheel spins, the faster it travels along the pathway. A moving, spinning wheel is not “staying in one place” — its path must be kept clear.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Translational and Rotational Motion of a Wheel",
+       phy:"The detached wheel rotates about its axis while its center moves forward. For pure rolling, v_center = ωR; slipping can make the relation different. The wheel is therefore not stationary, and learners should avoid its path and postpone crossing.",
+       phy_html:"The detached wheel rotates about its axis while its center moves forward. For pure rolling, v<sub>center</sub> = ωR; slipping can make the relation different. The wheel is therefore not stationary, and learners should avoid its path and postpone crossing.",
+       phy_bi_html:"An natanggal na gulong nag-iikot sa axis mientras naghihiro an sentro pasiring sa inutan. Sa pure rolling, v<sub>center</sub> = ωR; kun naghahalnas, puwedeng iba an relasyon. Dai ini nakapundo, kaya likayan an agihan asin ipagpaliban an pagbalyo.",
        live:[{l:'Wind',v:'Strong gusts',s:'unsafe'},{l:'Wheel',v:'Rolling along the pathway',s:'unsafe'},{l:'Bridge crossing',v:'Postpone',s:'unsafe'}],
        mission:'Move out of the wheel’s path — postpone crossing and wait at the safe spot'},
 
@@ -610,9 +656,11 @@ const GRADES = {
                 'Tuludon an mga kahon na daing iniisip an ramp huli ta hinahali kan mga makina an gabos na posibleng peligro.'],
        fb:'A stable ramp reduces the effort force needed by applying the force over a longer distance. The ramp should be checked before it is used.',
        fb_bi:'An matibay na ramp nagpapababa kan effort force na kaipuhan sa paggamit kan puwersa sa mas halabang distansya. Dapat surihon muna an ramp bago ini gamiton.',
-       phy_title:'Mechanical Advantage of a Ramp',
-       phy:'Lifting a box straight up needs an effort force equal to its weight, F = mg. A ramp of length L rising to height h needs only about F_in ≈ mg·(h/L), so its mechanical advantage is MA = F_out/F_in = L/h > 1. The same work is done (W = Fd), but over a longer distance with a smaller, safer force.',
-       phy_html:'Lifting a box straight up needs an effort force equal to its weight, <span class="mth"><i>F</i> = <i>mg</i></span>. A ramp of length <i>L</i> rising to height <i>h</i> needs only about <span class="mth"><i>F</i><sub>in</sub> ≈ <i>mg</i> · <span class="mf"><span class="mfn"><i>h</i></span><span class="mfd"><i>L</i></span></span></span>, so its mechanical advantage is <span class="mth">MA = <span class="mf"><span class="mfn"><i>F</i><sub>out</sub></span><span class="mfd"><i>F</i><sub>in</sub></span></span> = <span class="mf"><span class="mfn"><i>L</i></span><span class="mfd"><i>h</i></span></span> &gt; 1</span>. The same work is done (<span class="mth"><i>W</i> = <i>Fd</i></span>), but over a longer distance with a smaller, safer force.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Mechanical Advantage of an Inclined Plane",
+       phy:"An ideal ramp trades a smaller effort force for a longer travel distance. Ignoring friction, F_incline · L = mgh, so F_incline = mg(h/L), less than mg when L exceeds h. The ramp does not reduce the required energy; responders must check that it is stable and dry.",
+       phy_html:"An ideal ramp trades a smaller effort force for a longer travel distance. Ignoring friction, F<sub>incline</sub> · L = mgh, so F<sub>incline</sub> = mg(h/L), less than mg when L exceeds h. The ramp does not reduce the required energy; responders must check that it is stable and dry.",
+       phy_bi_html:"An ideal ramp nagtatao nin mas sadit na effort force kapalit kan mas halawig na distansya. Kun dai iisipon an friction, F<sub>incline</sub> · L = mgh, kaya F<sub>incline</sub> = mg(h/L). Dai nababawasan an enerhiyang kaipuhan; surihon muna an katatagan kan ramp.",
        live:[{l:'Lift vertically',v:'Effort = full weight',s:'unsafe'},{l:'Stable ramp',v:'Smaller effort, longer distance',s:'safe'},{l:'Ramp check',v:'Stable · checked',s:'safe'}],
        mission:'Use the ramp — carry the relief box up the stable ramp to the evacuation area'},
 
@@ -631,9 +679,11 @@ const GRADES = {
                 'Dapat butungon kan mga estudyante an sanga nin mayong fulcrum ta nagagamit man an lever maski mayo nin tuntungan o support point.'],
        fb:'A lever provides mechanical advantage and reduces the effort force needed to move the branch. Trained responders should perform the task while learners remain at a safe distance.',
        fb_bi:'An lever nagtatao nin mechanical advantage asin nagpapababa kan effort force na kaipuhan tanganing mahali an sanga. An mga bihasang responder an dapat maggibo kaini mientras magpundo sa ligtas na distansya an mga estudyante.',
-       phy_title:'Torque and Mechanical Advantage of a Lever',
-       phy:'A lever turns about its fulcrum. Torque is τ = rF sin θ, so a small effort applied far from the fulcrum balances a large load close to it: F_in·r_in = F_out·r_out. The mechanical advantage MA = F_out/F_in = r_in/r_out is greater than 1. The lever reduces the force needed — it does not remove the branch’s mass or weight, so the work area stays dangerous.',
-       phy_html:'A lever turns about its fulcrum. Torque is <span class="mth">τ = <i>rF</i> sin θ</span>, so a small effort applied far from the fulcrum balances a large load close to it: <span class="mth"><i>F</i><sub>in</sub><i>r</i><sub>in</sub> = <i>F</i><sub>out</sub><i>r</i><sub>out</sub></span>. The mechanical advantage <span class="mth">MA = <span class="mf"><span class="mfn"><i>F</i><sub>out</sub></span><span class="mfd"><i>F</i><sub>in</sub></span></span> = <span class="mf"><span class="mfn"><i>r</i><sub>in</sub></span><span class="mfd"><i>r</i><sub>out</sub></span></span></span> is greater than 1. The lever reduces the force needed — it does not remove the branch’s mass or weight, so the work area stays dangerous.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Lever and Mechanical Advantage",
+       phy:"A lever balances torques about a fulcrum: F_effort d_effort = F_load d_load in the ideal static case. A longer effort arm can reduce the force required, though the effort moves through a longer distance. Trained responders should operate the lever while learners keep clear.",
+       phy_html:"A lever balances torques about a fulcrum: F<sub>effort</sub> d<sub>effort</sub> = F<sub>load</sub> d<sub>load</sub> in the ideal static case. A longer effort arm can reduce the force required, though the effort moves through a longer distance. Trained responders should operate the lever while learners keep clear.",
+       phy_bi_html:"An lever nagbabalanse nin torque sa fulcrum: F<sub>effort</sub> d<sub>effort</sub> = F<sub>load</sub> d<sub>load</sub> sa ideal na kaso. An mas halawig na effort arm nagpapababa kan puwersang kaipuhan, maski mas halawig an paghiro. Bihasang responder an dapat gumamit asin magrayo an mga estudyante.",
        live:[{l:'Pathway',v:'Blocked by a heavy branch',s:'unsafe'},{l:'Lever + fulcrum',v:'Mechanical advantage',s:'safe'},{l:'Learners',v:'Keep a safe distance',s:'risky'}],
        mission:'Let the trained responders work — wait at the safe spot, away from the branch and lever'},
 
@@ -652,9 +702,11 @@ const GRADES = {
                 'Dagdagan nin mga kahon an nakakiling na gilid ta an pagdagdag kan karga mapataas sa baroto hali sa tubig.'],
        fb:'Placing passengers and boxes on one side can make the boat unstable even when the total load is within its capacity. Distributing the load evenly helps maintain balance and stability.',
        fb_bi:'An pagkabugtak kan mga pasahero asin kahon sa sarong gilid puwedeng magpaluya kan stability kan baroto maski dai lampas sa kapasidad an kabuuang karga. An pantay na pagkabugtak kan karga nakakatabang na mamantenir an balanse asin stability kan baroto.',
-       phy_title:'Buoyancy, Load and Stability of a Boat',
-       phy:'A boat floats when the buoyant force equals its total weight, F_b = ρ_fluid·g·V_displaced = W_total, with m_total = m_hull + m_passengers + m_cargo and V_required = m_total/ρ_fluid ≤ V_available. Staying within capacity only settles whether it floats. Stability also depends on where the load sits: a one-sided load shifts the center of gravity off the center line, so weight and buoyancy form a torque that tilts the boat. An even load keeps them in line.',
-       phy_html:'A boat floats when the buoyant force equals its total weight, <span class="mth"><i>F</i><sub>b</sub> = ρ<sub>fluid</sub><i>g</i><i>V</i><sub>displaced</sub> = <i>W</i><sub>total</sub></span>, with <span class="mth"><i>m</i><sub>total</sub> = <i>m</i><sub>hull</sub> + <i>m</i><sub>passengers</sub> + <i>m</i><sub>cargo</sub></span> and <span class="mth"><i>V</i><sub>required</sub> = <span class="mf"><span class="mfn"><i>m</i><sub>total</sub></span><span class="mfd">ρ<sub>fluid</sub></span></span> ≤ <i>V</i><sub>available</sub></span>. Staying within capacity only settles whether it floats. Stability also depends on where the load sits: a one-sided load shifts the center of gravity off the center line, so weight and buoyancy form a torque that tilts the boat. An even load keeps them in line.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Boat Buoyancy and Load Stability",
+       phy:"A floating boat is supported by buoyant force, F_b = ρ_water g V_displaced, balancing its weight at rest. But being within capacity does not guarantee stability: an off-center load shifts the center of gravity and can create a tipping moment, τ = rF. Redistribute people and supplies and cross only when current and boat conditions are safe.",
+       phy_html:"A floating boat is supported by buoyant force, F<sub>b</sub> = ρ<sub>water</sub> g V<sub>displaced</sub>, balancing its weight at rest. But being within capacity does not guarantee stability: an off-center load shifts the center of gravity and can create a tipping moment, τ = rF. Redistribute people and supplies and cross only when current and boat conditions are safe.",
+       phy_bi_html:"An barotong naglalataw sinusuportahan kan buoyant force, F<sub>b</sub> = ρ<sub>water</sub> g V<sub>displaced</sub>, na nagbabalanse sa gabat kaini kun nakapundo. Alagad an kapasidad dai garantiya nin stability: an kargang nasa sarong gilid nagpapabago kan center of gravity asin nakakatao nin torque, τ = rF. Ipantay an karga asin magbalyo sana kun ligtas.",
        live:[{l:'Total load',v:'Within capacity',s:'safe'},{l:'Load placement',v:'All on one side',s:'unsafe'},{l:'Boat',v:'Tilting',s:'unsafe'}],
        mission:'Do not board the tilting boat — wait at the safe spot while the load is spread evenly'},
 
@@ -673,9 +725,11 @@ const GRADES = {
                 'Mawawara an mass kan lalagan pagkatapos mahulog sa tubig kaya ligtas ining sunudon kan mga estudyante pasiring sa irarom kan salog.'],
        fb:'Because the container’s average density is lower than that of water, the buoyant force can keep it afloat. Learners should not enter rapidly moving floodwater to retrieve it.',
        fb_bi:'Huli ta mas hababa an average density kan lalagan kaysa sa tubig, kayang palatawon ini kan buoyancy force. Dai dapat magsulod an mga estudyante sa marikas na bulos kan baha tanganing kuanon ini.',
-       phy_title:'Buoyancy of a Sealed Container in Moving Water',
-       phy:'The buoyant force is F_b = ρ_fluid·g·V_displaced. A sealed container whose average density is less than water’s needs to displace only part of its volume to reach floating equilibrium, F_b = W_total, so it floats. Floating does not stop it moving: the fast current carries it downstream, and the same current would push on a person with a large force. Retrieving it is not worth entering the water.',
-       phy_html:'The buoyant force is <span class="mth"><i>F</i><sub>b</sub> = ρ<sub>fluid</sub><i>g</i><i>V</i><sub>displaced</sub></span>. A sealed container whose average density is less than water’s needs to displace only part of its volume to reach floating equilibrium, <span class="mth"><i>F</i><sub>b</sub> = <i>W</i><sub>total</sub></span>, so it floats. Floating does not stop it moving: the fast current carries it downstream, and the same current would push on a person with a large force. Retrieving it is not worth entering the water.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Floating Container in Fast Floodwater",
+       phy:"Archimedes' principle gives F_b = ρ_water g V_displaced. A sealed container with average density lower than water can float when buoyancy balances its weight. Floating does not mean stationary: the rapid current can carry it downstream. Do not enter floodwater to retrieve it.",
+       phy_html:"Archimedes' principle gives F<sub>b</sub> = ρ<sub>water</sub> g V<sub>displaced</sub>. A sealed container with average density lower than water can float when buoyancy balances its weight. Floating does not mean stationary: the rapid current can carry it downstream. Do not enter floodwater to retrieve it.",
+       phy_bi_html:"Segun sa prinsipyo ni Archimedes, F<sub>b</sub> = ρ<sub>water</sub> g V<sub>displaced</sub>. An saradong laagan na mas hababa an average density kaysa tubig puwedeng maglataw kun nababalanse kan buoyancy an gabat. Alagad puwede ining anudon kan sulog; dai magsulod sa baha tanganing kuanon ini.",
        live:[{l:'Container density',v:'Lower than water',s:'safe'},{l:'Container',v:'Floating · carried away',s:'risky'},{l:'Floodwater',v:'Moving rapidly',s:'unsafe'}],
        mission:'Do not enter the floodwater — step back from the riverbank to the safe spot'}
     ]},
@@ -703,9 +757,11 @@ const GRADES = {
                 'An akselerasyon kan baroto dai konektado sa net force kaya an mga pasahero pwedeng dai pansinon an mas makusog na sulog.'],
        fb:'The river current exerts an unbalanced force that can push the boat sideways and change its motion. The crossing should be postponed until conditions become safe.',
        fb_bi:'An bulos kan salog nagtatao nin dai balanseng puwersa na puwedeng magtulod sa baroto pasiring sa gilid asin magbago kan paghiro kaini. Dapat ipagpaliban an pagbalyo hasta sa magin ligtas an kondisyon.',
-       phy_title:'Net Force and Sideways Acceleration of a Boat',
-       phy:'By Newton’s second law, ∑F = ma. The stronger current adds a sideways force that nothing on the boat balances, so ∑F ≠ 0 and the boat accelerates in that direction, a = ∑F/m, drifting off the intended crossing path. The stronger the current, the larger the drift, so crossing should wait until the current weakens.',
-       phy_html:'By Newton’s second law, <span class="mth">∑<i>F</i> = <i>ma</i></span>. The stronger current adds a sideways force that nothing on the boat balances, so <span class="mth">∑<i>F</i> ≠ 0</span> and the boat accelerates in that direction, <span class="mth"><i>a</i> = <span class="mf"><span class="mfn">∑<i>F</i></span><span class="mfd"><i>m</i></span></span></span>, drifting off the intended crossing path. The stronger the current, the larger the drift, so crossing should wait until the current weakens.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Net Force on a Boat in Floodwater",
+       phy:"Newton's second law states ΣF = ma. When the lateral force of the current is not balanced by other forces, the boat accelerates sideways and deviates from its intended path. Postpone crossing until the current and operating conditions are safe.",
+       phy_html:"Newton's second law states ΣF = ma. When the lateral force of the current is not balanced by other forces, the boat accelerates sideways and deviates from its intended path. Postpone crossing until the current and operating conditions are safe.",
+       phy_bi_html:"An ikaduwang law ni Newton iyo an ΣF = ma. Kun dai nababalanse an puwersa kan sulog sa gilid, nag-aaccelerate an baroto pasiring sa gilid asin nawawara sa tamang agihan. Ipagpaliban an pagbalyo hasta magin ligtas an kondisyon.",
        live:[{l:'Flood current',v:'Getting stronger',s:'unsafe'},{l:'Net force on boat',v:'Unbalanced · sideways',s:'unsafe'},{l:'Boat',v:'Drifting off the crossing path',s:'unsafe'}],
        mission:'Postpone the crossing — move back from the riverbank to the safe spot'},
 
@@ -724,9 +780,11 @@ const GRADES = {
                 'Balanse an karatula, mantang nag-a-accelerate ini kaya puwede ining kaputan kan mga estudyante ta nagning dae ini mahali sa puwesto.'],
        fb:'Strong wind exerts an unbalanced force on the hanging sign and may cause it to fall toward the pathway. Learners should remain away from the sign and the bridge entrance.',
        fb_bi:'An makusog na duros nagtatao nin dai balanseng puwersa sa nakabitay na karatula asin puwedeng magpahulog kaini pasiring sa agihan. Dapat magrayo an mga estudyante sa karatula asin sa entrada kan tulay.',
-       phy_title:'From Equilibrium to Acceleration',
-       phy:'At rest the sign is in equilibrium: ∑F = 0, the support balancing wind and weight. When a gust makes F_wind greater than the support force, ∑F ≠ 0 and, by ∑F = ma, the sign accelerates toward the pathway. An accelerating object is not in equilibrium, and if the fastenings fail gravity takes over, so the area beneath it must be avoided.',
-       phy_html:'At rest the sign is in equilibrium: <span class="mth">∑<i>F</i> = 0</span>, the support balancing wind and weight. When a gust makes <span class="mth"><i>F</i><sub>wind</sub> &gt; <i>F</i><sub>support</sub></span>, <span class="mth">∑<i>F</i> ≠ 0</span> and, by <span class="mth">∑<i>F</i> = <i>ma</i></span>, the sign accelerates toward the pathway. An accelerating object is not in equilibrium, and if the fastenings fail gravity takes over, so the area beneath it must be avoided.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Loss of Force Equilibrium on a Hanging Sign",
+       phy:"At rest in equilibrium, ΣF = 0 and Στ = 0. A wind gust can upset force and torque balance, causing the sign to translate, rotate, or detach. Its movement signals danger; learners must avoid the sign and its possible fall zone.",
+       phy_html:"At rest in equilibrium, ΣF = 0 and Στ = 0. A wind gust can upset force and torque balance, causing the sign to translate, rotate, or detach. Its movement signals danger; learners must avoid the sign and its possible fall zone.",
+       phy_bi_html:"Kun balanse asin nakapundo, ΣF = 0 asin Στ = 0. An makusog na duros puwedeng magbag-o kan balanse nin puwersa asin torque kaya maghiro, magkiling, o mahulog an karatula. Magrayo sa posibleng babagsakan kaini.",
        live:[{l:'Wind',v:'Strong gusts',s:'unsafe'},{l:'Net force on sign',v:'Unbalanced',s:'unsafe'},{l:'Sign',v:'Moving toward pathway',s:'unsafe'}],
        mission:'Stay away from the sign and the bridge entrance — go to the safe spot'},
 
@@ -745,9 +803,11 @@ const GRADES = {
                 'Pabayaan an mga kahon sa binahang pantalan ta an mga bagay na dai naghihiro mayo nin energy asin dai puwedeng magdara nin peligro.'],
        fb:'Using a stable ramp and cart reduces the force needed to move the relief boxes and avoids the wet, slippery steps. The dry and stable route is the safer choice.',
        fb_bi:'An paggamit nin matibay na ramp asin kariton nagpapababa kan puwersang kaipuhan sa pagbalyo kan mga kahon asin nakakaiwas sa basa asin makadarinas na hagdan. An tuyo asin matibay na agihan an mas ligtas na pilion.',
-       phy_title:'Work, Displacement and the Ramp',
-       phy:'Work is W = Fd cos θ: a force does work only when it produces displacement. Raising a box to height h always needs the same energy, ΔU_g = mgh. Carrying it up short wet steps needs a large force at every step on a slippery surface; pushing it on a cart up a long, dry ramp spreads that same work over a longer distance with a smaller force, and the wheels cut friction.',
-       phy_html:'Work is <span class="mth"><i>W</i> = <i>Fd</i> cos θ</span>: a force does work only when it produces displacement. Raising a box to height <i>h</i> always needs the same energy, <span class="mth">Δ<i>U</i><sub>g</sub> = <i>mgh</i></span>. Carrying it up short wet steps needs a large force at every step on a slippery surface; pushing it on a cart up a long, dry ramp spreads that same work over a longer distance with a smaller force, and the wheels cut friction.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Work and Energy on a Safe Ramp",
+       phy:"Mechanical work is W = Fd cos θ. Raising the supplies increases gravitational potential energy by ΔPE = mgh, whether the route is short or long. A stable ramp and cart spread the required work over a longer distance and generally lower the effort force, while avoiding slippery steps.",
+       phy_html:"Mechanical work is W = Fd cos θ. Raising the supplies increases gravitational potential energy by ΔPE = mgh, whether the route is short or long. A stable ramp and cart spread the required work over a longer distance and generally lower the effort force, while avoiding slippery steps.",
+       phy_bi_html:"An mechanical work iyo an W = Fd cos θ. An pagsakat nin suplay nagdadagdag nin gravitational potential energy na ΔPE = mgh maski halipot o halawig an ruta. An matibay na ramp asin kariton nagpapalawig kan distansya asin nakakapababa kan effort force, asin nakakaiwas sa madulas na hagdan.",
        live:[{l:'Wet steps',v:'Short · slippery',s:'unsafe'},{l:'Cart + dry ramp',v:'Smaller force · stable',s:'safe'},{l:'Work to raise a box',v:'Same either way (mgh)',s:'safe'}],
        mission:'Push the cart up the dry, stable ramp to the evacuation area — avoid the wet steps'},
 
@@ -766,9 +826,11 @@ const GRADES = {
                 'An pagsabot sa nahuhulog na panel an makakatanggal kan energy kaini kaya dapat maghalat an mga estudyante sa mismong irarom kaini.'],
        fb:'The elevated metal panel has gravitational potential energy that may be converted into kinetic energy when it falls. Learners should move away from its possible landing area.',
        fb_bi:'An yerong nasa halangkaw na lugar may gravitational potential energy na puwedeng magin kinetic energy kun mahulog ini. Dapat magrayo an mga estudyante sa posibleng babagsakan kaini.',
-       phy_title:'Potential Energy Becoming Kinetic Energy',
-       phy:'A raised panel stores gravitational potential energy, U_g = mgh, even while it is not moving. As it falls, U_g is converted to kinetic energy, K = ½mv², while the mechanical energy E_mech = K + U_g stays about the same. By the ground, nearly all of mgh has become motion, so a falling metal sheet strikes hard; the safe choice is to stay out of the area where it could land.',
-       phy_html:'A raised panel stores gravitational potential energy, <span class="mth"><i>U</i><sub>g</sub> = <i>mgh</i></span>, even while it is not moving. As it falls, <i>U</i><sub>g</sub> is converted to kinetic energy, <span class="mth"><i>K</i> = <span class="mf"><span class="mfn">1</span><span class="mfd">2</span></span><i>m</i><i>v</i><sup>2</sup></span>, while the mechanical energy <span class="mth"><i>E</i><sub>mech</sub> = <i>K</i> + <i>U</i><sub>g</sub></span> stays about the same. By the ground, nearly all of <i>mgh</i> has become motion, so a falling metal sheet strikes hard; the safe choice is to stay out of the area where it could land.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Potential to Kinetic Energy in Falling Metal",
+       phy:"At elevation h, the panel has gravitational potential energy PE = mgh. As it falls, some potential energy transforms into kinetic energy, KE = ½mv², while air resistance may dissipate some energy. The panel can injure someone below; move away from its possible trajectory.",
+       phy_html:"At elevation h, the panel has gravitational potential energy PE = mgh. As it falls, some potential energy transforms into kinetic energy, KE = ½mv², while air resistance may dissipate some energy. The panel can injure someone below; move away from its possible trajectory.",
+       phy_bi_html:"Sa langkaw na h, an yero may gravitational potential energy na PE = mgh. Sa paghulog, parte kaini nagigin kinetic energy, KE = ½mv², mantang puwedeng may mawara huli sa air resistance. Puwede ining makasakit; magrayo sa posibleng agihan.",
        live:[{l:'Metal panel',v:'Lifted high by the wind',s:'unsafe'},{l:'Stored energy',v:'U = mgh',s:'risky'},{l:'If it falls',v:'U → K, hard impact',s:'unsafe'}],
        mission:'Move away from where the panel could land — go to the safe spot'},
 
@@ -787,9 +849,11 @@ const GRADES = {
                 'Mayo nin momentum an troso ta naglalataw ini kaya puwedeng pugulan ini kan mga pasahero gamit an saindang kamot.'],
        fb:'At the same velocity, the heavier log has greater momentum and can cause a stronger impact. The boat operator should postpone crossing and avoid the log’s path.',
        fb_bi:'Sa parehong velocity, mas dakula an momentum kan mas magabat na troso asin puwede ining magdulot nin mas makusog na pagkabunggo. Dapat ipagpaliban kan para-baroto an pagbalyo asin likayan an agihan kan troso.',
-       phy_title:'Momentum Depends on Mass and Velocity',
-       phy:'Momentum is p = mv. With the same velocity, the object with more mass has more momentum, so the log’s p is many times the container’s. Stopping it needs an impulse equal to that change in momentum, J = F_avg·Δt = Δp, so a log striking a small boat delivers a far larger force than the container would. Floating does not remove momentum.',
-       phy_html:'Momentum is <span class="mth"><i>p</i> = <i>mv</i></span>. With the same velocity, the object with more mass has more momentum, so the log’s <i>p</i> is many times the container’s. Stopping it needs an impulse equal to that change in momentum, <span class="mth"><i>J</i> = <i>F</i><sub>avg</sub>Δ<i>t</i> = Δ<i>p</i></span>, so a log striking a small boat delivers a far larger force than the container would. Floating does not remove momentum.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Momentum of a Large Floating Log",
+       phy:"Momentum is p = mv. With equal velocity, the larger mass of the log gives it greater momentum than the container. A collision could involve a large impulse, J = Δp; move the boat away from the log's path and postpone crossing.",
+       phy_html:"Momentum is p = mv. With equal velocity, the larger mass of the log gives it greater momentum than the container. A collision could involve a large impulse, J = Δp; move the boat away from the log's path and postpone crossing.",
+       phy_bi_html:"An momentum iyo an p = mv. Sa parehong velocity, mas dakula an momentum kan troso huli sa mas dakulang mass kaini. An pagbunggo puwedeng magtao nin dakulang impulse, J = Δp; iparayo an baroto asin ipagpaliban an pagbalyo.",
        live:[{l:'Velocity',v:'Same for log and container',s:'risky'},{l:'Log momentum',v:'Much larger (more mass)',s:'unsafe'},{l:'Boat',v:'In the log’s path',s:'unsafe'}],
        mission:'Postpone the crossing — move away from the river and the log’s path to the safe spot'},
 
@@ -808,9 +872,11 @@ const GRADES = {
                 'Hinahali kan padding an mass kan bagay durante kan pagbunggo kaya puwedeng magpadagos an mga estudyante sa paggamit kan dalan.'],
        fb:'A padded barrier increases the stopping time and reduces the average impact force. However, learners should still remain away from the path of windblown debris.',
        fb_bi:'An padded barrier nagpapalawig kan oras kan pagpundo asin nagpapababa kan average impact force. Alagad, dapat magrayo man giraray an mga estudyante sa agihan kan mga bagay na pinalupad kan duros.',
-       phy_title:'Impulse: Longer Stopping Time, Smaller Force',
-       phy:'Impulse equals the change in momentum: J = F_avg·Δt = Δp. To stop the object, Δp = mv is fixed. Flexible padding stretches the stopping time Δt, so the average force F_avg = Δp/Δt becomes smaller. The padding softens the impact; it does not remove the object’s mass or momentum, and debris can still glance off or fly over, so the collision area must still be avoided.',
-       phy_html:'Impulse equals the change in momentum: <span class="mth"><i>J</i> = <i>F</i><sub>avg</sub>Δ<i>t</i> = Δ<i>p</i></span>. To stop the object, <span class="mth">Δ<i>p</i> = <i>mv</i></span> is fixed. Flexible padding stretches the stopping time Δ<i>t</i>, so the average force <span class="mth"><i>F</i><sub>avg</sub> = <span class="mf"><span class="mfn">Δ<i>p</i></span><span class="mfd">Δ<i>t</i></span></span></span> becomes smaller. The padding softens the impact; it does not remove the object’s mass or momentum, and debris can still glance off or fly over, so the collision area must still be avoided.',
+       // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
+       phy_title:"Impulse and a Padded Protective Barrier",
+       phy:"Impulse is J = Δp = F_avg Δt. For the same momentum change, flexible padding increases stopping time Δt and thereby reduces average impact force F_avg = Δp/Δt. A barrier is not a guarantee against debris, so learners should remain away from the collision area.",
+       phy_html:"Impulse is J = Δp = F<sub>avg</sub> Δt. For the same momentum change, flexible padding increases stopping time Δt and thereby reduces average impact force F<sub>avg</sub> = Δp/Δt. A barrier is not a guarantee against debris, so learners should remain away from the collision area.",
+       phy_bi_html:"An impulse iyo an J = Δp = F<sub>avg</sub> Δt. Para sa parehong pagbabago kan momentum, an padding nagpapalawig kan oras kan pagpundo Δt asin nagpapababa kan average impact force F<sub>avg</sub> = Δp/Δt. Dai garantiya an barrier kontra sa debris; magrayo sa lugar nin pagbunggo.",
        live:[{l:'Windblown debris',v:'Flying toward the pathway',s:'unsafe'},{l:'Padded barrier',v:'Longer Δt → smaller force',s:'safe'},{l:'Collision area',v:'Still keep away',s:'unsafe'}],
        mission:'Stay away from the collision area — go to the safe spot clear of the barrier and pathway'}
     ]}
