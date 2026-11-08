@@ -10,7 +10,9 @@
       "**/.*/**",
       "**/*.command",
       "**/node_modules/**",
-      "__/**"
+      "__/**",
+      "sample-data/**",
+      "tools/**"
     ],
     "headers": [
       {

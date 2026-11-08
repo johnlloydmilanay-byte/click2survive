@@ -1,0 +1,6 @@
+# Generated sample-account credentials (tools/seed-sample-data.js) — never commit
+sample-data/
+
+# Local Firebase CLI / emulator state and logs
+.firebase/
+*-debug.log
