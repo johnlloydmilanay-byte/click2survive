@@ -448,7 +448,26 @@ const G7_THEMES = {
   cartramp:   { mood:'flood',   intensity:.45, theme:{ bpm:92,  chords:[[55,59,62],[48,52,55],[50,54,57],[55,59,62]] } },           // G C D G
   panel:      { mood:'typhoon', intensity:.72, theme:{ bpm:106, chords:[[50,53,57],[46,50,53],[48,52,55],[45,49,52]] } },          // Dm B♭ C A
   momentum:   { mood:'flood',   intensity:.62, theme:{ bpm:94,  chords:[[52,55,59],[48,52,55],[50,54,57],[47,51,54]] } },          // Em C D B
-  barrier:    { mood:'typhoon', intensity:.66, theme:{ bpm:104, chords:[[50,53,57],[48,52,55],[46,50,53],[45,49,52]] } }           // Dm C B♭ A
+  barrier:    { mood:'typhoon', intensity:.66, theme:{ bpm:104, chords:[[50,53,57],[48,52,55],[46,50,53],[45,49,52]] } },          // Dm C B♭ A
+  // ── Grade 8 (jhs-scenes.js) ──
+  channel:    { mood:'flood',   intensity:.6,  theme:{ bpm:94,  chords:[[57,60,64],[55,59,62],[53,57,60],[52,56,59]], accel:{ to:1.18, bars:8 } } }, // Am G F E
+  roofslide:  { mood:'typhoon', intensity:.64, theme:{ bpm:102, chords:[[50,53,57],[46,50,53],[48,52,55],[45,49,52]], accel:{ to:1.15, bars:8 } } }, // Dm B♭ C A
+  logbottle:  { mood:'flood',   intensity:.6,  theme:{ bpm:92,  chords:[[52,55,59],[48,52,55],[50,54,57],[47,51,54]] } },          // Em C D B
+  flowerpot:  { mood:'typhoon', intensity:.5,  theme:{ bpm:96,  chords:[[50,53,57],[55,58,62],[53,57,60],[45,49,52]] } },          // Dm Gm F A
+  stuckbox:   { mood:'flood',   intensity:.42, theme:{ bpm:88,  chords:[[48,52,55],[53,57,60],[55,59,62],[48,52,55]] } },          // C F G C
+  platform:   { mood:'typhoon', intensity:.6,  theme:{ bpm:100, chords:[[50,53,57],[48,52,55],[46,50,53],[45,49,52]] } },          // Dm C B♭ A
+  // ── Grade 9 ──
+  boatstop:   { mood:'flood',   intensity:.5,  theme:{ bpm:90,  chords:[[57,60,64],[53,57,60],[48,52,55],[55,59,62]] } },          // Am F C G
+  vehiclestop:{ mood:'typhoon', intensity:.55, theme:{ bpm:104, chords:[[50,53,57],[48,52,55],[53,57,60],[45,49,52]] } },          // Dm C F A
+  twocontainers:{ mood:'flood', intensity:.55, theme:{ bpm:94,  chords:[[52,55,59],[48,52,55],[55,59,62],[50,54,57]] } },          // Em C G D
+  roofboard:  { mood:'typhoon', intensity:.66, theme:{ bpm:106, chords:[[50,53,57],[46,50,53],[43,46,50],[45,49,52]] } },          // Dm B♭ Gm A
+  boatstep:   { mood:'flood',   intensity:.45, theme:{ bpm:86,  chords:[[48,52,55],[57,60,64],[53,57,60],[55,59,62]], arp:[0,1,2,1,0,2,1,2] } }, // C Am F G
+  branchspring:{ mood:'typhoon', intensity:.55, theme:{ bpm:96, chords:[[50,53,57],[55,58,62],[46,50,53],[45,49,52]] } },          // Dm Gm B♭ A
+  // ── Grade 10 ──
+  ropethrow:  { mood:'flood',   intensity:.55, theme:{ bpm:96,  chords:[[48,52,55],[55,59,62],[57,60,64],[53,57,60]], arp:[0,1,2,1,0,1,2,1] } }, // C G Am F
+  roofproj:   { mood:'typhoon', intensity:.7,  theme:{ bpm:106, chords:[[50,53,57],[46,50,53],[48,52,55],[45,49,52]] } },          // Dm B♭ C A
+  fender:     { mood:'flood',   intensity:.5,  theme:{ bpm:90,  chords:[[52,55,59],[48,52,55],[50,54,57],[52,55,59]] } },          // Em C D Em
+  inelastic:  { mood:'typhoon', intensity:.66, theme:{ bpm:104, chords:[[50,53,57],[48,52,55],[46,50,53],[45,49,52]] } }           // Dm C B♭ A
 };
 function loadScenario(idx){
   const scen = GS.gd.scenarios[idx];

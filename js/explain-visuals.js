@@ -503,19 +503,24 @@ const XV = (()=>{
   }
 
   // Same velocity, different mass → different momentum (G12 #5).
-  function momentum(id){
+  function momentum(id, ke){
     const T = 9, by = 66;
     const body = water(30, 170) + streaks(T, 36, 166, 50, 8)
       + `<g>${AT('translate',T,[[0,'0 0'],[1,'0 0'],[5.4,'210 0'],[T-.4,'260 0'],[T-.1,'0 0']])}`
       +   `<rect x="20" y="${by-14}" width="96" height="28" rx="14" fill="${C.wood}" stroke="#451a03" stroke-width="2"/>`
       +   `<rect x="44" y="130" width="22" height="14" rx="6" fill="#f59e0b" stroke="#78350f" stroke-width="1.4"/>`
       +   `<g opacity="0">${show(T,.6)}${arrow(id,120,by,150,by,'vel',3)}${arrow(id,70,137,100,137,'vel',3)}${text(135,by-10,'v',{size:10,fill:C.vel})}${text(85,127,'v',{size:10,fill:C.vel})}</g>`
-      +   `<g opacity="0">${show(T,1.8)}${arrow(id,20,by+26,140,by+26,'net',5)}${text(80,by+42,'p_log = m·v  (large)',{size:9.5,fill:'#fecaca'})}${arrow(id,44,158,58,158,'resist',3)}${text(96,168,'p small',{size:9,fill:'#fdba74'})}</g>`
+      +   `<g opacity="0">${show(T,1.8)}${arrow(id,20,by+26,140,by+26,'net',5)}${text(80,by+42,ke?'K_log = ½mv²  (large)':'p_log = m·v  (large)',{size:9.5,fill:'#fecaca'})}${arrow(id,44,158,58,158,'resist',3)}${text(96,168,ke?'K small':'p small',{size:9,fill:'#fdba74'})}</g>`
       + `</g>`
       + `<g>${AT('translate',T,[[0,'0 0'],[4.2,'0 0'],[5.4,'0 -40'],[T-.4,'0 -40'],[T-.1,'0 0']],true)}<g transform="translate(330,${by})"><path d="M-20,-10 L20,-10 L26,0 L20,10 L-20,10 L-26,0 Z" fill="#7c4a1e" stroke="#451a03" stroke-width="1.6"/>${person(0,6,'#fde68a',.5)}</g></g>`
       + `<g opacity="0">${show(T,.6,2.8)}${text(200,22,'Same velocity v for both',{size:11})}</g>`
-      + `<g opacity="0">${show(T,3)}${text(330,22,'p = m·v → more mass,',{size:10.5,fill:'#fecaca'})}${text(330,38,'more momentum',{size:10.5,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,3)}${text(330,22,ke?'K = ½mv² → more mass,':'p = m·v → more mass,',{size:10.5,fill:'#fecaca'})}${text(330,38,ke?'more kinetic energy':'more momentum',{size:10.5,fill:'#fecaca'})}</g>`
       + `<g opacity="0">${show(T,5.4)}${text(330,106,'boat moves out of its path ✓',{size:9.5,fill:C.safe})}</g>`;
+    if(ke) return { T, body, steps:[
+      S(.6, 'The heavy log and the light plastic bottle drift at about the same speed v.'),
+      S(1.8, 'Kinetic energy K = ½mv²: at the same speed, more mass means more kinetic energy.'),
+      S(3, 'So the log carries far more energy into anything it hits — a much stronger impact.'),
+      S(4.2, 'Safe decision: stay away from the log’s path.')] };
     return { T, body, steps:[
       S(.6, 'The log and the plastic container drift at the same velocity v.'),
       S(1.8, 'Momentum p = m·v: the log has far more mass, so far more momentum.'),
@@ -524,13 +529,13 @@ const XV = (()=>{
   }
 
   // Impulse: padding stretches the stopping time, lowering the force (G12 #6).
-  function impulse(id){
-    const T = 9;
+  function impulse(id, kind){
+    const T = 9, fender = kind === 'fender';
     const gx0 = 232, gy0 = 158, gw = 150, gh = 110;
     const spike = `M${gx0},${gy0} C${gx0+8},${gy0} ${gx0+10},${gy0-gh} ${gx0+16},${gy0-gh} C${gx0+22},${gy0-gh} ${gx0+24},${gy0} ${gx0+32},${gy0}`;
     const hump = `M${gx0},${gy0} C${gx0+30},${gy0} ${gx0+40},${gy0-gh*.3} ${gx0+75},${gy0-gh*.3} C${gx0+110},${gy0-gh*.3} ${gx0+120},${gy0} ${gx0+150},${gy0}`;
     const obj = `<rect x="-14" y="-5" width="28" height="10" rx="2" fill="${C.wood}" stroke="#451a03"/>`;
-    const body = text(100,22,'without padding',{size:9.5,fill:'#fecaca'}) + text(100,108,'with padding',{size:9.5,fill:C.safe})
+    const body = text(100,22,fender?'bare hull':'without padding',{size:9.5,fill:'#fecaca'}) + text(100,108,fender?'with rubber fender':'with padding',{size:9.5,fill:C.safe})
       + `<rect x="170" y="30" width="10" height="58" fill="#64748b"/>`
       + `<g>${AT('translate',T,[[0,'30 60'],[.6,'30 60'],[1.6,'154 60'],[1.7,'154 60'],[T-.4,'154 60'],[T-.1,'30 60']])}${obj}</g>`
       + `<g opacity="0">${show(T,1.6,3)}${text(150,46,'BANG',{size:11,fill:C.net})}</g>`
@@ -542,13 +547,278 @@ const XV = (()=>{
       + `<path d="${spike}" fill="${C.net}" fill-opacity=".25" stroke="${C.net}" stroke-width="2.4" ${draw(T,1.6,2.4,260)}>${drawAnim(T,1.6,2.6,260)}</path>`
       + `<path d="${hump}" fill="${C.safe}" fill-opacity=".2" stroke="${C.safe}" stroke-width="2.4" ${draw(T,4,6,330)}>${drawAnim(T,4,6.2,330)}</path>`
       + `<g opacity="0">${show(T,6.4)}${text(gx0+80,24,'same area: J = F_avg·Δt = Δp',{size:10.5,fill:C.vel})}${text(gx0+80,40,'longer Δt → smaller F_avg',{size:10.5,fill:C.safe})}</g>`
-      + `<g opacity="0">${show(T,7.2)}${text(100,186,'still keep away from the collision area',{size:9.5,fill:'#fecaca'})}</g>`;
+      + `<g opacity="0">${show(T,7.2)}${text(100,186,fender?'the fender also absorbs part of the KE':'still keep away from the collision area',{size:9.5,fill:fender?C.safe:'#fecaca'})}</g>`;
+    if(fender) return { T, body, steps:[
+      S(.6, 'A log hitting a bare hull stops almost instantly — a huge force spike.'),
+      S(3, 'A rubber fender squashes, so the log takes longer to stop.'),
+      S(4, 'The momentum to remove, Δp, is the same either way.'),
+      S(6.4, 'J = F_avg·Δt = Δp: a longer impact time means a smaller average force on the boat.'),
+      S(7.2, 'The fender also absorbs part of the kinetic energy, so less damage is done.')] };
     return { T, body, steps:[
       S(.6, 'Hitting a hard wall, the object stops almost instantly — a huge force spike.'),
       S(3, 'Flexible padding squashes, so the object takes longer to stop.'),
       S(4, 'The momentum to remove, Δp = mv, is the same either way.'),
       S(6.4, 'Since J = F_avg·Δt = Δp, a longer Δt means a smaller average force.'),
       S(7.2, 'Padding softens impacts but doesn’t remove the danger — stay out of the collision area.')] };
+  }
+
+
+  // ═══ GRADES 8–10 ═══
+
+  // Narrowing channel: same water, smaller opening → faster flow → the container accelerates (G8 #1).
+  function channel(id){
+    const T = 9, top = (x)=> x < 150 ? 40 : x < 230 ? 40 + (x-150)/80*42 : 82, bot = (x)=> 190 - top(x) - 20;
+    const xs = [30,62,96,136,186,250,330];
+    let marks = '';
+    xs.forEach((x,i)=>{ const t = .6 + i*.85; marks += `<g opacity="0">${show(T,t)}<circle cx="${x}" cy="150" r="4" fill="${C.vel}"/>${i?`<line x1="${xs[i-1]+5}" y1="166" x2="${x-5}" y2="166" stroke="${C.vel}" stroke-width="2"/>`:''}</g>`; });
+    const p = xs.map((x,i)=> [.6 + i*.85, `${x} 0`]);
+    const body = `<path d="M0,40 L150,40 L230,82 L400,82 L400,108 L230,108 L150,150 L0,150 Z" fill="#0c4a6e" opacity=".6" stroke="${C.water}" stroke-width="1.4"/>`
+      + streaks(T, 50, 140, 50, 6, 0, 150) + streaks(T, 86, 104, 170, 4, 232, 400)
+      + text(70,30,'wide · slower',{size:10,fill:'#bae6fd'}) + text(320,124,'narrow · faster',{size:10,fill:'#fecaca'})
+      + `<g>${AT('translate',T,[[0,'30 0'],...p,[T-.4,'330 0'],[T-.1,'30 0']])}<g transform="translate(-30,0)"><rect x="18" y="86" width="24" height="18" rx="3" fill="#e5e7eb" stroke="#64748b"/></g></g>`
+      + marks + text(200,184,'1 mark per second → the gaps keep growing',{size:9.5,fill:C.vel,weight:600})
+      + `<g opacity="0">${show(T,3)}${arrow(id,40,72,64,72,'vel',3)}${text(52,64,'v',{size:10,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,4.8)}${arrow(id,300,72,360,72,'vel',4)}${text(330,64,'v (much larger)',{size:10,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,5.6)}${text(200,22,'Speed increases: a = Δv / Δt > 0',{size:11.5,fill:C.vel})}</g>`;
+    return { T, body, steps:[
+      S(.6, 'Floodwater carries the container along the drainage channel.'),
+      S(3, 'Where the channel narrows, the same water squeezes through a smaller gap, so it flows faster.'),
+      S(4.8, 'The container’s speed keeps increasing — it is accelerating (a = Δv/Δt > 0).'),
+      S(5.6, 'Faster water pushes harder: stay away from the channel.')] };
+  }
+
+  // Motion map of an object speeding up on land (G8 #2 roofing sheet).
+  function motionMap(id){
+    const T = 9, xs = [40,56,84,124,176,240,316];
+    let marks = '';
+    xs.forEach((x,i)=>{ const t = .6 + i*.8; marks += `<g opacity="0">${show(T,t)}<rect x="${x-8}" y="126" width="16" height="4" fill="#a1a1aa"/>${text(x,146,i+'s',{size:8.5,fill:C.vel})}</g>`
+      + (i ? `<g opacity="0">${show(T,t)}${arrow(id,xs[i-1],108,x-4,108,'vel',1.6+i*.35)}</g>` : ''); });
+    const p = xs.map((x,i)=> [.6 + i*.8, `${x} 0`]);
+    const body = `<rect x="0" y="150" width="400" height="40" fill="${C.ground}"/>` + text(200,174,'pathway →',{size:9,fill:'#94a3b8'})
+      + `<g opacity=".7">${streaks(T,40,90,160,6)}</g>`
+      + `<g>${AT('translate',T,[[0,'40 0'],...p,[T-.4,'316 0'],[T-.1,'40 0']])}<g transform="translate(-40,0)"><rect x="24" y="122" width="32" height="6" rx="1" fill="#d4d4d8" stroke="#71717a"/></g></g>`
+      + marks + `<g opacity="0">${show(T,4.4)}${text(200,30,'Each second it moves farther: speeding up',{size:11})}${text(200,48,'a = Δv / Δt > 0',{size:11.5,fill:C.vel})}</g>`
+      + person(372, 104, C.safe, .9) + `<g opacity="0">${show(T,6.4)}${check(386,72,true)}${text(370,124,'out of its path',{size:8.5,fill:C.safe})}</g>`;
+    return { T, body, steps:[
+      S(.6, 'The wind pushes the loose roofing sheet along the ground.'),
+      S(2, 'Each gust adds speed: it covers more distance every second.'),
+      S(4.4, 'A changing speed means it is accelerating: a = Δv/Δt > 0.'),
+      S(6.4, 'The faster it goes, the harder it hits — stay away from its path.')] };
+  }
+
+  // Raised object: U = mgh; moving it low makes U small (G8 #4).
+  function potentialPot(id){
+    const T = 9, gy = 150;
+    const pot = `<g><path d="M-9,0 L9,0 L12,-18 L-12,-18 Z" fill="#b45309"/><circle cx="-5" cy="-24" r="7" fill="#3f7d2a"/><circle cx="5" cy="-26" r="8" fill="#4d7c0f"/></g>`;
+    const body = `<rect x="0" y="${gy}" width="260" height="40" fill="${C.ground}"/>`
+      + `<rect x="40" y="56" width="50" height="94" fill="#78716c"/><rect x="36" y="50" width="72" height="8" fill="#a8a29e"/>` + text(64,166,'high ledge',{size:9,fill:'#cbd5e1'})
+      + `<rect x="180" y="128" width="46" height="22" fill="#6b4f30"/>` + text(203,166,'low & secure',{size:9,fill:C.safe})
+      + `<g>${AT('translate',T,[[0,'92 50'],[3.8,'92 50'],[5.6,'203 128'],[T-.4,'203 128'],[T-.1,'92 50']],true)}${pot}</g>`
+      + `<g opacity="0">${show(T,.6,3.8)}<line x1="122" y1="50" x2="122" y2="${gy}" stroke="${C.vel}" stroke-dasharray="3 3"/>${text(132,104,'h',{size:12,fill:C.vel})}${text(130,24,'High up: U = mgh is large',{size:11,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,1.8,3.8)}<path d="M100,60 Q110,110 104,148" stroke="${C.net}" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#${id}-net)"/>${text(150,140,'if it falls: U → K',{size:9.5,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,5.6)}${text(130,24,'Low & secure: small h → small U',{size:11,fill:C.safe})}</g>`
+      + `<line x1="276" y1="150" x2="380" y2="150" stroke="#475569"/>`
+      + growBar(T, 300, 150, 30, 100, C.vel, [[0,.92],[3.8,.92],[5.6,.08],[T-.4,.08],[T-.1,.92]], true) + text(315,166,'U = mgh',{size:9.5,fill:C.vel})
+      + text(350,30,'stored energy',{size:9,fill:'#94a3b8',weight:600});
+    return { T, body, steps:[
+      S(.6, 'On the high ledge the heavy pot stores gravitational potential energy U = mgh.'),
+      S(1.8, 'Strong wind could knock it off: U would turn into kinetic energy as it falls onto the path.'),
+      S(3.8, 'Moving it low and securing it makes h small…'),
+      S(5.6, '…so U is small and it can no longer fall far. Do this before the wind gets stronger.')] };
+  }
+
+  // Work needs displacement: stuck box (d = 0 → W = 0) vs moving box (W = F·d) (G8 #5).
+  function workDisp(id){
+    const T = 9;
+    const box = (x,y)=> `<rect x="${x}" y="${y}" width="30" height="24" rx="2" fill="#c89b62" stroke="#78350f" stroke-width="1.4"/>`;
+    const body = `<rect x="0" y="80" width="400" height="6" fill="${C.ground}"/><rect x="0" y="170" width="400" height="6" fill="${C.ground}"/>`
+      + text(10,22,'Box caught on a raised portion',{size:10,anchor:'start',fill:'#fecaca'})
+      + `<rect x="160" y="66" width="12" height="14" fill="#78716c"/>` + box(128,56) + person(212,80,C.resist,.9)
+      + `<g opacity="0">${show(T,.6)}${arrow(id,200,62,170,62,'resist',3.5)}${text(186,52,'F',{size:10,fill:C.resist})}</g>`
+      + `<g opacity="0">${show(T,1.8)}${text(300,52,'d = 0',{size:12,fill:'#fecaca'})}${text(300,70,'W = F × 0 = 0',{size:12,fill:'#fecaca'})}</g>`
+      + text(10,112,'Box on a clear path',{size:10,anchor:'start',fill:C.safe})
+      + `<g>${AT('translate',T,[[0,'0 0'],[3.4,'0 0'],[6.6,'-170 0'],[T-.4,'-170 0'],[T-.1,'0 0']],true)}${box(300,146)}${person(352,170,C.resist,.9)}`
+      +   `<g opacity="0">${show(T,3.4,6.6)}${arrow(id,342,152,332,152,'resist',3.5)}</g></g>`
+      + `<g opacity="0">${show(T,3.6)}<line x1="315" y1="186" x2="${315-170}" y2="186" stroke="${C.vel}" stroke-width="2.4" marker-end="url(#${id}-vel)"/>${text(230,184,'d',{size:11,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,5.4)}${text(100,140,'W = F · d  (work is done)',{size:12,fill:C.safe})}</g>`
+      + `<g opacity="0">${show(T,6.8)}${text(300,112,'W = F·d·cos θ',{size:11,fill:C.vel})}</g>`;
+    return { T, body, steps:[
+      S(.6, 'The learner pushes the stuck box with force F…'),
+      S(1.8, '…but it doesn’t move: displacement d = 0, so the work done on it is W = 0.'),
+      S(3.4, 'On a clear path the same push makes the box move.'),
+      S(5.4, 'Now the force produces displacement in its direction, so work is done: W = F·d.'),
+      S(6.8, 'In general W = F·d·cos θ — no displacement, no work.')] };
+  }
+
+  // Mechanical energy hazard: loose objects up high → secured low (G8 #6).
+  function mechEnergy(id){
+    const T = 9, gy = 150;
+    const objs = [[66,44,'#c89b62'],[84,40,'#16a34a'],[100,46,'#c89b62']];
+    let o = '';
+    objs.forEach(([x,y,c],i)=>{ o += `<g>${AT('translate',T,[[0,`${x} ${y}`],[3.6+i*.3,`${x} ${y}`],[5.2+i*.3,`${206+i*14} ${gy-26}`],[T-.4,`${206+i*14} ${gy-26}`],[T-.1,`${x} ${y}`]],true)}<rect x="-7" y="-14" width="14" height="14" fill="${c}"/></g>`; });
+    const body = `<rect x="0" y="${gy}" width="260" height="40" fill="${C.ground}"/>`
+      + `<rect x="54" y="44" width="70" height="6" fill="#7a5532"/><line x1="58" y1="50" x2="58" y2="${gy}" stroke="#7a5532" stroke-width="4"/><line x1="120" y1="50" x2="120" y2="${gy}" stroke="#7a5532" stroke-width="4"/>`
+      + text(88,166,'high platform',{size:9,fill:'#cbd5e1'})
+      + `<rect x="196" y="${gy-30}" width="56" height="30" fill="#334155" stroke="#94a3b8"/>` + text(224,166,'low, enclosed',{size:9,fill:C.safe})
+      + o
+      + `<g opacity="0">${show(T,.6,3.6)}${arrow(id,8,36,48,36,'white',3)}${text(26,28,'wind',{size:9})}</g>`
+      + `<g opacity="0">${show(T,1.4,3.6)}<path d="M110,50 Q150,90 160,148" stroke="${C.net}" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#${id}-net)"/>${text(176,98,'U → K',{size:10,fill:'#fecaca'})}</g>`
+      + `<line x1="276" y1="150" x2="390" y2="150" stroke="#475569"/>`
+      + growBar(T, 290, 150, 26, 100, C.vel, [[0,.85],[3.6,.85],[5.8,.06],[T-.4,.06],[T-.1,.85]], true) + text(303,166,'U',{size:10,fill:C.vel})
+      + growBar(T, 340, 150, 26, 100, C.net, [[0,.02],[1.4,.02],[2.4,.5],[3.4,.02],[T,.02]], true) + text(353,166,'K',{size:10,fill:C.net})
+      + text(334,30,'E_mech = K + U',{size:10,fill:'#cbd5e1'})
+      + `<g opacity="0">${show(T,5.8)}${text(130,24,'Secured & low: little energy to release',{size:10.5,fill:C.safe})}</g>`;
+    return { T, body, steps:[
+      S(.6, 'Loose objects on the high platform store potential energy U = mgh.'),
+      S(1.4, 'Strong wind can knock them off: U turns into kinetic energy K as they fall or fly at people.'),
+      S(3.6, 'Securing them, or moving them to a low, enclosed area…'),
+      S(5.8, '…leaves little mechanical energy (K + U) to release — the hazard is reduced.')] };
+  }
+
+  // Inertia: the vehicle/boat stops, the loose load keeps going (G9 #1 boat, #2 vehicle).
+  function inertia(id, kind){
+    const T = 9, gy = kind==='boat' ? 128 : 150;
+    const ground = kind==='boat' ? water(118,190) + `<rect x="300" y="118" width="100" height="72" fill="#3f6212" opacity=".7"/>`
+      : `<rect x="0" y="${gy}" width="400" height="40" fill="${C.ground}"/><rect x="300" y="${gy-60}" width="8" height="60" fill="#b91c1c"/>`;
+    const veh = kind==='boat'
+      ? `<path d="M-60,-6 L50,-6 L62,-22 L-64,-22 Z" fill="#7c4a1e" stroke="#451a03" stroke-width="1.6"/>`
+      : `<rect x="-62" y="-30" width="96" height="10" fill="#15803d"/><rect x="34" y="-50" width="30" height="40" rx="3" fill="#15803d"/><rect x="40" y="-46" width="20" height="14" fill="#93c5fd"/><circle cx="-40" cy="-10" r="10" fill="#111827"/><circle cx="46" cy="-10" r="10" fill="#111827"/>`;
+    const stopX = 250, startX = 70;
+    const body = ground + text(kind==='boat'?350:304, kind==='boat'?110:84, kind==='boat'?'submerged object':'sudden stop', {size:9,fill:'#fecaca'})
+      + `<g>${AT('translate',T,[[0,`${startX} ${gy}`],[2.4,`${stopX} ${gy}`],[T-.4,`${stopX} ${gy}`],[T-.1,`${startX} ${gy}`]])}${veh}`
+      +   `<rect x="-30" y="${kind==='boat'?-36:-44}" width="16" height="14" fill="#ea580c"/><line x1="-34" y1="${kind==='boat'?-30:-38}" x2="-10" y2="${kind==='boat'?-30:-38}" stroke="${C.vel}" stroke-width="2"/>`
+      + `</g>`
+      // loose item: moves with the vehicle, then keeps going after the stop
+      + `<g>${AT('translate',T,[[0,`${startX} ${gy}`],[2.4,`${stopX} ${gy}`],[3.1,`${stopX+44} ${gy}`],[3.5,`${stopX+56} ${gy+(kind==='boat'?30:0)}`],[T-.4,`${stopX+56} ${gy+(kind==='boat'?30:0)}`],[T-.1,`${startX} ${gy}`]])}`
+      +   `<circle cx="10" cy="${kind==='boat'?-30:-38}" r="8" fill="#dc2626"/></g>`
+      + `<g opacity="0">${show(T,.4,2.4)}${arrow(id,20,40,70,40,'vel',3)}${text(45,32,'v (all together)',{size:9.5,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,2.6)}${text(200,26,'Vehicle stops — loose load keeps moving',{size:11,fill:'#fecaca'})}${text(200,44,'Inertia: ΣF = 0 ⇒ v stays the same',{size:10.5,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,4.4)}${text(150,kind==='boat'?84:64,'strapped load stays put ✓',{size:10,fill:C.safe})}</g>`;
+    return { T, body, steps:[
+      S(.4, kind==='boat' ? 'The boat and everything in it move toward the bank at the same speed.' : 'The vehicle, learners and supplies all move at the same speed.'),
+      S(2.4, kind==='boat' ? 'The boat hits a submerged object and stops suddenly.' : 'The vehicle stops suddenly.'),
+      S(2.6, 'Nothing stops the loose load, so it keeps moving forward — inertia (ΣF = 0 ⇒ v constant).'),
+      S(4.4, kind==='boat' ? 'A tied-down bag is stopped with the boat. Secure loose objects before travelling.' : 'Strapped containers stop with the vehicle. Secure them and avoid sudden stops.')] };
+  }
+
+  // Same force, different mass → different acceleration (G9 #3 containers, #4 roofing vs board).
+  function fma(id, kind){
+    const T = 9;
+    const [n1, n2] = kind==='wind' ? ['roofing sheet (light)','wooden board (heavy)'] : ['empty container (light)','filled container (heavy)'];
+    const shape1 = kind==='wind' ? `<rect x="-16" y="-4" width="32" height="5" fill="#d4d4d8" stroke="#71717a"/>` : `<rect x="-14" y="-24" width="28" height="24" rx="3" fill="#e5e7eb" opacity=".7" stroke="#64748b"/>`;
+    const shape2 = kind==='wind' ? `<rect x="-20" y="-7" width="40" height="8" fill="#8a6236" stroke="#451a03"/>` : `<rect x="-14" y="-24" width="28" height="24" rx="3" fill="#1d4ed8" stroke="#1e3a8a"/><rect x="-11" y="-17" width="22" height="15" fill="#38bdf8" opacity=".7"/>`;
+    const lane = (y, shape, far, label)=> `<line x1="0" y1="${y}" x2="400" y2="${y}" stroke="#334155"/>`
+      + `<g>${AT('translate',T,[[0,`60 ${y}`],[1.6,`60 ${y}`],[6.4,`${60+far} ${y}`],[T-.4,`${60+far} ${y}`],[T-.1,`60 ${y}`]],'in')}${shape}`
+      +   `<g opacity="0">${show(T,.5)}${arrow(id,-56,-10,-20,-10,kind==='wind'?'white':'water',3.5)}</g></g>` + text(60,y+16,label,{size:9.5,fill:'#cbd5e1'});
+    const body = (kind==='wind' ? '' : water(30,190).replace('opacity=".55"','opacity=".35"'))
+      + lane(84, shape1, 300, n1) + lane(160, shape2, 90, n2)
+      + `<g opacity="0">${show(T,.5)}${text(200,22,'same force F on both',{size:11,fill:kind==='wind'?C.white:C.water})}</g>`
+      + `<g opacity="0">${show(T,3.4)}${text(330,62,'large a',{size:11,fill:'#fecaca'})}${text(250,140,'small a',{size:11,fill:C.safe})}</g>`
+      + `<g opacity="0">${show(T,5)}${text(330,108,'a = F / m',{size:14,fill:C.vel})}</g>`;
+    return { T, body, steps:[
+      S(.5, kind==='wind' ? 'The wind pushes both objects with about the same force F.' : 'The floodwater pushes both containers with about the same force F.'),
+      S(1.6, 'Both start to speed up…'),
+      S(3.4, kind==='wind' ? '…but the light roofing sheet gains speed much faster than the heavy board.' : '…but the light, empty container gains speed much faster than the filled one.'),
+      S(5, 'Newton’s second law: a = F/m — the same force gives less mass more acceleration.'),
+      S(6.4, kind==='wind' ? 'The fast-moving sheet is the bigger danger: stay away from its path.' : 'Stay clear of light objects in moving water — they are swept away quickly.')] };
+  }
+
+  // Action–reaction stepping off a boat (G9 #5).
+  function actionReaction(id){
+    const T = 11, gy = 128;
+    const body = water(gy, 190, 120, 400) + `<rect x="0" y="${gy-8}" width="122" height="70" fill="#3f6212" opacity=".75"/>`
+      + text(60,184,'riverbank',{size:9,fill:'#d9f99d'})
+      // hard step: boat pushed away
+      + `<g>${AT('translate',T,[[0,'0 0'],[1.2,'0 0'],[3.4,'110 0'],[5,'110 0'],[5.4,'0 0'],[T,'0 0']])}<path d="M136,${gy-4} L300,${gy-4} L286,${gy+14} L150,${gy+14} Z" fill="#7c4a1e" stroke="#451a03" stroke-width="1.6"/></g>`
+      + `<g>${AT('translate',T,[[0,'170 0'],[1,'170 0'],[1.6,'92 0'],[5,'92 0'],[5.4,'170 0'],[6.6,'170 0'],[8.6,'92 0'],[T,'92 0']])}${person(0, gy-4, C.white, .9)}</g>`
+      + `<g opacity="0">${show(T,1,2.4)}${arrow(id,150,gy-22,200,gy-22,'net',4)}${text(176,gy-30,'F on boat',{size:9.5,fill:'#fecaca'})}${arrow(id,138,gy-50,88,gy-50,'resist',4)}${text(112,gy-58,'F on learner',{size:9.5,fill:'#fdba74'})}</g>`
+      + `<g opacity="0">${show(T,1.2,5)}${text(270,30,'Equal and opposite: F_A→B = −F_B→A',{size:10.5,fill:C.vel})}${text(270,48,'Hard step → boat shoots away ✗',{size:10.5,fill:'#fecaca'})}</g>`
+      // held + slow step
+      + `<g opacity="0">${show(T,5.6)}<line x1="40" y1="${gy-30}" x2="142" y2="${gy+2}" stroke="#d6b98c" stroke-width="2"/>${person(36, gy-6, C.safe, .9)}${text(270,30,'Boat held + slow step',{size:10.5,fill:C.safe})}${text(270,48,'→ small forces, boat stays ✓',{size:10.5,fill:C.safe})}</g>`;
+    return { T, body, steps:[
+      S(1, 'Stepping off, the learner pushes back on the boat…'),
+      S(1.2, '…and the boat pushes the learner forward with an equal and opposite force (Newton’s third law).'),
+      S(2.2, 'The boat, now free to move, shoots away from the bank — the learner may fall into the water.'),
+      S(5.6, 'Safe way: someone holds the boat steady and the learner steps off slowly, so the forces stay small.')] };
+  }
+
+  // A bent branch held by a support: force pair; release → it springs (G9 #6).
+  function branchSpring(id){
+    const T = 9;
+    const body = `<rect x="0" y="150" width="400" height="40" fill="${C.ground}"/><rect x="250" y="56" width="16" height="94" fill="#9ca3af"/>` + text(258,166,'bridge support',{size:9,fill:'#cbd5e1'})
+      + `<g>${AT('rotate',T,[[0,'0 70 146'],[4.6,'0 70 146'],[5.2,'-30 70 146'],[5.6,'-22 70 146'],[6,'-26 70 146'],[T-.4,'-26 70 146'],[T-.1,'0 70 146']])}`
+      +   `<path d="M70,146 Q150,70 248,84" stroke="#7a5532" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="190" cy="78" r="12" fill="#3f6212"/><circle cx="214" cy="72" r="10" fill="#4d7c0f"/></g>`
+      + `<g opacity="0">${show(T,.6,4.6)}${arrow(id,216,96,246,96,'net',3.6)}${text(222,114,'branch → support',{size:9,fill:'#fecaca'})}${arrow(id,298,76,268,76,'resist',3.6)}${text(318,66,'support → branch',{size:9,fill:'#fdba74'})}</g>`
+      + `<g opacity="0">${show(T,1.8,4.6)}${text(150,26,'Equal and opposite forces hold it bent',{size:11,fill:C.vel})}</g>`
+      + `<g opacity="0">${show(T,3,4.6)}${person(150,150,C.net,.9)}${text(150,166,'learner pulling ✗',{size:9,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,4.6)}${text(150,26,'Released → the push is gone → it springs!',{size:11,fill:'#fecaca'})}<path d="M220,70 Q200,40 160,40" stroke="${C.net}" stroke-width="2" stroke-dasharray="4 3" fill="none" marker-end="url(#${id}-net)"/></g>`
+      + person(370,150,C.vel,.9) + person(386,150,C.vel,.9) + `<g opacity="0">${show(T,6.2)}${text(372,44,'trained adults',{size:9,fill:C.safe})}${text(372,58,'+ equipment ✓',{size:9,fill:C.safe})}</g>`;
+    return { T, body, steps:[
+      S(.6, 'The bent branch pushes on the bridge support; the support pushes back equally (Newton’s third law).'),
+      S(1.8, 'Those equal and opposite forces are what hold the branch bent, storing energy.'),
+      S(3, 'Pulling it could free it suddenly…'),
+      S(4.6, '…then the support’s push is gone and the branch springs toward whoever is in front of it.'),
+      S(6.2, 'Safe decision: don’t pull it — trained adults with proper equipment should remove it.')] };
+  }
+
+  // Projectile: landing point depends on angle and speed (G10 #1 rope throw).
+  function projectileAim(id){
+    const T = 10, x0 = 40, y0 = 132, g = 9.8;
+    const path = (v, th)=>{ let d = `M${x0},${y0}`; const r = th*Math.PI/180; for(let t=.05;t<4;t+=.05){ const x = x0 + v*Math.cos(r)*t*14, y = y0 - (v*Math.sin(r)*t - .5*g*t*t)*14; d += ` L${x.toFixed(1)},${y.toFixed(1)}`; if(y > 160 || (x > 300 && y > 92)) break; } return d; };
+    const tries = [[5.2,20,C.net,'too low, too slow'],[9,75,C.resist,'too steep'],[7.6,45,C.safe,'adjusted θ and v₀ ✓']];
+    let ps = '';
+    tries.forEach(([v,th,col,l],i)=>{ const t0 = .6 + i*2.2; ps += `<path d="${path(v,th)}" stroke="${col}" stroke-width="2.6" fill="none" ${draw(T,t0,t0+1.2,700)} stroke-linecap="round">${drawAnim(T,t0,t0+1.2,700)}</path>`
+      + `<g opacity="0">${show(T,t0+1.2)}${text(i===1?120:i===0?120:230, i===1?24:i===0?150:46, l, {size:9.5,fill:col})}</g>`; });
+    const body = water(150,190,80,300) + `<rect x="0" y="132" width="80" height="58" fill="#3f6212" opacity=".75"/><rect x="300" y="92" width="100" height="98" fill="#a8a29e"/>`
+      + text(350,110,'raised platform',{size:9,fill:'#1f2937'}) + text(190,184,'flooded gap',{size:9,fill:'#bae6fd'})
+      + person(32,132,C.resist,.9) + person(340,92,C.white,.8) + person(362,92,C.white,.8)
+      + ps
+      + `<g opacity="0">${show(T,7.2)}${text(150,70,'x = x₀ + (v₀ cos θ) t',{size:10.5,fill:C.vel})}${text(150,86,'y = y₀ + (v₀ sin θ) t − ½ g t²',{size:10.5,fill:C.vel})}</g>`;
+    return { T, body, steps:[
+      S(.6, 'Thrown without aiming — too low and too slow — the rope falls into the water.'),
+      S(2.8, 'Too steep, it goes up high and still comes down short.'),
+      S(5, 'After estimating the distance, the right angle and speed land it on the platform.'),
+      S(7.2, 'The rope is a projectile: where it lands depends on the release angle θ and initial speed v₀.')] };
+  }
+
+  // Windblown roofing: a curved projectile path, not straight down (G10 #2).
+  function projectileRoof(id){
+    const T = 9, gy = 150;
+    const d = (()=>{ let s = 'M70,58'; for(let t=.05;t<3;t+=.05){ const x = 70 + 48*t*1.6, y = 58 - (12*t - 4.9*t*t)*9; s += ` L${x.toFixed(1)},${y.toFixed(1)}`; if(y > gy-4) break; } return s; })();
+    const body = `<rect x="0" y="${gy}" width="400" height="40" fill="${C.ground}"/><rect x="34" y="70" width="60" height="80" fill="#78716c"/><path d="M28,72 L100,72 L64,48 Z" fill="#a16207"/>`
+      + `<rect x="300" y="100" width="80" height="50" fill="#475569"/>` + text(340,166,'secure shelter',{size:9,fill:C.safe})
+      + `<line x1="70" y1="58" x2="70" y2="${gy}" stroke="#94a3b8" stroke-dasharray="3 4"/>` + `<g opacity="0">${show(T,.8)}${text(110,166,'not straight down ✗',{size:9,fill:'#cbd5e1'})}</g>`
+      + `<path d="${d}" stroke="${C.vel}" stroke-width="2.4" fill="none" stroke-dasharray="5 4"/>`
+      + `<g opacity="0">${A('opacity',T,[[0,0],[.6,0],[.7,1],[3.2,1],[3.3,0]])}<rect x="-12" y="-3" width="24" height="5" fill="#d4d4d8" stroke="#71717a"><animateMotion dur="${T}s" repeatCount="indefinite" path="${d}" keyPoints="0;0;1;1" keyTimes="0;${(.6/T).toFixed(3)};${(3.2/T).toFixed(3)};1" calcMode="linear" rotate="auto"/></rect></g>`
+      + `<ellipse cx="236" cy="${gy+2}" rx="38" ry="6" fill="${C.net}" opacity=".55"/>` + text(236,182,'landing area',{size:9,fill:'#fecaca'})
+      + `<g opacity="0">${show(T,3.4)}${text(200,24,'It flies sideways as it falls: a projectile',{size:11})}${text(200,42,'x = x₀ + (v₀ cos θ) t,  y = y₀ + (v₀ sin θ) t − ½ g t²',{size:9.5,fill:C.vel})}</g>`
+      + person(278,gy,C.safe,.9) + `<g opacity="0">${show(T,5)}<path d="M286,140 L306,140" stroke="${C.safe}" stroke-width="2" marker-end="url(#${id}-safe)"/>${check(292,112,true)}</g>`;
+    return { T, body, steps:[
+      S(.8, 'The wind tears a piece of roofing off the structure.'),
+      S(1.6, 'It starts with sideways speed, so it travels along a curved path while it falls.'),
+      S(3.4, 'That is projectile motion — it lands well away from the spot below where it started.'),
+      S(5, 'Its path is hard to predict: move into a secure shelter, away from where it could land.')] };
+  }
+
+  // Inelastic collision: they move together; momentum same before and after, some KE lost (G10 #6).
+  function inelastic(id){
+    const T = 9, gy = 120, tHit = 2.6;
+    const body = `<rect x="0" y="${gy}" width="400" height="6" fill="${C.ground}"/>`
+      + `<g>${AT('translate',T,[[0,'30 0'],[tHit,'170 0'],[6,'250 0'],[T-.4,'250 0'],[T-.1,'30 0']])}<rect x="0" y="${gy-12}" width="40" height="8" fill="#8a6236"/></g>`
+      + `<g>${AT('translate',T,[[0,'0 0'],[tHit,'0 0'],[6,'80 0'],[T-.4,'80 0'],[T-.1,'0 0']])}<rect x="210" y="${gy-24}" width="22" height="24" rx="2" fill="#e5e7eb" stroke="#64748b"/></g>`
+      + `<g opacity="0">${show(T,.4,tHit)}${arrow(id,40,70,100,70,'vel',3.2)}${text(70,62,'v₁',{size:10,fill:C.vel})}${text(222,80,'at rest',{size:9.5,fill:'#cbd5e1'})}</g>`
+      + `<g opacity="0">${show(T,tHit+.2)}${arrow(id,230,70,258,70,'vel',3.2)}${text(244,62,'v′ (slower, together)',{size:10,fill:C.vel})}${text(200,24,'INELASTIC: they stick together',{size:11.5,fill:'#fecaca'})}</g>`
+      + `<line x1="40" y1="176" x2="380" y2="176" stroke="#475569"/>`
+      + growBar(T, 70, 176, 26, 40, C.purple, [[0,1],[T,1]]) + text(83,188,'p before',{size:8.5,fill:'#ddd6fe'})
+      + `<g opacity="0">${show(T,tHit+.4)}${growBar(T, 130, 176, 26, 40, C.purple, [[0,1],[T,1]])}${text(143,188,'p after',{size:8.5,fill:'#ddd6fe'})}${text(110,138,'Σp before = Σp after',{size:10,fill:'#ddd6fe'})}</g>`
+      + growBar(T, 250, 176, 26, 40, C.net, [[0,1],[T,1]]) + text(263,188,'KE before',{size:8.5,fill:'#fecaca'})
+      + `<g opacity="0">${show(T,tHit+.4)}${growBar(T, 310, 176, 26, 40, C.net, [[0,.45],[T,.45]])}${text(323,188,'KE after',{size:8.5,fill:'#fecaca'})}${text(300,138,'some KE lost',{size:10,fill:'#fecaca'})}</g>`
+      + `<g opacity="0">${show(T,6.4)}${text(200,44,'m₁v₁ = (m₁ + m₂) v′ — still moving: stay out of their path',{size:9.5,fill:C.vel})}</g>`;
+    return { T, body, steps:[
+      S(.4, 'The windblown board moves at v₁; the plastic container is at rest.'),
+      S(tHit, 'They collide and move off together — an inelastic collision.'),
+      S(tHit+.4, 'Total momentum is conserved (Σp before = Σp after), but some kinetic energy is lost.'),
+      S(6.4, 'm₁v₁ = (m₁ + m₂)v′: the joined objects keep moving, so stay out of their path.')] };
   }
 
   // ═══ selection ═══
@@ -575,6 +845,22 @@ const XV = (()=>{
       case 'panel': return energyFall(opts.id);
       case 'momentum': return momentum(opts.id);
       case 'barrier': return impulse(opts.id);
+      case 'channel': return channel(opts.id);
+      case 'roofslide': return motionMap(opts.id);
+      case 'logbottle': return momentum(opts.id, true);
+      case 'flowerpot': return potentialPot(opts.id);
+      case 'stuckbox': return workDisp(opts.id);
+      case 'platform': return mechEnergy(opts.id);
+      case 'boatstop': return inertia(opts.id, 'boat');
+      case 'vehiclestop': return inertia(opts.id, 'vehicle');
+      case 'twocontainers': return fma(opts.id, 'water');
+      case 'roofboard': return fma(opts.id, 'wind');
+      case 'boatstep': return actionReaction(opts.id);
+      case 'branchspring': return branchSpring(opts.id);
+      case 'ropethrow': return projectileAim(opts.id);
+      case 'roofproj': return projectileRoof(opts.id);
+      case 'fender': return impulse(opts.id, 'fender');
+      case 'inelastic': return inelastic(opts.id);
     }
     if(scen.vel !== undefined || scen.rain !== undefined) return currentForce(opts.id, scen);
     if(scen.wind !== undefined) return windSquare(opts.id, scen);

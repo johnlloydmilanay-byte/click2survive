@@ -604,24 +604,26 @@ function shsPanel(scen){
 
 // 5 · FLOOD · Momentum — a heavy log and a light container drift at the same velocity
 // toward a small boat waiting at the crossing.
-function shsMomentum(scen){
+function shsMomentum(scen, mode){
+  const ke = mode === 'ke';
   shsRiver({ flow:1.8, rain:3800 });
   const BZ = 7;
   const boat = shsBanca(.62); boat.position.set(-1.8,.1,BZ); boat.rotation.y = .1; scene.add(boat);
   const rower = makeHuman(-.6,.15,0,0x065f46,0x334155,.62); rower.rotation.y = -Math.PI/2; boat.add(rower);
-  g7Tag('Boat waiting at the crossing', -1.8, 2.3, BZ, {size:.52});
+  g7Tag(ke ? 'Boat at the landing' : 'Boat waiting at the crossing', -1.8, 2.3, BZ, {size:.52});
   const logG = new THREE.Group(); scene.add(logG);
   const logM = new THREE.Mesh(new THREE.CylinderGeometry(.42,.5,4.2,20), pbr({color:0x5a4030,map:woodTex(),roughness:.92}));
   logM.rotation.z = Math.PI/2; logM.castShadow = true; logG.add(logM);
   [-1,1].forEach(sd=>{ const end = new THREE.Mesh(new THREE.CircleGeometry(.46,20), pbr({color:0xb08a5a, roughness:.9})); end.position.x = sd*2.11; end.rotation.y = sd*Math.PI/2; logG.add(end); });
   const can = new THREE.Group(); scene.add(can);
-  const cm = new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.5,18), pbr({color:0xf59e0b, roughness:.4})); cm.rotation.z = Math.PI/2; cm.castShadow = true; can.add(cm);
+  if(ke){ const b = g7MakeBottle(); b.scale.setScalar(1.8); b.rotation.y = Math.PI/2; can.add(b); }
+  else { const cm = new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.5,18), pbr({color:0xf59e0b, roughness:.4})); cm.rotation.z = Math.PI/2; cm.castShadow = true; can.add(cm); }
   const pLog = g7Arrow(0xef4444, 3.4, .11); pLog.rotation.y = -Math.PI/2; scene.add(pLog);
   const pCan = g7Arrow(0xfacc15, .45, .07); pCan.rotation.y = -Math.PI/2; scene.add(pCan);
-  const ll = g7Label('LOG: large m → large p = mv', {size:.6, fg:'#fecaca', border:'#ef4444'}); scene.add(ll);
-  const lc = g7Label('Container: small m → small p', {size:.54, fg:'#fde047'}); scene.add(lc);
+  const ll = g7Label(ke ? 'LOG: large m → large K = ½mv²' : 'LOG: large m → large p = mv', {size:.6, fg:'#fecaca', border:'#ef4444'}); scene.add(ll);
+  const lc = g7Label(ke ? 'Bottle: small m → small K' : 'Container: small m → small p', {size:.54, fg:'#fde047'}); scene.add(lc);
   const lv = g7Label('Same velocity v', {size:.55}); scene.add(lv);
-  const bars = shsBars(7,1.5,-1, ['p log','p can'], [0xef4444, 0xfacc15]); bars.userData.set(1, .1);
+  const bars = shsBars(7,1.5,-1, ke ? ['K log','K bottle'] : ['p log','p can'], [0xef4444, 0xfacc15]); bars.userData.set(1, ke ? .04 : .1);
   let z = -24, away = 0;
   animCallbacks.push((t,dt)=>{
     if(ctrl.on) away = Math.min(1, away + dt*.35);           // the decision: the boat moves out of the log's path
@@ -634,20 +636,21 @@ function shsMomentum(scen){
     ll.position.set(-1.6, 2.2, z); lc.position.set(2.6, 1.5, z); lv.position.set(.4, 3, z);
     boat.position.x = -1.8 - away*1.9; boat.position.z = BZ + away*2; boat.position.y = .1 + Math.sin(t*1.3)*.04;
   });
-  g7Tag('Momentum p = mv', 7, 4, 1.5, {size:.5});
+  g7Tag(ke ? 'Kinetic energy K = ½mv²' : 'Momentum p = mv', 7, 4, 1.5, {size:.5});
 
   g7SafePad(-11,-6,'SAFE SPOT · away from the river');
   g7Human(-5.9,3.2);
   humanGroup.rotation.y = Math.PI/2;
   g7Gateway(-11,-6,Math.PI/2);
   G7 = { bounds:[-15,4,-12,12], camOff:[5,4.5,-3],
-    hazards:[{test:(x,z)=> x>-4.7, msg:'⚠ The log has far more momentum — stay out of its path and postpone crossing!'}] };
+    hazards:[{test:(x,z)=> x>-4.7, msg: ke ? '⚠ The log carries far more kinetic energy — stay away from its path!' : '⚠ The log has far more momentum — stay out of its path and postpone crossing!'}] };
   g7Camera([-9,6.5,15],[.5,0,-1]);   // downstream: the log drifts toward the boat and the viewer
 }
 
 // Force–time sketch for the barrier scene: the same area (impulse) as a tall, narrow spike
 // without padding and a low, wide hump with it.
-function shsDrawImpulse(c, W, H){
+function shsDrawImpulse(c, W, H, labels){
+  labels = labels || ['no padding', 'padding: longer Δt, smaller F'];
   c.fillStyle = 'rgba(10,18,34,.9)'; g7RR(c,0,0,W,H,36); c.fill();
   c.fillStyle = '#e2e8f0'; c.font = `800 46px ${G7_FONT}`; c.textAlign = 'center'; c.fillText('Same impulse  J = F·Δt = Δp', W/2, 64);
   const x0 = 70, y0 = H-70, gw = W-120, gh = H-170;
@@ -659,8 +662,8 @@ function shsDrawImpulse(c, W, H){
     c.closePath(); c.fillStyle = col.replace('1)', '.28)'); c.fill(); c.strokeStyle = col; c.lineWidth = 7; c.stroke();
     c.fillStyle = col; c.font = `800 34px ${G7_FONT}`; c.fillText(lbl, lx, y0 - h - 16);
   };
-  curve('rgba(239,68,68,1)', gw*.16, gh*.92, 'no padding', x0+30);
-  curve('rgba(74,222,128,1)', gw*.72, gh*.3, 'padding: longer Δt, smaller F', x0+gw*.3);
+  curve('rgba(239,68,68,1)', gw*.16, gh*.92, labels[0], x0+30);
+  curve('rgba(74,222,128,1)', gw*.72, gh*.3, labels[1], x0+gw*.3);
 }
 
 // 6 · TYPHOON · Impulse — windblown debris strikes a padded barrier beside the pathway;

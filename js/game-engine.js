@@ -2325,7 +2325,7 @@ function startControl(){
   const scen = GS.gd.scenarios[GS.idx];
   const opt = scen.opts[scen.ci].toLowerCase();
   let proceed;
-  if(GS.grade===9 || isSceneGrade(GS.grade)) proceed = true; // G7/G11/G12: each scene places its gateway at the safe destination
+  if(GS.grade===9 || isSceneGrade(GS.grade)) proceed = true; // item scenes place their gateway at the safe destination
   else proceed = /cross/.test(opt) && !/do not|not cross/.test(opt);
 
   ctrl.on = true; ctrl.done = false;
@@ -2354,9 +2354,12 @@ function startControl(){
   gatewayActive = true;
 
   // Grade 9: apply the corrected boat configuration before crossing
-  if(GS.grade===9) applyBoatCorrection(scen);
+  // The old Grade 9 buoyancy lab steers the boat; every per-item scene walks the learner.
+  const boatMode = GS.grade===9 && !isSceneGrade(GS.grade);
+  ctrl.boat = boatMode;
+  if(boatMode) applyBoatCorrection(scen);
 
-  ctrl.subject = GS.grade===9 ? boatGroup : humanGroup;
+  ctrl.subject = boatMode ? boatGroup : humanGroup;
 
   // Chase camera offsets per mode
   if(isSceneGrade(GS.grade) && G7 && G7.camOff) ctrl.camOff.set(...G7.camOff);
@@ -2408,9 +2411,9 @@ function updateControl(dt, t){
   const mv = new THREE.Vector3().addScaledVector(fwd, joy.y).addScaledVector(right, joy.x);
   const mag = mv.length();
   const moving = mag > .12;
-  if(humanGroup && humanGroup.userData) humanGroup.userData.moving = (ctrl.grade!==9) && moving;
+  if(humanGroup && humanGroup.userData) humanGroup.userData.moving = !ctrl.boat && moving;
   // footsteps in time with the walk cycle
-  if(moving && ctrl.grade!==9){ footT += dt; if(footT > .37){ footT = 0; AudioSysSafe('footstep'); } } else footT = .3;
+  if(moving && !ctrl.boat){ footT += dt; if(footT > .37){ footT = 0; AudioSysSafe('footstep'); } } else footT = .3;
 
   if(isSceneGrade(ctrl.grade)){
     // ── Grades 7, 11, 12: walk to the safe destination; hazard areas refuse entry with a warning ──

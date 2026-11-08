@@ -29,7 +29,7 @@ const cur = items.find(x=>x.k===q.get('k')) || items[0];
 document.getElementById('nav').innerHTML = items.map(x=>`<a href="?k=${x.k}" class="${x===cur?'on':''}">${x.label}</a>`).join('');
 document.getElementById('title').textContent = `${GRADES[cur.g] ? GRADES[cur.g].name : ''} · ${cur.label} · ${cur.sc.scene || cur.sc.comp || ''}`;
 document.getElementById('sub').textContent = (cur.sc.q || cur.sc.objective || '').slice(0,160);
-const opts = cur.g === 9 ? {grade:9, lab:{w:cur.sc.world, loaded:+(q.get('n')||3)}} : {grade:cur.g};
+const opts = cur.sc.lab ? {grade:cur.g, lab:{w:cur.sc.world, loaded:+(q.get('n')||3)}} : {grade:cur.g};
 renderExplainVisual(cur.sc, opts);
 if(q.get('t')){ const svg=document.querySelector('.xv-svg'); setTimeout(()=>{ svg.pauseAnimations(); svg.setCurrentTime(+q.get('t')); document.querySelectorAll('.xv-steps li').forEach(li=>{ li.classList.toggle('on', +li.dataset.t <= +q.get('t')); }); }, 50); }
 </script></body></html>
