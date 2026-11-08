@@ -12,7 +12,7 @@ let resultsCache = [];    // all per-item results, live (if the rules allow it)
 let sessionsCache = [];   // all sessions (falls back to active-only if the rules only allow that)
 let assignTeacherId = null;
 let goTab = () => {};
-const GRADE_LIST = [7, 8, 9, 10];
+const GRADE_LIST = GRADE_LEVELS;   // from game-data.js: Junior High 7–10, Senior High 11–12
 
 function sectionById(id){ return sectionsCache.find(s => s.id === id); }
 function sectionName(id){ const s = sectionById(id); return s ? s.name : ''; }
@@ -65,9 +65,10 @@ function renderOverview(){
     + statHTML({ label:'Completed runs', icon:'journal-check', value:attemptsCache.length, sub:`${sessionsCache.length} session${sessionsCache.length===1?'':'s'}` })
     + statHTML({ label:'Live sessions', icon:'broadcast', tone: live.length ? 'good' : '', value:live.length, sub: live.length ? 'Students playing now' : 'None running' });
 
-  document.getElementById('ov-grades').innerHTML = GRADE_LIST.map(g => {
+  document.getElementById('ov-grades').innerHTML = GRADE_LIST.map((g, i) => {
     const r = gradeRollup(g);
-    return `<tr class="clickable" onclick="rowClick(event,this)">
+    const band = (!i || gradeBand(g) !== gradeBand(GRADE_LIST[i-1])) ? `<tr class="band-row"><th colspan="8" scope="colgroup">${gradeBand(g)}</th></tr>` : '';
+    return `${band}<tr class="clickable" onclick="rowClick(event,this)">
       <th scope="row"><button class="name-btn" data-primary onclick="openGradeItems(${g})"><span class="nm">Grade ${g}</span><span class="sr-only">, open item analysis</span></button></th><td class="muted">${esc(r.gd ? r.gd.topic : '')}</td>
       <td class="num">${r.secs.length}</td><td class="num">${r.teachers}</td><td class="num">${r.students}</td>
       <td>${r.students ? barHTML(r.participation, { tone:'seq', tip:`${r.played} of ${r.students} played` }) : '<span class="dim">—</span>'}</td>
@@ -182,9 +183,12 @@ function teacherRollup(t){
 }
 function renderTeachers(){
   const q = document.getElementById('t-search').value.trim().toLowerCase();
+  const level = document.getElementById('t-level').value;
   const body = document.getElementById('teachers-body');
-  const rows = teachersCache.filter(t => !q || (t.name||'').toLowerCase().includes(q) || (t.username||'').toLowerCase().includes(q));
-  if (!rows.length){ body.innerHTML = `<tr><td colspan="8">${emptyHTML(teachersCache.length ? 'No teachers match.' : 'No teachers yet. Create one above.', 'person-workspace')}</td></tr>`; return; }
+  const teaches = (t, shs) => (t.assignedSectionIds||[]).some(id => { const s = sectionById(id); return s && (s.grade >= 11) === shs; });
+  const rows = teachersCache.filter(t => (!q || (t.name||'').toLowerCase().includes(q) || (t.username||'').toLowerCase().includes(q))
+    && (!level || (level === 'none' ? !(t.assignedSectionIds||[]).length : teaches(t, level === 'shs'))));
+  if (!rows.length){ body.innerHTML = `<tr><td colspan="8">${emptyHTML(teachersCache.length ? 'No teachers match these filters.' : 'No teachers yet. Create one above.', 'person-workspace')}</td></tr>`; return; }
   body.innerHTML = rows.map(t => {
     const r = teacherRollup(t);
     return `<tr>
@@ -609,10 +613,13 @@ function openAssignModal(teacherId){
   const byGrade = {};
   sectionsCache.forEach(s => { (byGrade[s.grade] = byGrade[s.grade]||[]).push(s); });
   const list = document.getElementById('assign-list');
-  list.innerHTML = [7,8,9,10].map(g => {
+  // Grouped Junior High (7–10) / Senior High (11–12); a teacher may hold sections in both.
+  list.innerHTML = GRADE_LIST.map((g, i) => {
     const secs = byGrade[g]||[];
-    if (!secs.length) return '';
-    return `<fieldset style="border:0">
+    const band = (!i || gradeBand(g) !== gradeBand(GRADE_LIST[i-1])) && GRADE_LIST.slice(i).some(x => gradeBand(x) === gradeBand(g) && (byGrade[x]||[]).length)
+      ? `<div class="assign-band">${gradeBand(g)}</div>` : '';
+    if (!secs.length) return band;
+    return `${band}<fieldset style="border:0">
       <legend class="section-toggle-grade">Grade ${g}</legend>
       ${secs.map(s => `
         <label class="section-toggle-row">

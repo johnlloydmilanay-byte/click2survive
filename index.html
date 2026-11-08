@@ -53,10 +53,16 @@
           <label for="reg-grade">Grade Level</label>
           <select id="reg-grade" onchange="loadSections()">
             <option value="">Select grade…</option>
-            <option value="7">Grade 7</option>
-            <option value="8">Grade 8</option>
-            <option value="9">Grade 9</option>
-            <option value="10">Grade 10</option>
+            <optgroup label="Junior High School">
+              <option value="7">Grade 7</option>
+              <option value="8">Grade 8</option>
+              <option value="9">Grade 9</option>
+              <option value="10">Grade 10</option>
+            </optgroup>
+            <optgroup label="Senior High School">
+              <option value="11">Grade 11</option>
+              <option value="12">Grade 12</option>
+            </optgroup>
           </select>
         </div>
         <div class="field">

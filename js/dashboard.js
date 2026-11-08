@@ -43,7 +43,11 @@ function populateGradePicker(){
     return;
   }
   const prev = currentGrade;
-  sel.innerHTML = grades.map(g => `<option value="${g}">Grade ${g}</option>`).join('');
+  // Group by Junior/Senior High only when the teacher has sections in both.
+  const bands = [...new Set(grades.map(gradeBand))];
+  sel.innerHTML = bands.length > 1
+    ? bands.map(b => `<optgroup label="${b}">${grades.filter(g => gradeBand(g) === b).map(g => `<option value="${g}">Grade ${g}</option>`).join('')}</optgroup>`).join('')
+    : grades.map(g => `<option value="${g}">Grade ${g}</option>`).join('');
   sel.value = grades.includes(prev) ? prev : grades[0];
   onGradeChange();
 }

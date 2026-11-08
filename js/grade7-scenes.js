@@ -485,11 +485,13 @@ function g7Current(x0,x1,z0,z1,y,speedFn,alongZ){
 }
 
 // ─── entry point ───
+// Scene builders by `scene` key. Grades 11–12 register theirs in shs-scenes.js.
+const G7_SCENES = {trashbin:g7TrashBin, sign:g7Sign, route:g7Route, fallentree:g7FallenTree, bottle:g7Bottle, windupdate:g7WindUpdate, practice:g7Practice};
 function buildGrade7Scene(scen){
   G7 = null;
   G7_LABELS = [];
-  const b = {trashbin:g7TrashBin, sign:g7Sign, route:g7Route, fallentree:g7FallenTree, bottle:g7Bottle, windupdate:g7WindUpdate, practice:g7Practice}[scen.scene];
-  if(!b) throw new Error('Unknown Grade 7 scene: '+scen.scene);
+  const b = G7_SCENES[scen.scene];
+  if(!b) throw new Error('Unknown item scene: '+scen.scene);
   b(scen);
   G7_LABELS = G7_LABELS.filter(l=>l.parent);     // drop throw-away labels (e.g. from relabels)
   animCallbacks.push(g7LabelGuard);
@@ -1080,7 +1082,7 @@ function g7Warn(msg){
   clearTimeout(g7WarnTimer);
   g7WarnTimer = setTimeout(()=>{
     mb.classList.remove('warn');
-    if(ctrl.on && !ctrl.done && ctrl.scen) mt.textContent = missionText(ctrl.proceed, 7);
+    if(ctrl.on && !ctrl.done && ctrl.scen) mt.textContent = missionText(ctrl.proceed, ctrl.grade);
   }, 1600);
 }
 function g7InHazard(x,z){
@@ -1102,5 +1104,7 @@ function g7UpdateControl(dt, s, mv, moving){
   } else {
     s.position.x = cx; s.position.z = cz;
   }
+  // Scenes with raised ground (a ramp up to a platform) give the walking height here.
+  if(G7 && G7.heightAt){ s.position.y = G7.heightAt(s.position.x, s.position.z); if(s.userData) s.userData.baseY = s.position.y; }
   if(moving) s.rotation.y = Math.atan2(mv.x, mv.z);
 }

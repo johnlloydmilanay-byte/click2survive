@@ -27,7 +27,7 @@ let isObserving = false; // true when the student manually re-hid the panel to l
 // right-docked side panel.
 const WATCH_SECONDS = 10;
 let watching = false, watchTimer = null;
-function centerQ(){ return !!GS && GS.grade===7; }
+function centerQ(){ return !!GS && isSceneGrade(GS.grade); }
 function startWatch(){
   watching = true;
   let n = WATCH_SECONDS;
@@ -418,7 +418,7 @@ Object.values(GRADES).forEach(gd=>gd.scenarios.forEach((sc,n)=>{
   if(sc.key && CHOICE_LETTERS[sc.ci] !== sc.key)
     console.error(`${gd.name} item ${n+1}: answer index ${sc.ci} (${CHOICE_LETTERS[sc.ci]}) does not match answer key ${sc.key}`);
 }));
-// ── Grade 7 scene themes ── one musical idea per scenario, matched to its story
+// ── Item scene themes (Grades 7, 11, 12) ── one musical idea per scenario, matched to its story
 // (MIDI note numbers; chords loop one per bar). Mood sets the instrument family.
 const G7_THEMES = {
   // 1 · floodwater pushing the trash bin — hopeful but alert, steady "pushing" pulse
@@ -432,7 +432,23 @@ const G7_THEMES = {
   // 5 · floating bottle, current speeding up — flowing theme whose tempo keeps accelerating
   bottle:     { mood:'flood',   intensity:.75, theme:{ bpm:90,  chords:[[57,60,64],[55,59,62],[53,57,60],[52,56,59]], accel:{ to:1.22, bars:8 } } }, // Am G F E
   // 6 · wind 40 → 65 → 90 km/h — storm theme; intensity rises with each weather update (see grade7-scenes.js)
-  windupdate: { mood:'typhoon', intensity:.45, theme:{ bpm:104, chords:[[50,53,57],[48,52,55],[46,50,53],[45,49,52]] } }            // Dm C B♭ A
+  windupdate: { mood:'typhoon', intensity:.45, theme:{ bpm:104, chords:[[50,53,57],[48,52,55],[46,50,53],[45,49,52]] } },           // Dm C B♭ A
+  // ── Grade 11 (shs-scenes.js) ──
+  // rolling container / wheel — a rolling, circling arpeggio
+  drum:       { mood:'flood',   intensity:.6,  theme:{ bpm:96,  chords:[[57,60,64],[55,59,62],[53,57,60],[55,59,62]], arp:[0,1,2,1,0,1,2,1] } }, // Am G F G
+  wheel:      { mood:'typhoon', intensity:.62, theme:{ bpm:102, chords:[[50,53,57],[48,52,55],[46,50,53],[48,52,55]], arp:[0,1,2,1,0,1,2,1] } }, // Dm C B♭ C
+  // ramp / lever — steady, purposeful work rhythm
+  ramp:       { mood:'flood',   intensity:.45, theme:{ bpm:90,  chords:[[48,52,55],[53,57,60],[55,59,62],[48,52,55]] } },            // C F G C
+  lever:      { mood:'typhoon', intensity:.5,  theme:{ bpm:94,  chords:[[50,53,57],[55,58,62],[46,50,53],[45,49,52]] } },           // Dm Gm B♭ A
+  // tilting boat / floating container — uneasy, swaying
+  tiltboat:   { mood:'flood',   intensity:.6,  theme:{ bpm:84,  chords:[[52,55,59],[53,57,60],[52,55,59],[50,53,57]] } },           // Em F Em Dm
+  floatbox:   { mood:'typhoon', intensity:.72, theme:{ bpm:108, chords:[[57,60,64],[53,57,60],[55,59,62],[52,56,59]], accel:{ to:1.12, bars:8 } } }, // Am F G E
+  // ── Grade 12 ──
+  boatdrift:  { mood:'flood',   intensity:.68, theme:{ bpm:98,  chords:[[57,60,64],[55,59,62],[53,57,60],[52,56,59]], accel:{ to:1.15, bars:8 } } }, // Am G F E
+  cartramp:   { mood:'flood',   intensity:.45, theme:{ bpm:92,  chords:[[55,59,62],[48,52,55],[50,54,57],[55,59,62]] } },           // G C D G
+  panel:      { mood:'typhoon', intensity:.72, theme:{ bpm:106, chords:[[50,53,57],[46,50,53],[48,52,55],[45,49,52]] } },          // Dm B♭ C A
+  momentum:   { mood:'flood',   intensity:.62, theme:{ bpm:94,  chords:[[52,55,59],[48,52,55],[50,54,57],[47,51,54]] } },          // Em C D B
+  barrier:    { mood:'typhoon', intensity:.66, theme:{ bpm:104, chords:[[50,53,57],[48,52,55],[46,50,53],[45,49,52]] } }           // Dm C B♭ A
 };
 function loadScenario(idx){
   const scen = GS.gd.scenarios[idx];
@@ -494,18 +510,18 @@ function loadScenario(idx){
   // with the scenario's own severity value so a 110km/h scene sounds stormier than a
   // 30km/h one, same idea as the visual PAGASA alert.
   if(typeof AudioSys!=='undefined'){
-    if(g===7) scen.hazard==='typhoon' ? AudioSys.setAmbience('wind', (scen.wind||60)/110) : AudioSys.setAmbience('water', .7);
+    if(isSceneGrade(g)) scen.hazard==='typhoon' ? AudioSys.setAmbience('wind', (scen.wind||60)/110) : AudioSys.setAmbience('water', .7);
     else if(g===8) AudioSys.setAmbience('rain', (scen.rain||10)/40);
     else if(g===9) AudioSys.setAmbience('water', .3);
     else AudioSys.setAmbience('wind', (scen.wind||30)/110);
     // Grade 7: each scenario has its own theme (G7_THEMES); Grades 8–10 keep the calm pad.
     if(!GS.tutorial){
-      if(g===7 && AudioSys.sceneMusic && G7_THEMES[scen.scene]) AudioSys.sceneMusic(Object.assign({ phase:'observe', key:'g7-'+scen.scene }, G7_THEMES[scen.scene]));
+      if(isSceneGrade(g) && AudioSys.sceneMusic && G7_THEMES[scen.scene]) AudioSys.sceneMusic(Object.assign({ phase:'observe', key:'g7-'+scen.scene }, G7_THEMES[scen.scene]));
       else AudioSys.startMusic('calm');
     }
   }
   try{
-    if(g===7) buildGrade7Scene(scen);
+    if(isSceneGrade(g)) buildGrade7Scene(scen);
     else if(g===8) buildFloodScene(scen,8);
     else if(g===9) buildBoatScene(scen);
     else buildBridgeScene(scen);

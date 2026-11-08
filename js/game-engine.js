@@ -2079,7 +2079,7 @@ function buildMenuBackground(){
 //  CONTROL PHASE — student pilots the simulation
 // ═══════════════════════════════════════════════
 function missionText(proceed, grade){
-  if(grade===7) return (ctrl.scen && ctrl.scen.mission) || 'Carry out the safe decision — reach the gateway';
+  if(isSceneGrade(grade)) return (ctrl.scen && ctrl.scen.mission) || 'Carry out the safe decision — reach the gateway';
   if(grade===9) return proceed ? 'Steer the bancá across the river to the gateway' : 'Return the bancá safely to the dock gateway';
   if(grade===10) return proceed ? 'Walk across the hanging bridge to the gateway' : 'Retreat carefully off the bridge to the safe-zone gateway';
   return proceed ? 'Wade across the floodwater to the gateway' : 'Retreat to the high-ground gateway behind you';
@@ -2321,7 +2321,7 @@ function startControl(){
   const scen = GS.gd.scenarios[GS.idx];
   const opt = scen.opts[scen.ci].toLowerCase();
   let proceed;
-  if(GS.grade===9 || GS.grade===7) proceed = true; // G7: each scene places its gateway at the safe destination
+  if(GS.grade===9 || isSceneGrade(GS.grade)) proceed = true; // G7/G11/G12: each scene places its gateway at the safe destination
   else proceed = /cross/.test(opt) && !/do not|not cross/.test(opt);
 
   ctrl.on = true; ctrl.done = false;
@@ -2343,7 +2343,7 @@ function startControl(){
   document.querySelector('.joy-label').textContent = '⟁ Move';
 
   // Reposition gateway for retreat missions (execute the correct decision)
-  if(gatewayGroup && !proceed && GS.grade!==7){
+  if(gatewayGroup && !proceed && !isSceneGrade(GS.grade)){
     if(GS.grade===10){ gatewayGroup.position.set(-11, 2.0, 0); }
     else { gatewayGroup.position.set(0, 2.3, -14); gatewayGroup.rotation.y = 0; }
   }
@@ -2355,7 +2355,7 @@ function startControl(){
   ctrl.subject = GS.grade===9 ? boatGroup : humanGroup;
 
   // Chase camera offsets per mode
-  if(GS.grade===7 && G7 && G7.camOff) ctrl.camOff.set(...G7.camOff);
+  if(isSceneGrade(GS.grade) && G7 && G7.camOff) ctrl.camOff.set(...G7.camOff);
   else if(GS.grade===9) ctrl.camOff.set(-6, 4.5, -7);
   else if(GS.grade===10) ctrl.camOff.set(proceed?-6:6, 4, -7);
   else ctrl.camOff.set(0, 4.2, proceed?-9:9);
@@ -2408,8 +2408,8 @@ function updateControl(dt, t){
   // footsteps in time with the walk cycle
   if(moving && ctrl.grade!==9){ footT += dt; if(footT > .37){ footT = 0; AudioSysSafe('footstep'); } } else footT = .3;
 
-  if(ctrl.grade===7){
-    // ── Grade 7: walk to the safe destination; hazard areas refuse entry with a warning ──
+  if(isSceneGrade(ctrl.grade)){
+    // ── Grades 7, 11, 12: walk to the safe destination; hazard areas refuse entry with a warning ──
     g7UpdateControl(dt, s, mv, moving);
   }
   else if(ctrl.grade===8){
