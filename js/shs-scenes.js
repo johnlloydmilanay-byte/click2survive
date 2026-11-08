@@ -340,8 +340,15 @@ function shsRampScene(scen, cart){
   scene.add(load);
   const fRamp = g7Arrow(0x4ade80, .8, .07); scene.add(fRamp);
   const lr = g7Label('RAMP: F_incline = mg(h/L)  (smaller)', {size:.58, fg:'#bbf7d0'}); scene.add(lr);
-  let rt = 0;
+  let rt = 0, mine = null;
   animCallbacks.push((t,dt)=>{
+    if(mine){
+      // Take Control: the force-along-the-ramp label rides with the learner's own load
+      const p = mine.getWorldPosition(new THREE.Vector3()), on = p.x > RX0 && p.x < RX1 && Math.abs(p.z+10) < 1.5;
+      fRamp.visible = lr.visible = on; pusher.visible = load.visible = false;
+      fRamp.position.set(p.x+.55, p.y+.6, p.z-.9); fRamp.rotation.set(0, Math.PI, ang); lr.position.set(p.x+.4, p.y+1.9, p.z-.9);
+      return;
+    }
     rt = (rt + dt) % 9;
     const f = Math.min(1, rt/7.5);
     const x = RX1 + .6 - f*(RX1-RX0+1.6);
@@ -355,24 +362,53 @@ function shsRampScene(scen, cart){
     lr.position.set(x+.4, y+1.9, -10.9);
   });
 
-  // The learner, carrying a box (G11) or pushing a loaded cart (G12).
-  g7Human(9.5,-.5, 0x1e3a8a);
-  humanGroup.rotation.y = -Math.PI*.75;
-  if(cart){
-    // pushing the loaded cart: handle end just in front of the hands
-    const c = load.clone(); c.rotation.y = Math.PI/2; c.position.set(0,0,.74); humanGroup.add(c);
-    humanGroup.userData.pose = 'cart';
-  } else {
-    // carrying the box in front, both hands on its sides
-    const b = shsReliefBox(.82); b.position.set(0,1.06,.42); humanGroup.add(b);
-    humanGroup.userData.pose = 'carry';
-  }
+  // The learner's own load waits beside the dirt path near the landing: a relief box on the
+  // ground (G11) or the loaded cart (G12). They fetch it, take it up the ramp and set it down
+  // with the other relief supplies on the platform.
+  g7Human(11,-4.6, 0x1e3a8a);
+  humanGroup.rotation.y = -Math.PI*.6; humanGroup.rotation.order = 'YXZ';
+  const LX = 8.6, LZ = -2.6;                          // where the load waits
+  const myLoad = cart ? load.clone() : shsReliefBox(.82);
+  if(cart){ myLoad.position.set(LX, 0, LZ); myLoad.rotation.y = 0; }
+  else { myLoad.position.set(LX, .172, LZ); myLoad.rotation.y = .3; }
+  scene.add(myLoad);
+  const loadTag = g7Tag(cart ? 'your cart of relief goods' : 'your relief box', LX, cart ? 2.1 : 1.3, LZ, {size:.5});
+  const CG = .74;                                     // cart: hands-to-cart-centre distance
+  const dropX = cart ? -5.75 : -5.0, dropZ = cart ? -10 : -11.45;
   g7Gateway(-6.6,-10,Math.PI/2);
   gatewayGroup.position.y += H;
   g7Tag('Gateway: top of the ramp', -6.6, H+4, -10, {size:.5});
+  // cart: rolls in front of the hands, following the ground and pitching with the slope
+  const cartFollow = ()=>{
+    const h = humanGroup, fx = Math.sin(h.rotation.y), fz = Math.cos(h.rotation.y);
+    const cx = h.position.x + fx*CG, cz = h.position.z + fz*CG;
+    const hb = heightAt(cx - fx*.5, cz - fz*.5), hf = heightAt(cx + fx*.5, cz + fz*.5);
+    myLoad.rotation.order = 'YXZ';
+    myLoad.position.set(cx, (hb+hf)/2, cz); myLoad.rotation.set(0, h.rotation.y + Math.PI/2, Math.atan2(hb - hf, 1));
+    h.rotation.x = .1;
+  };
   const stepMsg = cart ? '⚠ The wet steps are slippery — push the cart up the dry, stable ramp instead.'
                        : '⚠ Lifting straight up takes the box’s full weight as effort — use the ramp.';
   G7 = { bounds:[-11.5,11,-12,7], camOff:[5,5.5,4], heightAt,
+    onControl(){ mine = myLoad; },
+    tasks:[
+      cart ? {at:[LX+CG+.02, LZ], face:[LX, LZ], act:'✋ Grip the cart handle', obj:myLoad, short:'Go to your cart and grip the handle',
+               text:'Go to your loaded cart and grip its handle',
+               done:'Handle gripped — push it to the low end of the ramp',
+               run(next){ loadTag.visible = false; humanGroup.userData.pose = 'cart'; G7.onMove = cartFollow; cartFollow(); G7.probe = 1.35; G7.speed = 2.2; G7.turnRate = 5; next(); }}
+           : {at:[LX+.78, LZ+.24], face:[LX, LZ], act:'✋ Pick up the box', obj:myLoad, short:'Pick up your relief box',
+               text:'Go to your relief box and pick it up',
+               done:'Box lifted — carry it to the low end of the ramp',
+               run(next){ loadTag.visible = false; g7Carry(myLoad, [0,1.06,.42], 0, ()=>{ G7.probe = .7; G7.speed = 2.6; next(); }); }},
+      cart ? {at:[dropX+CG, dropZ], face:[dropX-1, dropZ], act:'🅿 Park the cart', ghost:[{src:load, at:[dropX, H, dropZ], rotY:0}],
+               short:'Push it up the dry ramp and park it', text:'Push the cart up the dry, stable ramp and park it on the platform',
+               done:'Cart parked at the evacuation area — W = F·d with a smaller force',
+               run(next){ G7.onMove = null; G7.probe = 0; humanGroup.rotation.x = 0; humanGroup.userData.pose = null;
+                 g7Tween(myLoad, new THREE.Vector3(dropX, H, dropZ), .5, 0, next, f=>{ myLoad.rotation.set(0, myLoad.rotation.y*(1-f), myLoad.rotation.z*(1-f)); }); }}
+           : {at:[dropX, dropZ+.82], face:[dropX, dropZ], act:'⬇ Put it down', ghost:[{src:myLoad, at:[dropX, H+.172, dropZ], rotY:0}],
+               short:'Carry it up the ramp and set it down', text:'Carry the box up the stable ramp and set it with the other relief boxes',
+               done:'Box delivered — the ramp made the effort smaller',
+               run(next){ G7.probe = 0; g7PutDown(myLoad, new THREE.Vector3(dropX, H+.172, dropZ), next, 0); }}],
     hazards:[{test:stepZone, msg:stepMsg},
              {test:(x,z)=> x>RX0-.6 && x<RX0+.6 && z>-13.4 && z<-2.6 && !(z>RZ0 && z<RZ1), msg:'⚠ That is the platform wall — go round to the ramp.'},
              {test:(x,z)=> x<RX0 && z>-3.6 && z<-2.4, msg:'⚠ That is the platform wall — go round to the ramp.'},
@@ -486,19 +522,19 @@ function shsTiltBoat(scen){
       G7.hazards = [{test:(x,z)=> x > 13.3 && !onDock(x,z), msg:'⚠ Stay on the landing — do not board or step into the water.'}];
     },
     tasks:[
-      {at:[17.15, 3.75], face:[BX, 3.4], text:'Ask the passengers to sit along the boat’s centre line', done:'Passengers centred — the boat is heeling less',
+      {at:[17.15, 3.75], face:[BX, 3.4], act:'📣 Ask them to centre', obj:load[1].o, short:'Ask the passengers to sit in the middle', text:'Walk to the end of the landing and ask the passengers to sit along the centre line', done:'Passengers centred — the boat is heeling less',
        run(next){
          humanGroup.userData.pose = 'wave';
          g7Say(humanGroup, 'Please move to the middle of the boat, one by one!', 2400);
          g7Seq([[1200, ()=>{ humanGroup.userData.pose = null; go[0] = true; }], [1900, next]]);
        }},
-      {at:[17.15, 2.25], face:[BX, 2.6], text:'Have the boxes moved so the load is spread evenly', done:'Boxes spread out — weight is balanced on both sides',
+      {at:[17.15, 2.25], face:[BX, 2.6], act:'📣 Ask to move the boxes', obj:load[4].o, short:'Have the boxes spread evenly', text:'Have the boxes moved so the load is spread evenly', done:'Boxes spread out — weight is balanced on both sides',
        run(next){
          humanGroup.userData.pose = 'wave';
          g7Say(humanGroup, 'Move one box to the bow and one to the other side, please.', 2400);
          g7Seq([[1200, ()=>{ humanGroup.userData.pose = null; go[1] = true; }], [1900, next]]);
        }},
-      {at:end, face:[BX, 3], text:'Check the boat is level and within capacity', done:'Level and within capacity ✓ — cross only when conditions are safe',
+      {at:end, face:[BX, 3], act:'✔ Check the boat', obj:boat, short:'Check it is level and within capacity', text:'Check the boat is level and within capacity', done:'Level and within capacity ✓ — cross only when conditions are safe',
        run(next){
          g7Relabel(ls, 'LOAD spread evenly ✓  Within capacity ✓\nBoat level & stable', {size:.62, fg:'#bbf7d0', border:'#22c55e'});
          setTimeout(next, 900);
@@ -693,7 +729,7 @@ function shsMomentum(scen, mode){
   // Momentum items: the learner warns the boat operator, who postpones the crossing and moves aside.
   if(!ke) Object.assign(G7, {
     tasks:[
-      {at:[-5.45, BZ-.9], face:[-1.8, BZ], text:'Warn the boat operator: a log is coming — postpone the crossing',
+      {at:[-5.45, BZ-.9], face:[-1.8, BZ], act:'📣 Warn the operator', obj:rower, short:'Warn the boat operator', text:'Go to the riverbank by the boat and warn the operator to postpone the crossing',
        done:'The operator postponed the crossing and is moving out of the log’s path',
        run(next){
          humanGroup.userData.pose = 'wave';

@@ -129,6 +129,7 @@ function animate(){
         ctrl.subject.getWorldPosition(wp);
         cam.look.lerp(new THREE.Vector3(wp.x, wp.y+1.2, wp.z), .1);
         cam.target.copy(wp).add(ctrl.camOff);
+        if(isSceneGrade(ctrl.grade) && typeof g7CamAdjust === 'function') g7CamAdjust(wp, cam.target);   // rise over trees/walls in the way
       }
       camera.position.lerp(cam.target, .06);
       camera.lookAt(cam.look);
@@ -2398,6 +2399,7 @@ function startControl(){
     if(G7.subject) ctrl.subject = G7.subject;
     if(G7.onControl) G7.onControl();
     if(G7.tasks) g7StartTasks();
+    if(!GS.tutorial) g7RouteGuide();            // dotted route round the danger zones to the next target
     document.getElementById('m-text').textContent = missionText(proceed, GS.grade);
   }
 
@@ -2447,6 +2449,13 @@ function updateControl(dt, t){
   const fwd = new THREE.Vector3(gw.x-wp.x, 0, gw.z-wp.z);
   const gdist = fwd.length();
   if(gdist > .001) fwd.normalize();
+  // Item scenes (not the tutorial): screen-relative steering — UP walks away from the
+  // camera, LEFT/RIGHT go left/right on screen. Unlike the gateway basis it never flips
+  // when you pass close to a marker, and it lets you steer round obstacles naturally.
+  if(isSceneGrade(ctrl.grade) && !GS.tutorial){
+    const cf = new THREE.Vector3(wp.x - camera.position.x, 0, wp.z - camera.position.z);
+    if(cf.lengthSq() > .01) fwd.copy(cf.normalize());
+  }
   const right = new THREE.Vector3(-fwd.z, 0, fwd.x);
   const mv = new THREE.Vector3().addScaledVector(fwd, joy.y).addScaledVector(right, joy.x);
   const mag = mv.length();
@@ -2535,6 +2544,7 @@ function controlSuccess(){
   mb.classList.add('passed');
   document.getElementById('m-text').textContent = (isSceneGrade(ctrl.grade) && G7 && G7.doneText) || '✓ GATEWAY PASSED — Level Complete';
   document.getElementById('m-dist').textContent = 'advancing...';
+  if(typeof g7ClosePanels==='function') g7ClosePanels();
   const dl = document.getElementById('m-dist-l'); if(dl) dl.textContent = '';
   if(navigator.vibrate) navigator.vibrate([50,40,50,40,90]);
   AudioSysSafe('fanfare');

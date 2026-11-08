@@ -662,7 +662,7 @@ const GRADES = {
        phy_html:"An ideal ramp trades a smaller effort force for a longer travel distance. Ignoring friction, F<sub>incline</sub> · L = mgh, so F<sub>incline</sub> = mg(h/L), less than mg when L exceeds h. The ramp does not reduce the required energy; responders must check that it is stable and dry.",
        phy_bi_html:"An ideal ramp nagtatao nin mas sadit na effort force kapalit kan mas halawig na distansya. Kun dai iisipon an friction, F<sub>incline</sub> · L = mgh, kaya F<sub>incline</sub> = mg(h/L). Dai nababawasan an enerhiyang kaipuhan; surihon muna an katatagan kan ramp.",
        live:[{l:'Lift vertically',v:'Effort = full weight',s:'unsafe'},{l:'Stable ramp',v:'Smaller effort, longer distance',s:'safe'},{l:'Ramp check',v:'Stable · checked',s:'safe'}],
-       mission:'Use the ramp — carry the relief box up the stable ramp to the evacuation area'},
+       mission:'Pick up your relief box, carry it up the stable ramp and set it down at the evacuation area'},
 
       {scene:'lever', hazard:'typhoon', comp:'Simple and Compound Machines', concept:'simple_machines', out:'risky', ci:2, key:'C', wind:55,
        sit:'After a typhoon, a heavy fallen branch blocks the pathway leading to the hanging bridge. Trained responders plan to use a lever with a stable fulcrum, while learners wait nearby.',
@@ -809,7 +809,7 @@ const GRADES = {
        phy_html:"Mechanical work is W = Fd cos θ. Raising the supplies increases gravitational potential energy by ΔPE = mgh, whether the route is short or long. A stable ramp and cart spread the required work over a longer distance and generally lower the effort force, while avoiding slippery steps.",
        phy_bi_html:"An mechanical work iyo an W = Fd cos θ. An pagsakat nin suplay nagdadagdag nin gravitational potential energy na ΔPE = mgh maski halipot o halawig an ruta. An matibay na ramp asin kariton nagpapalawig kan distansya asin nakakapababa kan effort force, asin nakakaiwas sa madulas na hagdan.",
        live:[{l:'Wet steps',v:'Short · slippery',s:'unsafe'},{l:'Cart + dry ramp',v:'Smaller force · stable',s:'safe'},{l:'Work to raise a box',v:'Same either way (mgh)',s:'safe'}],
-       mission:'Push the cart up the dry, stable ramp to the evacuation area — avoid the wet steps'},
+       mission:'Grip your loaded cart, push it up the dry, stable ramp and park it at the evacuation area — avoid the wet steps'},
 
       {scene:'panel', hazard:'typhoon', comp:'Work and Energy', concept:'work_energy', out:'unsafe', ci:1, key:'B', wind:85,
        sit:'During a typhoon, a loose metal panel is lifted by the wind to a higher position near the hanging bridge. If it falls, its gravitational potential energy will be transformed into kinetic energy.',

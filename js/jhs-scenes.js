@@ -189,11 +189,11 @@ function jFlowerpot(scen){
     // The decision is something to DO: take the pot down before the wind gets stronger.
     onControl(){ G7.hazards = [wallBody, crateBody]; },
     tasks:[
-      {at:[WX+1.2, WZ-.96], face:[WX+1.2, WZ-.15], text:'Lift the flowerpot down from the high ledge',
+      {at:[WX+1.2, WZ-.96], face:[WX+1.2, WZ-.15], act:'✋ Lift the pot down', obj:pot, short:'Lift the flowerpot down from the ledge', text:'Stand in front of the ledge and lift the flowerpot down',
        done:'Pot lifted down — carry it with both hands',
        run(next){ state = 'held'; pot.rotation.set(0,0,0); g7Carry(pot, [0,.82,.42], 0, ()=> setTimeout(next, 250));
          g7Relabel(lu, 'Lifted down: smaller h → less PE', {size:.62, fg:'#fde047', border:'#facc15'}); }},
-      {at:[-14.2, 3.98], face:[-14.2, 5], text:'Set the pot on the low, secure crate',
+      {at:[-14.2, 3.98], face:[-14.2, 5], act:'⬇ Set it on the crate', obj:crate, ghost:[{src:pot, at:[end.x,end.y,end.z]}], short:'Set it on the low, secure crate', text:'Carry the pot to the low crate and set it down',
        done:'Pot is low and secure: small h → small PE',
        run(next){ g7PutDown(pot, end, ()=>{ state = 'low'; lowTag.visible = false; g7Relabel(lu, 'Low & secure: small h → small PE', {size:.66, fg:'#bbf7d0', border:'#22c55e'}); next(); }); }}],
     finish:[-17,-5.5], finishText:'Pot secured — now walk to the safe spot, away from the ledge' };
@@ -267,10 +267,10 @@ function jStuckBox(scen){
       g7Relabel(lM, 'Your relief box — push it along the clear path', {size:.6, fg:'#fde047', border:'#facc15'});
     },
     tasks:[
-      {at:[X0+GAP, -1.5], face:[X0, -1.5], text:'Get behind your relief box on the clear path',
+      {at:[X0+GAP, -1.5], face:[X0, -1.5], act:'✋ Grip the box', obj:myBox, short:'Get behind your relief box', text:'Walk behind your relief box on the clear path',
        done:'Hands on the box — now push it (force → displacement)',
        run(next){ humanGroup.userData.pose = 'push';
-         g7Anim(.4, f=>{ humanGroup.rotation.x = .5*f; }, ()=>{ mine = true; G7.speed = 1.8; G7.turnRate = 3; next(); }); }}],
+         g7Anim(.4, f=>{ humanGroup.rotation.x = .5*f; }, ()=>{ mine = true; G7.speed = 1.8; G7.turnRate = 3; G7.probe = GAP + .45; next(); }); }}],
     finish:[-9.4,-1.5], finishRot:Math.PI/2, finishText:'Push the box along the clear path to the dry waiting area' };
   g7Camera([3,8.5,-13],[-1,.5,2]);
 }
@@ -322,13 +322,13 @@ function jPlatform(scen){
       {test:(x,z)=> Math.abs(x-PX) < 1.65 && Math.abs(z-PZ) < 1.15, msg:'⚠ Reach the objects from the front of the platform.'},
       {test:(x,z)=> Math.abs(x-SX) < 1.3 && Math.abs(z-SZ) < 1, msg:'⚠ Load the storage box from the front.'}]; },
     tasks:[
-      {at:[PX-.65, PZ-1.43], face:[PX-.65, PZ], text:'Take the two loose relief boxes down from the platform', done:'Boxes in hand — carry them to the storage',
+      {at:[PX-.65, PZ-1.43], face:[PX-.65, PZ], act:'✋ Take the boxes', obj:objs[0].m, short:'Take the two relief boxes down', text:'Stand in front of the platform and take the two loose relief boxes', done:'Boxes in hand — carry them to the storage',
        run(next){ take([[0,[0,1.06,.42],0],[1,[0,1.38,.42],0]], next); }},
-      {at:stand, face:[SX, SZ], text:'Put the boxes in the low enclosed storage', done:'Boxes stored low — go back for the rest',
+      {at:stand, face:[SX, SZ], act:'⬇ Put them in storage', obj:store, ghost:[0,1].map(i=>({src:objs[i].m, at:objs[i].b, rotY:i*.25})), short:'Put them in the low storage', text:'Carry the boxes to the low enclosed storage and put them in', done:'Boxes stored low — go back for the rest',
        run(next){ stow([0,1], next); }},
-      {at:[PX+.55, PZ-1.43], face:[PX+.55, PZ], text:'Take the water container and the loose board', done:'Got them — carry them to the storage',
+      {at:[PX+.55, PZ-1.43], face:[PX+.55, PZ], act:'✋ Take them', obj:objs[2].m, short:'Take the container and the board', text:'Go back and take the water container and the loose board', done:'Got them — carry them to the storage',
        run(next){ take([[2,[0,1.06,.42],0],[3,[0,1.34,.42],0]], next); }},
-      {at:stand, face:[SX, SZ], text:'Store them, then close and latch the lid', done:'All objects secured low & enclosed: little PE',
+      {at:stand, face:[SX, SZ], act:'⬇ Store & close the lid', obj:store, ghost:[2,3].map(i=>({src:objs[i].m, at:objs[i].b, rotY:i === 3 ? 0 : i*.25})), short:'Store them and latch the lid', text:'Store them, then close and latch the lid', done:'All objects secured low & enclosed: little PE',
        run(next){ stow([2,3], ()=>{
          humanGroup.userData.pose = 'reach';
          g7Anim(.8, f=>{ lidPivot.rotation.x = 1.25*(1-f); }, ()=>{
@@ -402,7 +402,7 @@ function jBoatStop(scen){
       G7.hazards = [{test:(x,z)=> x > -4.85, msg:'⚠ Stay on the bank — reach the bag from the edge, don’t step into the boat.'}];
     },
     tasks:[
-      {at:[-5.0, BZ], face:[DX, BZ], text:'Tie down the loose bag before the boat travels',
+      {at:[-5.0, BZ], face:[DX, BZ], act:'🪢 Tie down the bag', obj:loose, short:'Tie down the loose bag', text:'Go to the boat’s end at the bank and tie down the loose bag',
        done:'Bag tied down — it now moves with the boat',
        run(next){
          humanGroup.userData.pose = 'reach';
@@ -482,7 +482,7 @@ function jVehicleStop(scen){
     hazards:[{test:road, msg:'⚠ Stay off the road — wait in the waiting area while the cargo is secured.'}],
     onControl(){ parked = true; lT.visible = true; G7.hazards = [truckBody]; },
     tasks:[
-      {at:[PARK-1.75, -1.62], face:[PARK-1.75, 0], text:'Strap down the loose drums in the truck bed', done:'All drums strapped — they will move with the truck',
+      {at:[PARK-1.75, -1.62], face:[PARK-1.75, 0], act:'🪢 Strap the drums', obj:loose[1].m, short:'Strap down the loose drums', text:'Stand beside the cargo bed and strap down the loose drums', done:'All drums strapped — they will move with the truck',
        run(next){
          humanGroup.userData.pose = 'reach';
          const seq = [...bands, ...cross];
@@ -632,7 +632,7 @@ function jBoatStep(scen){
                     {test:(x,z)=> x > -3.3, msg:'⚠ Step toward the dock, not the far side of the boat.'}];
     },
     tasks:[
-      {at:[-5.9, BZ], face:[-7.2, BZ], r:.7, text:'Step off slowly onto the dock while the boat is held',
+      {at:[-5.9, BZ], face:[-7.2, BZ], r:.7, auto:true, short:'Step off slowly onto the dock', text:'Walk slowly across onto the dock while the boat is held',
        done:'Off the boat safely — small, equal forces; the held boat barely moved',
        run(next){ g7Say(holder, 'Good — slow and steady!', 2000, {border:'#4ade80'}); setTimeout(next, 600); }}],
     finish:[-11,-8], finishRot:Math.PI/2, finishText:'Now walk to the safe spot on the bank' };
@@ -687,7 +687,7 @@ function jBranchSpring(scen){
   G7 = { bounds:[-19,-6.4,-9,9], camOff:[6,4.5,5],
     hazards:[{test:(x,z)=> Math.hypot(x+10.2, z-2.4) < 3, msg:'⚠ Don’t pull the branch — it can spring out. Leave it to trained adults!'}],
     tasks:[
-      {at:[-14.3, 6.9], face:[-14.1, 8.4], text:'Ask the trained adults to remove the bent branch',
+      {at:[-14.3, 6.9], face:[-14.1, 8.4], act:'🗣 Ask for help', obj:adults[1], short:'Ask the trained adults for help', text:'Go round the branch to the trained adults and ask them to remove it',
        done:'The trained adults will release it with proper equipment',
        run(next){
          humanGroup.userData.pose = 'wave';
@@ -827,7 +827,7 @@ function jRopeThrow(scen){
              {test:(x,z)=> Math.hypot(x+5.4,z) < 1.4, msg:'⚠ Give the rescuer room to throw.'}],
     onControl(){ mode = 'aim'; coil.position.copy(hand); },
     tasks:[
-      {at:[-6.75,-1.1], face:[-5.4,0], text:'Go to the rescue worker and estimate the distance to the platform',
+      {at:[-6.75,-1.1], face:[-5.4,0], act:'📏 Estimate the distance', obj:rescuer, short:'Estimate the distance to the platform', text:'Go to the rescue worker and estimate the distance to the platform',
        done:'Distance estimated: about 11.8 m to the target',
        run(next){
          g7Say(rescuer, 'Help me aim — how far is the platform?', 2200);
@@ -835,7 +835,7 @@ function jRopeThrow(scen){
          dTag = g7Tag(`d ≈ ${(TX-X0).toFixed(1)} m`, (X0+TX)/2, Y0+.7, 1.4, {size:.6, fg:'#7dd3fc', border:'#38bdf8'});
          setTimeout(next, 1400);
        }},
-      {at:[-6.75,-1.1], face:[-5.4,0], text:'Set the release angle and speed, then throw', done:'Rope delivered — adjusted angle and speed reached the target',
+      {at:[-6.75,-1.1], face:[-5.4,0], act:'🎯 Aim the throw', obj:rescuer, short:'Set the angle and speed, then throw', text:'Set the release angle and speed, then throw', done:'Rope delivered — adjusted angle and speed reached the target',
        run(next){ openAim(next); }}],
     finish:[-12,-6], finishText:'Now step back from the edge to the safe spot' };
   g7Camera([-3,7,-15],[1.5,2,0]);

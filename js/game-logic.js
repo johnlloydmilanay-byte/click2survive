@@ -920,6 +920,7 @@ function showResults(){
 function replayGrade(){ requestFullscreenIfMobile(); transitionTo(()=>startGrade(GS.grade, GS.sessionId, GS.sessionLabel)); }
 function goMenu(){
   narrStop();
+  if(typeof g7ClosePanels==='function') g7ClosePanels();     // action button, checklist, aiming panel
   if(typeof AudioSys!=='undefined') AudioSys.startMusic('bright');
   if(typeof tutAbort==='function') tutAbort();
   G10Wind = 0;

@@ -1092,16 +1092,23 @@ function g7InHazard(x,z){
   return null;
 }
 function g7UpdateControl(dt, s, mv, moving){
-  const speed = (G7 && G7.speed) || 3.2;           // e.g. a slow, careful step off a boat
-  const nx = s.position.x + mv.x*speed*dt, nz = s.position.z + mv.z*speed*dt;
+  if(!moving) mv = new THREE.Vector3();             // ignore a resting thumb's tiny drift
+  const mag = Math.min(1, mv.length());
+  const speed = ((G7 && G7.speed) || 3.2) * (.35 + .65*mag);   // a light push walks slowly, a full push walks briskly
+  const ml = mv.length() || 1;
+  const nx = s.position.x + mv.x/ml*speed*dt*(moving?1:0), nz = s.position.z + mv.z/ml*speed*dt*(moving?1:0);
   const [x0,x1,z0,z1] = G7 ? G7.bounds : [-20,20,-20,20];
   const cx = THREE.MathUtils.clamp(nx,x0,x1), cz = THREE.MathUtils.clamp(nz,z0,z1);
-  const hz = g7InHazard(cx,cz);
+  // G7.probe: something pushed or carried ahead of the learner (a box, a cart) must not go
+  // into a danger zone or a wall either, so the point that far ahead is checked too.
+  const pr = (G7 && G7.probe) || 0, ux = mv.x/ml, uz = mv.z/ml;
+  const blocked = (x,z)=> g7InHazard(x,z) || (pr && moving ? g7InHazard(x + ux*pr, z + uz*pr) : null);
+  const hz = blocked(cx,cz);
   if(hz){
     g7Warn(hz.msg);
     // Slide along the edge: allow whichever single-axis move stays safe.
-    if(!g7InHazard(cx, s.position.z)) s.position.x = cx;
-    else if(!g7InHazard(s.position.x, cz)) s.position.z = cz;
+    if(!blocked(cx, s.position.z)) s.position.x = cx;
+    else if(!blocked(s.position.x, cz)) s.position.z = cz;
   } else {
     s.position.x = cx; s.position.z = cz;
   }
@@ -1110,60 +1117,285 @@ function g7UpdateControl(dt, s, mv, moving){
   if(moving){
     const want = Math.atan2(mv.x, mv.z) + ((G7 && G7.yawOff) || 0);   // yawOff: a boat's bow is its local +x
     let d = want - s.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
-    s.rotation.y += (G7 && G7.turnRate) ? d*Math.min(1, dt*G7.turnRate) : d;
+    s.rotation.y += d*Math.min(1, dt*((G7 && G7.turnRate) || 12));    // turn smoothly, never snap
   }
   if(G7 && G7.onMove) G7.onMove(dt, s, moving);
 }
 
 // ─── ON-THE-SPOT ACTIONS ───
 // When the safe decision is something to DO — lift a pot down, tie down cargo, ask the
-// trained adults — a scene lists the steps in G7.tasks: [{at:[x,z], text, done, run(next)}].
-// The gateway becomes a small marker over the current step; walking up to it runs that
-// step's action (the learner holds still while it plays), then the marker moves on. After
-// the last step the learner goes to G7.finish ([x,z], the safe spot), or the level ends
-// right there if there is no finish.
+// trained adults — a scene lists the steps in G7.tasks:
+//   {at:[x,z]   where to stand (in front of the object),  face:[x,z] what to face,
+//    text, act ('✋ Pick up the pot' — the action button), done, run(next),
+//    obj (Object3D marked with a bouncing arrow), ghost:[{src, at:[x,y,z], rotY}] (where
+//    to put it, shown as a see-through copy), auto (runs on arrival, no button), r}
+// The learner walks to the glowing footprints, presses the action button (or Space/E),
+// and the step plays out; then the guides move on. After the last step the learner goes to
+// G7.finish ([x,z], the safe spot), or the level ends right there if there is no finish.
 function g7StartTasks(){
-  const T = G7.tasks, gw = gatewayGroup, y0 = gw.position.y, MK = .5;
+  const T = G7.tasks, gw = gatewayGroup, y0 = gw.position.y, G = G7;
+  const live = ()=> G7 === G && ctrl.on && !ctrl.done;
   G7.step = 0;
+  const pad = g7FootPad(); const mark = g7ObjMarker();
+  let ghosts = [];
+  const btn = g7ActionButton();
+  const list = g7Checklist(T.map(t=> t.short || t.text).concat(G7.finish ? [G7.finishShort || 'Go to the safe spot'] : []));
   const aim = ()=>{
+    if(!live()) return;
     const k = G7.step;
+    ghosts.forEach(g=> scene.remove(g)); ghosts = [];
     if(k < T.length){
-      // small marker ring standing on the spot where the learner does this step
-      gw.userData.k = MK; G7.reachR = T[k].r || 1.1;
-      gw.position.set(T[k].at[0], y0*MK + (T[k].y||0), T[k].at[1]);
-      if(T[k].face) gw.rotation.y = Math.atan2(T[k].face[0]-T[k].at[0], T[k].face[1]-T[k].at[1]);
-      G7.taskText = `Step ${k+1} of ${T.length}: ${T[k].text}`;
+      const t = T[k];
+      G7.reachR = t.r || (t.auto ? .8 : .6);
+      gw.visible = false;                                    // the footprints replace the ring
+      gw.position.set(t.at[0], y0, t.at[1]);
+      pad.place(t.at, t.face);
+      mark.show(t.obj, t.act ? t.act.replace(/^\S+\s/, '').toUpperCase() : '');
+      (t.ghost || []).forEach(g=> ghosts.push(g7Ghost(g.src, g.at, g.rotY)));
+      G7.taskText = `Step ${k+1} of ${T.length}: ${t.text}`;
+      g7DistLabel(t.auto ? 'to the next step' : 'to the footprints');
     } else {
-      gw.userData.k = 1; G7.reachR = 2.2;
+      pad.hide(); mark.hide();
+      gw.visible = true; G7.reachR = 2.2;
       gw.position.set(G7.finish[0], y0, G7.finish[1]); gw.rotation.y = G7.finishRot || 0;
       G7.taskText = G7.finishText || 'Done — now go to the safe spot';
+      g7DistLabel('to the safe spot');
     }
+    list.set(k);
+    g7AimCamera([gw.position.x, gw.position.z]);
     document.getElementById('m-text').textContent = G7.taskText;
-    g7DistLabel(k < T.length ? 'to the next step' : 'to the safe spot');
-    missionExpand(4000);
+    missionExpand(4500);
     G7.busy = false;
   };
-  G7.onReach = ()=>{
-    if(G7.busy) return;
-    const k = G7.step;
-    if(k >= T.length){ controlSuccess(); return; }
-    G7.busy = true;
+  const doStep = ()=>{
+    if(!live() || G7.busy) return;
+    const k = G7.step; if(k >= T.length) return;
+    G7.busy = true; btn.hide();
     humanGroup.userData.moving = false;
     document.getElementById('m-text').textContent = '⏳ ' + T[k].text + '…';
-    missionExpand(3000);
     AudioSysSafe('click');
-    // step onto the exact spot, turn to the object, then play the action
-    g7StepTo(T[k].at, T[k].face, ()=> T[k].run(()=>{
+    // step squarely onto the spot, turn to the object, then play the action
+    g7StepTo(T[k].at, T[k].face, ()=>{ if(!live()) return; mark.hide(); T[k].run(()=>{
+      if(!live()) return;
       G7.step++;                 // stays busy (no walking, no re-trigger) until the next marker is set
+      list.set(G7.step, true);
       document.getElementById('m-text').textContent = '✓ ' + (T[k].done || 'Done');
-      missionExpand(3000);
+      missionExpand(3200);
       AudioSysSafe('correct');
       if(navigator.vibrate) navigator.vibrate(30);
-      if(G7.step >= T.length && !G7.finish){ setTimeout(()=> controlSuccess(), 900); return; }
-      setTimeout(aim, 1100);
-    }));
+      if(G7.step >= T.length && !G7.finish){ pad.hide(); ghosts.forEach(g=> scene.remove(g)); setTimeout(()=>{ if(live()) controlSuccess(); }, 1000); return; }
+      setTimeout(aim, 1200);
+    }); });
   };
+  btn.onPress = doStep;
+  G7.onReach = ()=>{
+    if(G7.busy) return;
+    if(G7.step >= T.length){ controlSuccess(); return; }
+    if(T[G7.step].auto) doStep();
+  };
+  // Each frame: the action button shows only while the learner stands on the footprints.
+  animCallbacks.push(()=>{
+    if(G7 !== G) return;
+    const k = G7.step, on = live() && !G7.busy && k < T.length && !T[k].auto &&
+      Math.hypot(humanGroup.position.x - T[k].at[0], humanGroup.position.z - T[k].at[1]) < G7.reachR;
+    if(on) btn.show(T[k].act || '✋ Do it'); else btn.hide();
+    pad.glow(on);
+  });
   aim();
+}
+// Chase-camera occlusion: a few times a second, check whether a tree, wall or house stands
+// between the camera and the learner; if so the camera rises toward an over-the-shoulder
+// top view until the line of sight is clear again.
+const G7_CAM = { lift:0, want:0, tNext:0, list:null, scene:null, ray:new THREE.Raycaster() };
+function g7CamAdjust(wp, target){
+  const C = G7_CAM, now = performance.now();
+  if(C.scene !== G7){                                     // new scene: collect the solid things that can block the view
+    C.scene = G7; C.lift = C.want = 0; C.list = [];
+    scene.traverse(o=>{ if(o.isMesh && o.castShadow && !o.isInstancedMesh){ let p = o, mine = false; while(p){ if(p === humanGroup){ mine = true; break; } p = p.parent; } if(!mine) C.list.push(o); } });
+  }
+  const ox = target.x - wp.x, oy = target.y - wp.y, oz = target.z - wp.z, hd = Math.hypot(ox, oz);
+  const lifted = (l)=> new THREE.Vector3(wp.x + ox*(1-.5*l), wp.y + oy + hd*1.05*l, wp.z + oz*(1-.5*l));
+  if(now > C.tNext){
+    C.tNext = now + 160;
+    const blocked = (from, to, cut)=>{ const d = new THREE.Vector3().subVectors(to, from), L = d.length(); if(L < 1) return false;
+      C.ray.set(from, d.normalize()); C.ray.near = .6; C.ray.far = L - cut;
+      return C.ray.intersectObjects(C.list, false).some(h=> h.object.visible && h.object.parent && h.object.parent.visible !== false); };
+    // what must stay in view: the learner, and the route's next ~8 m and the target
+    const look = [new THREE.Vector3(wp.x, wp.y + 1.2, wp.z)];
+    if(gatewayGroup && ctrl.on){
+      const g = gatewayGroup.position, r = (G7 && G7.route) || [], hA = G7 && G7.heightAt;
+      const at = (x,z)=> look.push(new THREE.Vector3(x, (hA ? hA(x,z) : 0) + .9, z));
+      for(let i=0, acc=0; i<r.length-1 && acc<8; i++){ const a = r[i], b = r[i+1], L2 = Math.hypot(b[0]-a[0], b[1]-a[1]);
+        for(let s=1.5; s<L2 && acc+s<8; s+=2) at(a[0]+(b[0]-a[0])*s/L2, a[1]+(b[1]-a[1])*s/L2); acc += L2; }
+      if(Math.hypot(g.x - wp.x, g.z - wp.z) < 12) at(g.x, g.z);
+    }
+    const hitFrom = (cp)=> look.some((p,i)=> blocked(cp, p, i ? .6 : .3));
+    // rise while the current view is blocked; come back down only once the normal view is clear
+    if(hitFrom(lifted(C.want))) C.want = Math.min(1, C.want + .2);
+    else if(C.want > 0 && !hitFrom(target)) C.want = Math.max(0, C.want - .2);
+  }
+  C.lift += (C.want - C.lift)*.05;
+  if(C.lift > .01) target.copy(lifted(C.lift));
+}
+// Points the chase camera so the next target is "up" on the joystick at the start of each
+// step: behind the learner, opposite the target, a little to the side, keeping the scene's
+// own camera distance and height.
+function g7AimCamera(to){
+  if(!G7 || G7.autoCam === false || !humanGroup) return;
+  const b = G7.camOff || [6,4.5,5], hd = Math.max(5.5, Math.hypot(b[0], b[2])), h = b[1];
+  let dx = to[0] - humanGroup.position.x, dz = to[1] - humanGroup.position.z;
+  const L = Math.hypot(dx, dz); if(L < .5) return;
+  dx /= L; dz /= L;
+  const a = .38, c = Math.cos(a), s = Math.sin(a);           // ~22° off straight-behind, so the target isn't hidden behind the learner
+  ctrl.camOff.set(-(dx*c - dz*s)*hd, h, -(dx*s + dz*c)*hd);
+}
+// "Stand here" pad: two glowing footprints in a ring, facing the object.
+function g7FootPad(){
+  const g = new THREE.Group(); g.visible = false; scene.add(g);
+  const mat = new THREE.MeshBasicMaterial({color:0x4ade80, transparent:true, opacity:.85, depthWrite:false, toneMapped:false});
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.48,.56,40), mat); ring.rotation.x = -Math.PI/2; g.add(ring);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(.48,40), new THREE.MeshBasicMaterial({color:0x4ade80, transparent:true, opacity:.16, depthWrite:false, toneMapped:false}));
+  disc.rotation.x = -Math.PI/2; g.add(disc);
+  const foot = new THREE.Shape(); foot.absellipse(0, 0, .065, .14, 0, Math.PI*2, false, 0);
+  [-.11, .11].forEach((x,i)=>{ const f = new THREE.Mesh(new THREE.ShapeGeometry(foot), mat); f.rotation.x = -Math.PI/2; f.position.set(x, .005, i ? .04 : -.04); g.add(f); });
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(.09,.2,3), mat); tip.rotation.x = Math.PI/2; tip.position.set(0,.01,.42); g.add(tip);   // which way to face
+  let on = false;
+  animCallbacks.push((t)=>{ if(!g.visible) return; const k = on ? 1.15 : 1 + Math.sin(t*4)*.07; ring.scale.setScalar(k); disc.material.opacity = on ? .38 : .14 + Math.sin(t*4)*.05; });
+  return {
+    place(at, face){ const y = (G7 && G7.heightAt) ? G7.heightAt(at[0], at[1]) : 0;
+      g.position.set(at[0], y + .04, at[1]); g.rotation.y = face ? Math.atan2(face[0]-at[0], face[1]-at[1]) : 0; g.visible = true; },
+    hide(){ g.visible = false; }, glow(v){ on = v; mat.color.setHex(v ? 0xfde047 : 0x4ade80); }
+  };
+}
+// Bouncing arrow (and a short verb) over the object the current step is about.
+function g7ObjMarker(){
+  const m = new THREE.MeshBasicMaterial({color:0xfde047, toneMapped:false, depthTest:false, transparent:true});
+  const arrow = new THREE.Group(); arrow.visible = false; arrow.renderOrder = 21; scene.add(arrow);
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(.2,.38,4), m); cone.rotation.x = Math.PI; cone.renderOrder = 21; arrow.add(cone);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.3,8), m); stem.position.y = .32; stem.renderOrder = 21; arrow.add(stem);
+  let obj = null, top = 0, label = null;
+  const wp = new THREE.Vector3(), box = new THREE.Box3();
+  animCallbacks.push((t)=>{
+    if(!arrow.visible || !obj) return;
+    if(obj.isObject3D) obj.getWorldPosition(wp); else wp.set(...obj);
+    arrow.position.set(wp.x, wp.y + top + .45 + Math.abs(Math.sin(t*3.2))*.25, wp.z); arrow.rotation.y = t*1.5;
+    if(label) label.position.set(wp.x, wp.y + top + 1.3, wp.z);
+    if(label) label.visible = !(G7_ACT && G7_ACT.el.style.display === 'block');   // the button says it now
+  });
+  return {
+    show(o, verb){
+      obj = o; if(label){ scene.remove(label); label = null; }
+      if(!o){ arrow.visible = false; return; }
+      if(o.isObject3D){ o.updateMatrixWorld(true); box.setFromObject(o); o.getWorldPosition(wp); top = Math.max(.2, box.max.y - wp.y); } else top = 0;
+      arrow.visible = true;
+      if(verb){ label = g7Label(verb, {size:.5, fg:'#1c1917', bg:'rgba(253,224,71,.95)', pin:true}); scene.add(label); }
+    },
+    hide(){ arrow.visible = false; if(label){ scene.remove(label); label = null; } }
+  };
+}
+// See-through copy of an object where it should be put down.
+function g7Ghost(src, at, rotY){
+  const c = src.clone(true);
+  const gm = new THREE.MeshBasicMaterial({color:0x4ade80, transparent:true, opacity:.35, depthWrite:false, toneMapped:false});
+  c.traverse(o=>{ if(o.isMesh){ o.material = gm; o.castShadow = false; } if(o.isSprite) o.visible = false; });
+  c.position.set(...at); c.rotation.set(0, rotY||0, 0); c.scale.copy(src.getWorldScale(new THREE.Vector3())); c.visible = true;
+  scene.add(c);
+  animCallbacks.push((t)=>{ gm.opacity = .22 + Math.sin(t*4)*.12; });
+  return c;
+}
+// Big contextual action button (also Space / E / Enter while it shows).
+let G7_ACT = null;
+function g7ActionButton(){
+  const b = document.createElement('button'); b.className = 'g7-act g7-ui'; b.id = 'g7-act'; b.type = 'button';
+  b.style.display = 'none'; document.body.appendChild(b);
+  const api = { onPress:null,
+    show(txt){ if(b.textContent !== txt) b.textContent = txt; if(b.style.display !== 'block'){ b.style.display = 'block'; AudioSysSafe('pop'); if(navigator.vibrate) navigator.vibrate(15); } },
+    hide(){ b.style.display = 'none'; } };
+  const press = (e)=>{ if(e) e.preventDefault(); if(b.style.display === 'block' && api.onPress) api.onPress(); };
+  b.addEventListener('click', press); b.addEventListener('touchstart', press, {passive:false});
+  G7_ACT = api; api.el = b;
+  return api;
+}
+document.addEventListener('keydown', e=>{
+  if(!G7_ACT || !G7_ACT.el.isConnected || G7_ACT.el.style.display !== 'block') return;
+  if(e.key === ' ' || e.key === 'Enter' || e.key.toLowerCase() === 'e'){ e.preventDefault(); G7_ACT.onPress && G7_ACT.onPress(); }
+});
+// "Your tasks" checklist under the top-left HUD.
+function g7Checklist(items){
+  const p = document.createElement('div'); p.className = 'g7-steps g7-ui'; p.id = 'g7-steps';
+  p.innerHTML = '<div class="g7s-h">Your tasks</div>' + items.map((s,i)=> `<div class="g7s-i" data-i="${i}"><span class="g7s-b"></span><span>${s}</span></div>`).join('');
+  document.body.appendChild(p);
+  return { set(k, justDone){ p.querySelectorAll('.g7s-i').forEach((el,i)=>{
+    el.classList.toggle('done', i < k); el.classList.toggle('now', i === k);
+    if(justDone && i === k-1){ el.classList.add('pop'); setTimeout(()=> el.classList.remove('pop'), 600); } }); } };
+}
+
+// ─── ROUTE GUIDE ───
+// A dotted line on the ground from the learner to the current target that goes round the
+// danger zones: A* over a 0.5 m grid of the scene's own hazard tests (with a small margin,
+// dropped if that closes a narrow passage), straightened by line-of-sight, refreshed as you
+// walk. Shown in every item scene during Take Control.
+function g7RouteGuide(){
+  const G = G7, CELL = .5, grp = new THREE.Group(); scene.add(grp);
+  const dotGeo = new THREE.SphereGeometry(.07, 10, 8);
+  const dotMat = new THREE.MeshBasicMaterial({color:0x7dd3fc, toneMapped:false, transparent:true, opacity:.9});
+  const pool = [];
+  let last = null, tLast = -9, route = [];
+  const free = (x,z,m)=>{ if(g7InHazard(x,z)) return false; if(!m) return true;
+    return !(g7InHazard(x+m,z) || g7InHazard(x-m,z) || g7InHazard(x,z+m) || g7InHazard(x,z-m)); };
+  const plan = (sx,sz,tx,tz,m)=>{
+    const [x0,x1,z0,z1] = G.bounds, W = Math.ceil((x1-x0)/CELL)+1, H = Math.ceil((z1-z0)/CELL)+1;
+    const ci = (x,z)=> [Math.round((x-x0)/CELL), Math.round((z-z0)/CELL)];
+    const [si,sj] = ci(sx,sz), [ti,tj] = ci(tx,tz);
+    const ok = new Uint8Array(W*H); for(let i=0;i<W;i++) for(let j=0;j<H;j++) ok[i+j*W] = free(x0+i*CELL, z0+j*CELL, m) ? 1 : 0;
+    const S = si+sj*W, Tg = ti+tj*W; if(S<0||S>=W*H||Tg<0||Tg>=W*H) return null; ok[S] = 1; ok[Tg] = 1;
+    const g = new Float32Array(W*H).fill(1e9), from = new Int32Array(W*H).fill(-1), closed = new Uint8Array(W*H);
+    const heap = []; const push = (n,f)=>{ heap.push([f,n]); let i = heap.length-1; while(i>0){ const p = (i-1)>>1; if(heap[p][0] <= heap[i][0]) break; [heap[p],heap[i]] = [heap[i],heap[p]]; i = p; } };
+    const pop = ()=>{ const top = heap[0], end = heap.pop(); if(heap.length){ heap[0] = end; let i = 0; for(;;){ const l = 2*i+1, r = l+1; let s = i; if(l<heap.length && heap[l][0]<heap[s][0]) s = l; if(r<heap.length && heap[r][0]<heap[s][0]) s = r; if(s===i) break; [heap[s],heap[i]] = [heap[i],heap[s]]; i = s; } } return top; };
+    const hh = (i,j)=> Math.hypot(i-ti, j-tj);
+    g[S] = 0; push(S, hh(si,sj));
+    while(heap.length){
+      const [,n] = pop(); if(closed[n]) continue; closed[n] = 1; if(n === Tg) break;
+      const i = n%W, j = (n/W)|0;
+      for(let di=-1;di<=1;di++) for(let dj=-1;dj<=1;dj++){ if(!di && !dj) continue;
+        const a = i+di, b = j+dj; if(a<0||b<0||a>=W||b>=H) continue; const q = a+b*W; if(!ok[q] || closed[q]) continue;
+        if(di && dj && (!ok[i+di+j*W] || !ok[i+(j+dj)*W])) continue;      // no corner cutting
+        const ng = g[n] + (di && dj ? 1.414 : 1); if(ng < g[q]){ g[q] = ng; from[q] = n; push(q, ng + hh(a,b)); } }
+    }
+    if(from[Tg] < 0 && Tg !== S) return null;
+    const pts = []; for(let n = Tg; n >= 0; n = from[n]){ pts.push([x0+(n%W)*CELL, z0+((n/W)|0)*CELL]); if(n === S) break; }
+    pts.reverse(); pts[0] = [sx,sz]; pts[pts.length-1] = [tx,tz];
+    // straighten: keep a point only where the straight line to the next kept one is blocked
+    const clear = (a,b)=>{ const L = Math.hypot(b[0]-a[0], b[1]-a[1]); for(let d=.25; d<L; d+=.25){ const f = d/L; if(!free(a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, m*.6)) return false; } return true; };
+    const out = [pts[0]]; let i = 0;
+    while(i < pts.length-1){ let j = pts.length-1; while(j > i+1 && !clear(pts[i], pts[j])) j--; out.push(pts[j]); i = j; }
+    return out;
+  };
+  const draw = (pts)=>{
+    let n = 0; const hA = G.heightAt;
+    for(let s=0; s<pts.length-1 && n<160; s++){
+      const a = pts[s], b = pts[s+1], L = Math.hypot(b[0]-a[0], b[1]-a[1]);
+      for(let d = (s ? 0 : .7); d < L && n < 160; d += .45){
+        const x = a[0]+(b[0]-a[0])*d/L, z = a[1]+(b[1]-a[1])*d/L;
+        let m = pool[n]; if(!m){ m = new THREE.Mesh(dotGeo, dotMat); pool.push(m); grp.add(m); }
+        m.position.set(x, (hA ? hA(x,z) : 0) + .09, z); m.userData.d = n; m.visible = true; n++;
+      }
+    }
+    for(let i=n;i<pool.length;i++) pool[i].visible = false;
+  };
+  animCallbacks.push((t)=>{
+    if(G7 !== G) return;
+    const show = ctrl.on && !ctrl.done && !G.busy && !G.noWalk && gatewayGroup;
+    grp.visible = !!show; if(!show) return;
+    const p = humanGroup.position, tg = gatewayGroup.position;
+    const key = `${tg.x.toFixed(1)},${tg.z.toFixed(1)}`;
+    if(t - tLast > .5 && (!last || last.key !== key || Math.hypot(p.x-last.x, p.z-last.z) > .6)){
+      tLast = t; last = {key, x:p.x, z:p.z};
+      route = plan(p.x, p.z, tg.x, tg.z, .35) || plan(p.x, p.z, tg.x, tg.z, 0) || [[p.x,p.z],[tg.x,tg.z]];
+      G.route = route; draw(route);
+    }
+    pool.forEach(m=>{ if(m.visible){ const w = (Math.sin(t*6 - m.userData.d*.55) + 1)/2; m.scale.setScalar(.75 + w*.6); } });   // pulses flow toward the target
+  });
 }
 // Walks the learner the last few centimetres onto a step's spot and turns them to face
 // the object (if given), then calls done().
@@ -1242,5 +1474,5 @@ function g7PutDown(obj, worldTo, done, rotY, keepPose){
   g7Tween(obj, worldTo, .7, .18, done, f=>{ obj.rotation.y = r0 + (r1-r0)*f; });
 }
 // Remove any interaction panel a scene added (e.g. the rope-throw aiming panel).
-function g7ClosePanels(){ document.querySelectorAll('.g7-panel').forEach(p=> p.remove()); g7DistLabel('to gateway'); }
+function g7ClosePanels(){ document.querySelectorAll('.g7-panel, .g7-ui').forEach(p=> p.remove()); G7_ACT = null; g7DistLabel('to gateway'); }
 function g7DistLabel(s){ const l = document.getElementById('m-dist-l'); if(l) l.textContent = s; }
