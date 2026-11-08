@@ -13,7 +13,7 @@
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <title>Click to Survive — Log In</title>
-<link rel="stylesheet" href="css/auth.css?v=20261108login">
+<link rel="stylesheet" href="css/auth.css?v=20261108val">
 </head>
 <body>
 <!-- .split: on short landscape phones the card becomes two columns (brand | form) so
@@ -28,9 +28,10 @@
   <div class="card-form">
     <!-- Who is logging in: students use their Student ID; teachers and the Super Admin
          share one username/password form, and the system works out which they are. -->
-    <div class="roles" role="tablist" aria-label="I am a">
+    <div class="roles three" role="tablist" aria-label="I am a">
       <button type="button" class="role active" id="role-student" role="tab" aria-selected="true" onclick="switchRole('student')"><span aria-hidden="true">🎒</span> Student</button>
       <button type="button" class="role" id="role-staff" role="tab" aria-selected="false" onclick="switchRole('staff')"><span aria-hidden="true">🧑‍🏫</span> Teacher / Admin</button>
+      <button type="button" class="role" id="role-validator" role="tab" aria-selected="false" onclick="switchRole('validator')"><span aria-hidden="true">✅</span> Validator</button>
     </div>
 
     <div class="mode active" id="mode-student">
@@ -82,6 +83,16 @@
     </div>
     </div>
 
+    <div class="mode" id="mode-validator">
+      <div class="panel active" id="panel-validator">
+        <label for="val-name">Your Full Name</label>
+        <input id="val-name" type="text" placeholder="e.g. Maria Santos" autocomplete="name" maxlength="80" onkeydown="if(event.key==='Enter')doValidatorLogin()">
+        <button class="btn" id="val-btn" onclick="doValidatorLogin()">Start Validating</button>
+        <div class="msg" id="val-msg"></div>
+        <div class="hint">For content validators: one account opens every grade level (7–12). Each scenario shows its correct answer — play it, then rate it and leave feedback. Use the same name next time to continue where you left off.</div>
+      </div>
+    </div>
+
     <div class="mode" id="mode-staff">
       <div class="panel active" id="panel-staff">
         <label for="staff-id">Username or Email</label>
@@ -119,9 +130,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js"></script>
-<script src="js/session.js?v=20261108login"></script>
-<script src="js/auth-page.js?v=20261108login"></script>
-<script src="js/staff-login.js?v=20261108login"></script>
+<script src="js/session.js?v=20261108val"></script>
+<script src="js/auth-page.js?v=20261108val"></script>
+<script src="js/staff-login.js?v=20261108val"></script>
 <script src="js/app-shell.js?v=20261011e"></script>
 </body>
 </html>

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/dashboard.css?v=20261108shs">
+<link rel="stylesheet" href="css/dashboard.css?v=20261108val">
 </head>
 <body data-app="Click to Survive Admin">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -31,6 +31,7 @@
       <ul class="nav" aria-labelledby="nav-l2">
         <li><button class="tab" data-tab="items" data-title="Item Analysis"><i class="bi bi-clipboard-data" aria-hidden="true"></i>Item Analysis</button></li>
         <li><button class="tab" data-tab="reports" data-title="Reports"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>Reports</button></li>
+        <li><button class="tab" data-tab="validation" data-title="Validation"><i class="bi bi-patch-check" aria-hidden="true"></i>Validation<span class="count" id="tc-validators">0</span></button></li>
       </ul>
     </nav>
     <div class="side-foot">
@@ -190,6 +191,36 @@
         </div>
       </section>
 
+      <!-- ══ VALIDATION ══ -->
+      <section class="view" data-view="validation" aria-labelledby="va-h">
+        <div class="page-head"><div><h2 id="va-h">Scenario validation</h2><p>Results from content validators. Each validator logs in with their name, plays every scenario with the answer key shown, then rates it 0–5 stars and writes feedback.</p></div>
+          <div class="row"><button class="btn secondary" onclick="exportValidation()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>CSV of all feedback</button></div></div>
+        <div class="notice warn" id="va-notice" role="alert" style="display:none"></div>
+        <div class="stat-row" id="va-stats"></div>
+        <section class="panel flush" aria-labelledby="va-v-h">
+          <div class="panel-h"><h3 id="va-v-h"><i class="bi bi-people" aria-hidden="true"></i>Validators</h3></div>
+          <div class="table-wrap">
+            <table>
+              <caption class="sr-only">Validators</caption>
+              <thead><tr><th scope="col">Validator</th><th scope="col" style="min-width:170px">Progress</th><th scope="col">Average rating</th><th scope="col" class="num">Not finished</th><th scope="col">Last active</th><th scope="col">Status</th></tr></thead>
+              <tbody id="va-validators"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel flush" aria-labelledby="va-s-h">
+          <div class="panel-h"><h3 id="va-s-h"><i class="bi bi-list-stars" aria-hidden="true"></i>Results per scenario</h3>
+            <div class="toolbar" style="margin:0"><div class="field"><label for="va-grade">Grade</label><select id="va-grade" data-grade-select onchange="renderValidation()"><option value="">All grades</option><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
+            <div class="field"><label for="va-sort">Sort</label><select id="va-sort" onchange="renderValidation()"><option value="order">Grade &amp; number</option><option value="low">Lowest rated first</option><option value="high">Highest rated first</option></select></div></div></div>
+          <div class="table-wrap">
+            <table>
+              <caption class="sr-only">Validation results per scenario</caption>
+              <thead><tr><th scope="col">Grade</th><th scope="col" class="num">#</th><th scope="col">Scenario</th><th scope="col">Average</th><th scope="col" class="num">Ratings</th><th scope="col">Range</th><th scope="col">Feedback</th></tr></thead>
+              <tbody id="va-scenarios"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
       <!-- ══ ITEM ANALYSIS ══ -->
       <section class="view" data-view="items" aria-labelledby="ia-h">
         <div class="page-head"><div><h2 id="ia-h">Item analysis</h2><p>School-wide learning per item and competency. Narrow it to one section or session to compare classes.</p></div>
@@ -305,6 +336,21 @@
   </div>
 </div>
 
+<!-- Validation: one validator's ratings, or every rating of one scenario -->
+<div class="modal-overlay" id="va-modal" style="display:none">
+  <div class="modal-card wide" role="dialog" aria-modal="true" aria-labelledby="vam-title" tabindex="-1">
+    <div class="modal-head">
+      <div><h2 id="vam-title">Validation</h2><div class="modal-sub" id="vam-sub"></div></div>
+      <div class="row">
+        <button class="btn danger" id="vam-del" style="display:none"><i class="bi bi-trash" aria-hidden="true"></i>Remove validator</button>
+        <button class="icon-btn" onclick="closeModal('va-modal')" aria-label="Close dialog"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div class="stat-row" id="vam-stats"></div>
+    <div id="vam-body" class="va-feed"></div>
+  </div>
+</div>
+
 <!-- Student detail -->
 <div class="modal-overlay" id="student-modal" style="display:none">
   <div class="modal-card wide" role="dialog" aria-modal="true" aria-labelledby="st-title" tabindex="-1">
@@ -337,10 +383,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js"></script>
-<script src="js/session.js?v=20261108login"></script>
-<script src="js/game-data.js?v=20261108ui"></script>
+<script src="js/session.js?v=20261108val"></script>
+<script src="js/game-data.js?v=20261108val"></script>
 <script src="js/dash-common.js?v=20261108shs"></script>
 <script src="js/report-pdf.js?v=20261020rep3"></script>
-<script src="js/superadmin.js?v=20261108shs"></script>
+<script src="js/superadmin.js?v=20261108val"></script>
 </body>
 </html>

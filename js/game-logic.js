@@ -4,8 +4,9 @@
 // is populated inside init() below rather than at top level; it redirects to index.html
 // on its own if there's no logged-in profile.
 let STUDENT = null;
+let VALIDATOR = null;   // set instead of STUDENT for a validator account (js/validator.js)
 
-function doLogout(){ doLogoutStudent(); }
+function doLogout(){ if(VALIDATOR) doLogoutValidator(); else doLogoutStudent(); }
 
 // Lightweight diagnostic hook kept so game-engine.js's misconception/telemetry
 // calls (labInit, labLaunch, etc.) have something to call without needing edits there.
@@ -146,7 +147,7 @@ function attemptScore(base){
 }
 
 function recordResult(entry){
-  if(GS.tutorial) return;          // practice round: never scored or saved
+  if(GS.tutorial || GS.validator) return;          // practice round / validation play: never scored or saved
   resultsLog.push(Object.assign({
     scenarioIndex: GS.idx,
     melc: GS.gd.melc || '',
@@ -248,7 +249,7 @@ function enterSession(){
 // opts.tutorial runs the unscored practice round (opts.gd = its one practice scenario).
 function startGrade(g, sessionId, sessionLabel, opts){
   opts = opts || {};
-  GS = { grade:g, idx:0, scores:[], gd:opts.gd || GRADES[g], answered:false, attempts:0, t0:Date.now(), pred:'', sessionId, sessionLabel, tutorial:!!opts.tutorial };
+  GS = { grade:g, idx:0, scores:[], gd:opts.gd || GRADES[g], answered:false, attempts:0, t0:Date.now(), pred:'', sessionId, sessionLabel, tutorial:!!opts.tutorial, validator:!!opts.validator };
   resultsLog = [];
   // music: upbeat loop for the practice round; real scenarios get their own scene score (see loadScenario)
   if(typeof AudioSys!=='undefined'){ AudioSys.init(); if(GS.tutorial) AudioSys.startMusic('bright'); }
@@ -257,7 +258,7 @@ function startGrade(g, sessionId, sessionLabel, opts){
   document.getElementById('hud-ico').style.background = GS.gd.color;
   showScreen('s-game');
   setupHUD(g);
-  loadScenario(0);
+  loadScenario(opts.idx || 0);
   const tut = document.getElementById('tutorial');
   tut.style.display = 'block';
   setTimeout(()=>tut.style.display='none', 4500);
@@ -520,6 +521,8 @@ function loadScenario(idx){
       ce.appendChild(b);
     });
   }
+  document.getElementById('val-rate-now').hidden = true;
+  if(GS.validator && !scen.lab && typeof valMarkAnswer === 'function') valMarkAnswer(scen);   // validator: answer key shown
   updateParams(scen);
   updatePAGASA(scen);
   const g = GS.grade;
@@ -657,8 +660,9 @@ function handleChoice(i){
   if(GS.answered || !panelRevealed) return;
   narrStop();
   if(typeof tutAllows==='function' && !tutAllows('answer')) return;
-  GS.answered = true;
   const scen = GS.gd.scenarios[GS.idx];
+  if(GS.validator && i !== scen.ci) return;       // validator: only the answer key is playable
+  GS.answered = true;
   const ok = i === scen.ci;
   GS.attempts = 1;
   const btns = document.querySelectorAll('.ch-btn');
@@ -927,6 +931,8 @@ function goMenu(){
   resetCenterQ();
   AudioSysSafe('click');
   if(typeof AudioSys!=='undefined') AudioSys.setAmbience(null);
+  document.getElementById('val-rate-now').hidden = true;
+  if(VALIDATOR){ transitionTo(()=>{ buildMenuBackground(); valShowHub(GS && GS.validator ? GS.grade : null); }); return; }
   transitionTo(()=>{ buildMenuBackground(); showScreen('s-menu'); renderStartCard(); loadHistory(); });
 }
 function showScreen(id){
@@ -1044,15 +1050,19 @@ async function finishLoad(){
   const wait = 2100 - (performance.now() - LD_T0);
   if(wait > 0) await new Promise(r=>setTimeout(r, wait));
   const L = document.getElementById('s-load');
-  showScreen('s-menu');
+  if(VALIDATOR) valShowHub(); else showScreen('s-menu');
   L.classList.add('on');
   requestAnimationFrame(()=>requestAnimationFrame(()=>L.classList.add('ld-out')));
   await new Promise(r=>setTimeout(r, 520));
   L.classList.remove('on','ld-out');
 }
 async function init(){
-  STUDENT = await requireStudentSession();
-  if(!STUDENT) return; // requireStudentSession() is already redirecting to index.html
+  const V = getValidatorSession();
+  if(V){ VALIDATOR = V; await ensureAnonAuth(); }
+  else {
+    STUDENT = await requireStudentSession();
+    if(!STUDENT) return; // requireStudentSession() is already redirecting to index.html
+  }
   initThree();
   applyTier();
   initControls();
@@ -1065,6 +1075,7 @@ async function init(){
   await new Promise(r=>setTimeout(r,250));
   setLoad(100,'Ready!');
   await new Promise(r=>setTimeout(r,350));
+  if(VALIDATOR){ await valLoad(); await finishLoad(); return; }
   renderStartCard();
   loadHistory();
   if(typeof tutCheckRemote==='function') tutCheckRemote();

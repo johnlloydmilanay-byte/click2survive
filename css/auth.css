@@ -80,6 +80,8 @@ body{min-height:100vh;min-height:100dvh}
 
 /* ═══ Role switch: Student · Teacher / Admin (index.html) ═══ */
 .roles{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+.roles.three{grid-template-columns:repeat(3,1fr)}
+.roles.three .role{font-size:.8rem;padding:10px 4px;flex-wrap:wrap;text-align:center;line-height:1.15}
 .role{display:flex;align-items:center;justify-content:center;gap:.45rem;padding:11px 8px;border-radius:13px;border:1px solid var(--bord);
   background:rgba(255,255,255,.04);color:var(--txm);font:600 .86rem/1.1 inherit;font-family:inherit;cursor:pointer;transition:all .2s;min-height:44px}
 .role:hover{color:#fff;border-color:rgba(56,189,248,.5)}

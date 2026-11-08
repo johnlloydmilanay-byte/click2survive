@@ -10,6 +10,8 @@ let studentsCache = [];   // all students, live
 let attemptsCache = [];   // all completed runs, live
 let resultsCache = [];    // all per-item results, live (if the rules allow it)
 let sessionsCache = [];   // all sessions (falls back to active-only if the rules only allow that)
+let validatorsCache = []; // content validators (name-only accounts), live
+let valReviewsCache = []; // their per-scenario ratings + feedback, live
 let assignTeacherId = null;
 let goTab = () => {};
 const GRADE_LIST = GRADE_LEVELS;   // from game-data.js: Junior High 7–10, Senior High 11–12
@@ -32,7 +34,9 @@ function renderAll(){
     cnt('tc-sections', sectionsCache.length); cnt('tc-teachers', teachersCache.length); cnt('tc-students', studentsCache.length);
     const live = sessionsCache.filter(s => s.status === 'active').length;
     const lc = document.getElementById('tc-live'); lc.style.display = live ? '' : 'none'; lc.innerHTML = `${live}<span class="sr-only"> live</span>`;
-    renderOverview(); renderSections(); renderTeachers(); renderStudents(); renderSessions(); renderItems(); populateReportPickers();
+    cnt('tc-validators', validatorsCache.length);
+    renderOverview(); renderSections(); renderTeachers(); renderStudents(); renderSessions(); renderItems(); populateReportPickers(); renderValidation();
+    if (document.getElementById('va-modal').style.display === 'flex' && vaOpen) vaOpen.render();
     if (document.getElementById('session-modal').style.display === 'flex') renderSessionModal();
     if (document.getElementById('student-modal').style.display === 'flex') renderStudentModal();
   });
@@ -312,6 +316,125 @@ function renderSessionModal(){
     : `<tr><td colspan="6">${emptyHTML('No students in this section yet.', 'people')}</td></tr>`;
 }
 
+// ═══ VALIDATION ═══
+// Validators rate every scenario 0–5 ★ with feedback (game.html in validator mode).
+const VA_TOTAL = () => GRADE_LIST.reduce((n, g) => n + GRADES[g].scenarios.length, 0);
+function vaStars(n){
+  if (n == null) return '<span class="dim">–</span>';
+  const r = Math.round(n);
+  return `<span class="va-stars" role="img" aria-label="${(+n).toFixed(1)} of 5 stars">${'★'.repeat(r)}<span class="off">${'★'.repeat(5-r)}</span></span>`;
+}
+function vaScenTitle(g, i){ const s = GRADES[g] && GRADES[g].scenarios[i]; return s ? (s.phy_title || s.concept || `Scenario ${i+1}`) : `Scenario ${i+1}`; }
+function vaReviewsOf(validatorId){ return valReviewsCache.filter(r => r.validatorId === validatorId); }
+function vaScenarioRows(){
+  const rows = [];
+  GRADE_LIST.forEach(g => GRADES[g].scenarios.forEach((s, i) => {
+    const rs = valReviewsCache.filter(r => r.grade === g && r.idx === i);
+    const ratings = rs.map(r => r.rating);
+    rows.push({ g, i, title: vaScenTitle(g, i), rs, avg: mean(ratings), min: ratings.length ? Math.min(...ratings) : null, max: ratings.length ? Math.max(...ratings) : null,
+      comments: rs.filter(r => r.comment).length, unfinished: rs.filter(r => r.completed === false).length });
+  }));
+  return rows;
+}
+function renderValidation(){
+  const total = VA_TOTAL(), rows = vaScenarioRows();
+  const all = valReviewsCache.map(r => r.rating), avg = mean(all);
+  const doneAll = validatorsCache.filter(v => vaReviewsOf(v.id).length >= total).length;
+  const low = rows.filter(r => r.avg != null && r.avg < 3).length;
+  const covered = rows.filter(r => r.rs.length).length;
+  document.getElementById('va-stats').innerHTML =
+      statHTML({ label:'Validators', icon:'people', value: validatorsCache.length, sub: `${doneAll} finished all ${total}` })
+    + statHTML({ label:'Ratings submitted', icon:'star', value: valReviewsCache.length, sub: `${covered} / ${total} scenarios rated at least once` })
+    + statHTML({ label:'Overall average', icon:'stars', tone: avg == null ? '' : avg >= 4 ? 'good' : avg >= 3 ? '' : 'warn', value: avg == null ? '–' : `${avg.toFixed(2)}<small> / 5</small>`, sub: avg == null ? '' : vaStars(avg) })
+    + statHTML({ label:'Below 3 ★', icon:'exclamation-triangle', tone: low ? 'warn' : 'good', value: low, sub: 'scenarios needing revision' });
+  // validators
+  const vb = document.getElementById('va-validators');
+  const vs = validatorsCache.slice().sort((a,b) => toMillis(b.lastActiveAt) - toMillis(a.lastActiveAt));
+  vb.innerHTML = vs.length ? vs.map(v => {
+    const rs = vaReviewsOf(v.id), n = rs.length, a = mean(rs.map(r => r.rating)), unf = rs.filter(r => r.completed === false).length;
+    return `<tr class="clickable" onclick="rowClick(event,this)">
+      <td><button class="name-btn" data-primary data-vid="${esc(v.id)}" onclick="openValidator(this.dataset.vid)"><span class="avatar" style="width:28px;height:28px;font-size:.68rem" aria-hidden="true">${esc(initials(v.name))}</span><span class="nm">${esc(v.name)}</span></button></td>
+      <td>${barHTML(n / total * 100, { tip: `${n} of ${total} scenarios` })}<div class="dim">${n} / ${total} scenarios</div></td>
+      <td>${a == null ? '<span class="dim">No ratings yet</span>' : `${vaStars(a)} <b>${a.toFixed(2)}</b>`}</td>
+      <td class="num">${unf || '<span class="dim">0</span>'}</td>
+      <td class="nowrap dim">${fmtAgo(v.lastActiveAt)}</td>
+      <td>${n >= total ? `<span class="badge good">${ico('check-circle-fill')}Completed</span>` : n ? `<span class="badge warn">${ico('hourglass-split')}In progress</span>` : `<span class="badge none">${ico('circle')}Not started</span>`}</td></tr>`;
+  }).join('') : `<tr><td colspan="6">${emptyHTML('No validators yet. Validators log in from the login page → Validator, with just their name.', 'patch-check')}</td></tr>`;
+  // per scenario
+  const g = Number(document.getElementById('va-grade').value) || null, sort = document.getElementById('va-sort').value;
+  let list = rows.filter(r => !g || r.g === g);
+  if (sort === 'low') list.sort((a,b) => (a.avg ?? 9) - (b.avg ?? 9));
+  if (sort === 'high') list.sort((a,b) => (b.avg ?? -1) - (a.avg ?? -1));
+  document.getElementById('va-scenarios').innerHTML = list.map(r => `<tr class="clickable" onclick="rowClick(event,this)">
+      <td>${r.g}</td><td class="num">${r.i+1}</td>
+      <td><button class="name-btn" data-primary onclick="openValScenario(${r.g},${r.i})"><span class="nm">${esc(r.title)}</span></button>${r.unfinished ? `<div class="dim">${r.unfinished} rated before finishing</div>` : ''}</td>
+      <td class="nowrap">${r.avg == null ? '<span class="dim">Not rated</span>' : `${vaStars(r.avg)} <b>${r.avg.toFixed(2)}</b>`}</td>
+      <td class="num">${r.rs.length}</td>
+      <td class="nowrap">${r.min == null ? '–' : r.min === r.max ? r.min + ' ★' : `${r.min}–${r.max} ★`}</td>
+      <td>${r.comments ? `<button class="btn secondary sm" onclick="openValScenario(${r.g},${r.i})">${ico('chat-left-text')}${r.comments} comment${r.comments === 1 ? '' : 's'}</button>` : '<span class="dim">–</span>'}</td></tr>`).join('');
+}
+let vaOpen = null;
+function vaFeedHTML(list, by){
+  if (!list.length) return emptyHTML('No ratings yet.', 'star');
+  return list.map(r => `<article class="va-item">
+      <div class="va-item-h"><div><b>${by === 'scenario' ? esc(r.validatorName || r.validatorId) : `Grade ${r.grade} · #${r.idx+1} · ${esc(vaScenTitle(r.grade, r.idx))}`}</b>
+        ${r.completed === false ? `<span class="badge warn">${ico('exclamation-triangle')}Rated before finishing</span>` : ''}</div>
+        <div class="nowrap">${vaStars(r.rating)} <b>${r.rating}</b><span class="dim"> / 5</span></div></div>
+      <div class="va-item-c">${r.comment ? esc(r.comment) : '<span class="dim">No comment</span>'}</div>
+      <div class="dim">${r.playCount > 1 ? `Played ${r.playCount}× · ` : ''}updated ${fmtWhen(r.updatedAt, true)}</div></article>`).join('');
+}
+function openValidator(id){
+  vaOpen = { render(){
+    const v = validatorsCache.find(x => x.id === id); if (!v) return closeModal('va-modal');
+    const rs = vaReviewsOf(id).sort((a,b) => a.grade - b.grade || a.idx - b.idx), a = mean(rs.map(r => r.rating)), total = VA_TOTAL();
+    document.getElementById('vam-title').textContent = v.name;
+    document.getElementById('vam-sub').textContent = `Validator · joined ${fmtWhen(v.createdAt, true)} · last active ${fmtAgo(v.lastActiveAt)}`;
+    document.getElementById('vam-stats').innerHTML =
+        statHTML({ label:'Progress', icon:'check2-square', value:`${rs.length}<small> / ${total}</small>`, sub: rs.length >= total ? 'Completed' : 'In progress' })
+      + statHTML({ label:'Average rating', icon:'star', value: a == null ? '–' : a.toFixed(2), sub: a == null ? '' : vaStars(a) })
+      + statHTML({ label:'Comments', icon:'chat-left-text', value: rs.filter(r => r.comment).length })
+      + statHTML({ label:'Not finished', icon:'exclamation-triangle', tone: rs.some(r => r.completed === false) ? 'warn' : '', value: rs.filter(r => r.completed === false).length });
+    document.getElementById('vam-body').innerHTML = vaFeedHTML(rs, 'validator');
+    const del = document.getElementById('vam-del'); del.style.display = ''; del.onclick = () => removeValidator(id);
+  }};
+  vaOpen.render(); openModal('va-modal');
+}
+function openValScenario(g, i){
+  vaOpen = { render(){
+    const rs = valReviewsCache.filter(r => r.grade === g && r.idx === i).sort((a,b) => a.rating - b.rating), a = mean(rs.map(r => r.rating));
+    const sc = GRADES[g].scenarios[i];
+    document.getElementById('vam-title').textContent = `Grade ${g} · Scenario ${i+1}: ${vaScenTitle(g, i)}`;
+    document.getElementById('vam-sub').textContent = `${sc.hazard === 'flood' ? 'Flood' : 'Typhoon'} · Answer key ${'ABCDE'[sc.ci]}. ${sc.opts[sc.ci]}`;
+    document.getElementById('vam-stats').innerHTML =
+        statHTML({ label:'Average rating', icon:'star', value: a == null ? '–' : a.toFixed(2), sub: a == null ? '' : vaStars(a) })
+      + statHTML({ label:'Ratings', icon:'people', value: rs.length })
+      + statHTML({ label:'Lowest / highest', icon:'arrow-down-up', value: rs.length ? `${Math.min(...rs.map(r=>r.rating))} / ${Math.max(...rs.map(r=>r.rating))}` : '–' })
+      + statHTML({ label:'Not finished', icon:'exclamation-triangle', tone: rs.some(r => r.completed === false) ? 'warn' : '', value: rs.filter(r => r.completed === false).length });
+    document.getElementById('vam-body').innerHTML = vaFeedHTML(rs, 'scenario');
+    document.getElementById('vam-del').style.display = 'none';
+  }};
+  vaOpen.render(); openModal('va-modal');
+}
+async function removeValidator(id){
+  const v = validatorsCache.find(x => x.id === id); if (!v) return;
+  if (!confirm(`Remove validator "${v.name}" and all ${vaReviewsOf(id).length} of their ratings? This cannot be undone.`)) return;
+  try{
+    const batch = db.batch();
+    vaReviewsOf(id).forEach(r => batch.delete(db.collection('validationReviews').doc(r.id)));
+    batch.delete(db.collection('validators').doc(id));
+    await batch.commit();
+    closeModal('va-modal'); toast(`Removed ${v.name}.`, 'ok');
+  }catch(e){ toast('Could not remove: ' + e.message, 'err'); }
+}
+function exportValidation(){
+  const rows = [['Validator','Grade','Scenario #','Scenario','Rating (0-5)','Comment','Finished scenario','Times played','Updated']];
+  valReviewsCache.slice().sort((a,b) => String(a.validatorName).localeCompare(b.validatorName) || a.grade - b.grade || a.idx - b.idx)
+    .forEach(r => rows.push([r.validatorName || r.validatorId, r.grade, r.idx+1, vaScenTitle(r.grade, r.idx), r.rating, r.comment || '', r.completed === false ? 'No' : 'Yes', r.playCount || 1, r.updatedAt || '']));
+  rows.push([]); rows.push(['Per scenario','Grade','Scenario #','Scenario','Average','Ratings','Min','Max']);
+  vaScenarioRows().forEach(r => rows.push(['', r.g, r.i+1, r.title, r.avg == null ? '' : r.avg.toFixed(2), r.rs.length, r.min ?? '', r.max ?? '']));
+  downloadCSV('scenario-validation.csv', rows);
+}
+
 // ═══ ITEM ANALYSIS ═══
 function sectionOptions(g){ return '<option value="">All sections</option>' + sectionsCache.filter(s => s.grade === g).map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join(''); }
 function sessionOptions(g, sec){ return '<option value="">All sessions</option>' + sessionsCache.filter(s => s.grade === g && (!sec || s.sectionId === sec)).map(s => `<option value="${s.id}">${esc(sessionOptionLabel(s))}</option>`).join(''); }
@@ -410,6 +533,12 @@ function watchAll(){
   db.collection('scenarioResults').onSnapshot(snap => {
     resultsCache = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderAll();
   }, fail('per-item answers (scenarioResults). Item analysis needs Super Admin read access to this collection in firestore.rules', 'ia-notice'));
+  db.collection('validators').onSnapshot(snap => {
+    validatorsCache = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderAll();
+  }, fail('validators (update firestore.rules)', 'va-notice'));
+  db.collection('validationReviews').onSnapshot(snap => {
+    valReviewsCache = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderAll();
+  }, fail('validation reviews (update firestore.rules)', 'va-notice'));
   // Older rules may only let the admin list *active* sessions; fall back to that.
   const setSessions = snap => {
     sessionsCache = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => toMillis(b.createdAt) - toMillis(a.createdAt));

@@ -133,6 +133,30 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
+    // ── Validators: content reviewers who log in with just their name (validators/{id},
+    // id derived from the name, so the same name continues the same progress anywhere).
+    // Like students there's no password — the name is the whole credential.
+    match /validators/{validatorId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 1 && request.resource.data.name.size() <= 80;
+      allow delete: if isSuperAdmin();
+    }
+    // One review per validator per scenario: {validatorId}_{grade}_{idx}, 0–5 stars + comment.
+    match /validationReviews/{reviewId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+                    && request.resource.data.validatorId is string
+                    && exists(/databases/$(database)/documents/validators/$(request.resource.data.validatorId))
+                    && isValidGrade(request.resource.data.grade)
+                    && request.resource.data.idx is int && request.resource.data.idx >= 0 && request.resource.data.idx < 20
+                    && reviewId == request.resource.data.validatorId + '_' + string(request.resource.data.grade) + '_' + string(request.resource.data.idx)
+                    && request.resource.data.rating is int && request.resource.data.rating >= 0 && request.resource.data.rating <= 5
+                    && request.resource.data.comment is string && request.resource.data.comment.size() <= 2000;
+      allow delete: if isSuperAdmin();
+    }
+
     match /scenarioResults/{resultId} {
       allow read: if isSuperAdmin() || isAssignedToSection(resource.data.get('sectionId', null));
       allow create: if isSignedIn();

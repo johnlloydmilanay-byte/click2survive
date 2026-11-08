@@ -5,6 +5,7 @@
 const STUDENT_KEY = 'c2s_student_profile';
 const TEACHER_KEY = 'c2s_teacher_profile';
 const SUPERADMIN_KEY = 'c2s_superadmin_profile';
+const VALIDATOR_KEY = 'c2s_validator_profile';
 
 function saveStudentSession(profile){ localStorage.setItem(STUDENT_KEY, JSON.stringify(profile)); }
 function getStudentSession(){ try{ return JSON.parse(localStorage.getItem(STUDENT_KEY) || 'null'); } catch(e){ return null; } }
@@ -13,6 +14,16 @@ function clearStudentSession(){ localStorage.removeItem(STUDENT_KEY); }
 function saveTeacherSession(profile){ localStorage.setItem(TEACHER_KEY, JSON.stringify(profile)); }
 function getTeacherSession(){ try{ return JSON.parse(localStorage.getItem(TEACHER_KEY) || 'null'); } catch(e){ return null; } }
 function clearTeacherSession(){ localStorage.removeItem(TEACHER_KEY); }
+
+// Validators (content reviewers) log in with just their name: the same name always opens
+// the same validator record (validators/{id}), so their progress follows them to any device.
+function saveValidatorSession(profile){ localStorage.setItem(VALIDATOR_KEY, JSON.stringify(profile)); }
+function getValidatorSession(){ try{ return JSON.parse(localStorage.getItem(VALIDATOR_KEY) || 'null'); } catch(e){ return null; } }
+function clearValidatorSession(){ localStorage.removeItem(VALIDATOR_KEY); }
+function validatorIdFromName(name){
+  return 'v-' + String(name||'').trim().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+}
 
 function saveSuperAdminSession(profile){ localStorage.setItem(SUPERADMIN_KEY, JSON.stringify(profile)); }
 function getSuperAdminSession(){ try{ return JSON.parse(localStorage.getItem(SUPERADMIN_KEY) || 'null'); } catch(e){ return null; } }
@@ -131,6 +142,10 @@ function consumeLoginError(msgElId){
 function doLogoutStudent(){
   clearStudentSession();
   auth.signOut().finally(()=>{ window.location.href = 'index.html'; });
+}
+function doLogoutValidator(){
+  clearValidatorSession();
+  auth.signOut().finally(()=>{ window.location.href = 'index.html?role=validator'; });
 }
 function doLogoutTeacher(){
   clearTeacherSession();

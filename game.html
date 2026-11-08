@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap">
 <title>Click to Survive — Disaster Preparedness Simulation</title>
-<link rel="stylesheet" href="css/game.css?v=20261108guide">
+<link rel="stylesheet" href="css/game.css?v=20261108val2">
 <style>
 #topbar{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.25rem;pointer-events:none}
 #topbar.hidden{display:none}
@@ -133,6 +133,29 @@
       <button class="howto-btn" onclick="startTutorial()">❓ How to play (tutorial)</button>
       <div class="menu-foot">Drag the joystick to look around · Answer with the buttons or keys 1/2/3 · Hazard guidance follows PAGASA / FEMA / UNDRR advisories · <a href="#" onclick="showPhysics();return false" style="color:var(--acc)">Physics equations published here</a></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Validator hub (validator accounts only, see js/validator.js): pick a grade, then a
+       scenario; the answer key is shown in play; afterwards rate it 0–5 ★ with feedback. -->
+  <div id="s-val" class="screen">
+    <div class="val-wrap">
+      <div class="val-top">
+        <div>
+          <div class="menu-eyebrow">Validator mode · All grade levels</div>
+          <h1 class="val-h1">Scenario <em>Validation</em></h1>
+          <p class="val-sub" id="val-hello">Play each scenario with its correct answer shown, carry out the decision, then rate it and leave feedback.</p>
+        </div>
+        <div class="val-prog">
+          <div class="val-prog-n"><b id="val-done">0</b> / <span id="val-total">36</span> scenarios validated</div>
+          <div class="val-bar"><i id="val-bar"></i></div>
+          <button class="val-review-btn" id="val-review-btn" onclick="valShowReview()" disabled>🔒 Review my feedback</button>
+          <div class="val-lock" id="val-lock">Unlocks after you validate every scenario.</div>
+        </div>
+      </div>
+      <div id="val-grades" class="val-grades"></div>
+      <div id="val-list" class="val-list" hidden></div>
+      <div id="val-review" class="val-review" hidden></div>
     </div>
   </div>
 
@@ -315,20 +338,41 @@
 </div>
 <div id="trans"></div>
 
+<!-- Validator: rate the scenario after executing it -->
+<div id="val-rate" class="val-modal" role="dialog" aria-modal="true" aria-labelledby="vr-title" hidden>
+  <div class="val-card">
+    <div class="vr-eyebrow" id="vr-eyebrow">Grade 8 · Scenario 4</div>
+    <h2 id="vr-title">Rate this scenario</h2>
+    <div class="vr-status" id="vr-status"></div>
+    <div class="vr-label">Your rating</div>
+    <div class="vr-stars" id="vr-stars" role="radiogroup" aria-label="Rating from 0 to 5 stars"></div>
+    <div class="vr-rtext" id="vr-rtext">Tap the stars (0 – 5)</div>
+    <label class="vr-label" for="vr-comment">Feedback / comments</label>
+    <textarea id="vr-comment" maxlength="2000" rows="4" placeholder="What works well? Is the scene, question, answer key, animation and explanation accurate? Anything to fix?"></textarea>
+    <div class="vr-msg" id="vr-msg"></div>
+    <div class="vr-btns">
+      <button class="vr-btn" id="vr-again" onclick="valPlayAgain()">↻ Play again</button>
+      <button class="vr-btn primary" id="vr-save" onclick="valSaveRating()">Save &amp; mark as played</button>
+    </div>
+  </div>
+</div>
+<button id="val-rate-now" class="val-rate-now" onclick="valRateNow()" hidden>⭐ Rate now</button>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js?v=20261011q"></script>
-<script src="js/session.js?v=20261108login"></script>
+<script src="js/session.js?v=20261108val2"></script>
 <script src="js/audio-sys.js?v=20261011q"></script>
-<script src="js/game-data.js?v=20261108guide"></script>
-<script src="js/game-engine.js?v=20261108guide"></script>
-<script src="js/grade7-scenes.js?v=20261108g11"></script>
-<script src="js/shs-scenes.js?v=20261108guide"></script>
-<script src="js/jhs-scenes.js?v=20261108guide"></script>
-<script src="js/explain-visuals.js?v=20261108guide"></script>
-<script src="js/game-logic.js?v=20261108guide"></script>
+<script src="js/game-data.js?v=20261108val2"></script>
+<script src="js/game-engine.js?v=20261108val2"></script>
+<script src="js/grade7-scenes.js?v=20261108val2"></script>
+<script src="js/shs-scenes.js?v=20261108val2"></script>
+<script src="js/jhs-scenes.js?v=20261108val2"></script>
+<script src="js/explain-visuals.js?v=20261108val2"></script>
+<script src="js/game-logic.js?v=20261108val2"></script>
+<script src="js/validator.js?v=20261108val2"></script>
 <script src="js/tutorial.js?v=20261011q"></script>
 <script src="js/app-shell.js?v=20261011q"></script>
 </body>

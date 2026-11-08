@@ -2553,6 +2553,7 @@ function controlSuccess(){
   setTimeout(()=>{ stick.style.boxShadow = ''; }, 900);
   setTimeout(()=>{
     if(GS.tutorial){ if(typeof tutEvent==='function') tutEvent('gateway'); return; }   // practice round: the tutorial takes it from here
+    if(GS.validator){ valAfterPlay(true); return; }                                      // validation: rate this scenario
     const n = GS.idx+1;
     if(n >= GS.gd.scenarios.length) transitionTo(showResults);
     else {
