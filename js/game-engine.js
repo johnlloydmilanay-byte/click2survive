@@ -2304,6 +2304,10 @@ function labExplain(floated, r, max){
   document.getElementById('fb-text').textContent = diag;
   document.getElementById('fb-physics').textContent =
     `F_b = ρ·g·V = ${w.rho}×9.81×${w.hullV} = ${Math.round(r.F_b_max)} N max · W = (${w.hullM}+${LAB.loaded}×${w.pM})×9.81 = ${Math.round(r.W)} N · floats ⟺ W ≤ F_b`;
+  // Animated diagram: people added one at a time until the weight passes the maximum buoyant force.
+  if(typeof setExplainView === 'function') setExplainView('visual');
+  if(typeof renderExplainVisual === 'function') renderExplainVisual(LAB.scen, { grade: 9, lab: { w, loaded: LAB.loaded } });
+  if(typeof fitFeedback === 'function') fitFeedback();
 }
 function labRetry(){
   document.getElementById('fb-wrap').classList.remove('on');

@@ -779,3 +779,42 @@ body.tut-on #tutorial{display:none!important}   /* the old one-line hint; the tu
 .qh-tools{display:flex;align-items:center;gap:.5em;flex:0 0 auto}
 .qh-listen{padding:.4em .9em;font-size:.8em;min-height:40px;white-space:nowrap}
 @media (max-width:900px), (max-height:500px){ .story-listen{padding:6px 14px;font-size:.82rem;min-height:36px} }
+
+/* ═══ ANIMATED VISUAL EXPLANATIONS (js/explain-visuals.js) ═══
+   The diagram sits between the panel heading and the written explanation; its numbered
+   steps light up in time with the animation. Sizes are em of the card's fitted font. */
+#fb-wrap .fbp-top{display:flex;align-items:center;justify-content:space-between;gap:.6em;margin-bottom:.45em;flex:0 0 auto}
+#fb-wrap .fbp-top .fbp-h{margin-bottom:0}
+.fbp-tabs{display:none;gap:.3em;flex:0 0 auto}
+.fbp-tabs button{font:inherit;font-size:.7em;font-weight:700;color:#c4b5fd;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.35);
+  border-radius:999px;padding:.35em .85em;cursor:pointer;min-height:32px}
+.fbp-tabs button[aria-selected="true"]{background:#7c3aed;border-color:#a78bfa;color:#fff}
+.xv{flex:0 0 auto;margin:0 0 .6em}
+.xv[hidden]{display:none}
+.xv-stage{position:relative;background:radial-gradient(120% 140% at 50% 0%,rgba(30,41,59,.9),rgba(2,6,23,.92));
+  border:1px solid rgba(148,163,184,.22);border-radius:.7em;overflow:hidden}
+.xv-svg{display:block;width:100%;height:10.5em}
+.xv-replay{position:absolute;right:.4em;bottom:.4em;width:2em;height:2em;min-width:32px;min-height:32px;border-radius:50%;
+  border:1px solid rgba(148,163,184,.4);background:rgba(15,23,42,.8);color:#e2e8f0;font-size:.85em;cursor:pointer;line-height:1}
+.xv-replay:hover{background:#7c3aed}
+.xv-steps{list-style:none;margin:.5em 0 0;padding:0;display:flex;flex-direction:column;gap:.22em}
+.xv-steps li{display:flex;gap:.5em;align-items:flex-start;font-size:.8em;line-height:1.35;color:rgba(255,255,255,.38);
+  padding:.18em .45em;border-radius:.45em;border-left:3px solid transparent;transition:color .35s,background .35s,border-color .35s}
+.xv-steps li.on{color:rgba(255,255,255,.82)}
+.xv-steps li.now{color:#fff;background:rgba(139,92,246,.16);border-left-color:#a78bfa}
+.xv-n{flex:0 0 auto;width:1.45em;height:1.45em;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:.8em;font-weight:800;background:rgba(148,163,184,.2);color:#cbd5e1;margin-top:.05em}
+.xv-steps li.on .xv-n{background:#4c1d95;color:#ddd6fe}
+.xv-steps li.now .xv-n{background:#a78bfa;color:#1e1b4b}
+/* compact: diagram and text take turns behind the tabs */
+#fb-wrap .fb-compact .fbp-tabs{display:flex}
+#fb-wrap .fb-compact .fb-phys[data-view="visual"] .fbp-t{display:none}
+#fb-wrap .fb-compact .fb-phys[data-view="text"] .xv{display:none}
+#fb-wrap .fb-compact .xv{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;margin:0}
+#fb-wrap .fb-compact .xv-stage{flex:1 1 0;min-height:6.5em;display:flex;flex-direction:column}
+#fb-wrap .fb-compact .xv-svg{flex:1 1 0;height:0;min-height:0}
+/* one-line caption: only the current step, in a fixed two-line slot so the card never jumps */
+#fb-wrap .fb-compact .xv-steps{flex:0 0 auto;margin-top:.4em}
+#fb-wrap .fb-compact .xv-steps li{display:none;min-height:2.75em;align-items:center}
+#fb-wrap .fb-compact .xv-steps li.now{display:flex}
+@media (prefers-reduced-motion: reduce){ .xv-steps li{transition:none} }

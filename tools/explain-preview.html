@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Explanation Visuals Preview</title>
+<!-- Dev-only preview of every question's animated explanation (js/explain-visuals.js).
+     Not deployed (firebase.json ignores tools/). Open via the local server:
+     http://localhost:5050/tools/explain-preview.html   ?k=g11-3 picks one, &t=4 freezes at 4 s. -->
+<link rel="stylesheet" href="../css/game.css">
+<style>
+  body{margin:0;background:#020617;color:#e2e8f0;font:15px system-ui,-apple-system,sans-serif;overflow:auto!important;height:auto!important}
+  .wrap{max-width:860px;margin:0 auto;padding:18px}
+  nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  nav a{color:#c4b5fd;background:#1e1b4b;border-radius:999px;padding:3px 10px;text-decoration:none;font-size:13px}
+  nav a.on{background:#7c3aed;color:#fff}
+  h1{font-size:18px;margin:0 0 4px} .sub{color:#94a3b8;margin:0 0 12px;font-size:13px}
+  .xv-svg{height:auto!important}
+  .xv-steps li{font-size:15px}
+</style></head><body><div class="wrap">
+<nav id="nav"></nav><h1 id="title"></h1><p class="sub" id="sub"></p>
+<div class="xv" id="fb-visual"></div>
+</div>
+<script src="../js/game-data.js"></script>
+<script src="../js/explain-visuals.js"></script>
+<script>
+const q = new URLSearchParams(location.search);
+const items = [];
+Object.entries(GRADES).forEach(([g,gd])=> gd.scenarios.forEach((sc,i)=> items.push({k:`g${g}-${i+1}`, g:+g, sc, label:`G${g} #${i+1}`})));
+items.push({k:'practice', g:7, sc:{scene:'practice'}, label:'Tutorial'});
+const cur = items.find(x=>x.k===q.get('k')) || items[0];
+document.getElementById('nav').innerHTML = items.map(x=>`<a href="?k=${x.k}" class="${x===cur?'on':''}">${x.label}</a>`).join('');
+document.getElementById('title').textContent = `${GRADES[cur.g] ? GRADES[cur.g].name : ''} · ${cur.label} · ${cur.sc.scene || cur.sc.comp || ''}`;
+document.getElementById('sub').textContent = (cur.sc.q || cur.sc.objective || '').slice(0,160);
+const opts = cur.g === 9 ? {grade:9, lab:{w:cur.sc.world, loaded:+(q.get('n')||3)}} : {grade:cur.g};
+renderExplainVisual(cur.sc, opts);
+if(q.get('t')){ const svg=document.querySelector('.xv-svg'); setTimeout(()=>{ svg.pauseAnimations(); svg.setCurrentTime(+q.get('t')); document.querySelectorAll('.xv-steps li').forEach(li=>{ li.classList.toggle('on', +li.dataset.t <= +q.get('t')); }); }, 50); }
+</script></body></html>

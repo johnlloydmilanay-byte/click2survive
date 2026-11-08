@@ -695,18 +695,40 @@ function fitFeedback(){
   const wrap = document.getElementById('fb-wrap');
   if(!wrap.classList.contains('on')) return;
   const card = wrap.querySelector('.fb-card');
+  // With an animated diagram, first try showing diagram + text together; if that would
+  // shrink the type below a readable size, switch to compact mode, where they take turns
+  // behind the Visual / Read tabs.
+  const hasVisual = !document.getElementById('fb-visual').hidden;
+  card.classList.remove('fb-compact');
   const cols = [...card.querySelectorAll('.fb-col')];
   const phys = card.querySelector('.fbp-t');
   wrap.classList.add('measuring');
-  const ok = ()=> cols.every(c=> c.scrollHeight <= c.clientHeight + 1)
-    && phys.parentElement.scrollHeight <= phys.parentElement.clientHeight + 1;
+  const box = phys.parentElement;
+  const fits = ()=> cols.every(c=> c.scrollHeight <= c.clientHeight + 1) && box.scrollHeight <= box.clientHeight + 1;
+  // In compact mode both tabs must fit at the chosen size, so switching never overflows.
+  const ok = ()=>{
+    if(!card.classList.contains('fb-compact')) return fits();
+    const v = box.dataset.view;
+    box.dataset.view = 'visual'; const a = fits();
+    box.dataset.view = 'text'; const b = fits();
+    box.dataset.view = v;
+    return a && b;
+  };
   const set = (px)=>{ card.style.fontSize = px + 'px'; };
-  let lo = 8, hi = Math.max(15, Math.min(28, Math.min(innerWidth/42, innerHeight/22)));
-  set(hi);
-  if(!ok()){ for(let k=0;k<14;k++){ const m=(lo+hi)/2; set(m); if(ok()) lo=m; else hi=m; } set(lo); }
+  const top = Math.max(15, Math.min(28, Math.min(innerWidth/42, innerHeight/22)));
+  let lo, hi;
+  const search = ()=>{ lo = 8; hi = top; set(hi); if(!ok()){ for(let k=0;k<14;k++){ const m=(lo+hi)/2; set(m); if(ok()) lo=m; else hi=m; } set(lo); } else lo = hi; };
+  search();
+  if(hasVisual && lo < 13){ card.classList.add('fb-compact'); search(); }
   void card.offsetHeight;
   wrap.classList.remove('measuring');
 }
+function setExplainView(view){
+  const phys = document.querySelector('#fb-wrap .fb-phys');
+  phys.dataset.view = view;
+  phys.querySelectorAll('.fbp-tabs button').forEach(b=> b.setAttribute('aria-selected', String(b.dataset.view === view)));
+}
+document.querySelectorAll('#fb-wrap .fbp-tabs button').forEach(b=> b.addEventListener('click', ()=> setExplainView(b.dataset.view)));
 function showFeedback(ok, scen){
   if(centerQ()){
     // The answer is in: put the popup away so the feedback card stands alone, and keep
@@ -753,6 +775,9 @@ function showFeedback(ok, scen){
     physEl.textContent = scen.phy;
     physHead.textContent = '⚛ Physics Explanation';
   }
+  // Animated diagram of the same physics, with steps that light up as it plays.
+  setExplainView('visual');
+  if(typeof renderExplainVisual === 'function') renderExplainVisual(scen, { grade: GS.grade });
   const last = GS.idx === GS.gd.scenarios.length-1;
   const nb = document.getElementById('next-btn');
   if(ok || GS.tutorial){
