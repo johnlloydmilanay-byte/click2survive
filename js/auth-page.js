@@ -135,7 +135,7 @@ async function doValidatorLogin(){
     const doc = await ref.get();
     const now = firebase.firestore.FieldValue.serverTimestamp();
     if(doc.exists) await ref.update({ name, lastActiveAt: now });
-    else await ref.set({ name, createdAt: now, lastActiveAt: now, reviewedCount: 0, avgRating: null });
+    else await ref.set({ name, createdAt: now, lastActiveAt: now });
     clearStudentSession();
     saveValidatorSession({ validatorId, name });
     setMsg('val-msg', doc.exists ? 'Welcome back! Continuing your validation…' : 'Validator account created! Opening…', 'ok');

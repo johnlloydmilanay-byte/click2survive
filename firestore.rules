@@ -133,28 +133,78 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
-    // ── Validators: content reviewers who log in with just their name (validators/{id},
-    // id derived from the name, so the same name continues the same progress anywhere).
-    // Like students there's no password — the name is the whole credential.
+    // ── Expert validators log in with just their name (validators/{id}, id derived from
+    // the name, so the same name continues the same form anywhere). Like student IDs, the
+    // name is the whole credential, so records can only be fetched by id, never listed, and
+    // a submitted (signed) form locks everything until a super admin reopens it.
+    function validationLocked(validatorId) {
+      let path = /databases/$(database)/documents/validationForms/$(validatorId);
+      return exists(path) && get(path).data.get('submitted', false) == true;
+    }
+    function validatorExists(validatorId) {
+      return exists(/databases/$(database)/documents/validators/$(validatorId));
+    }
     match /validators/{validatorId} {
-      allow read: if isSignedIn();
+      allow get: if isSignedIn();
+      allow list: if isSuperAdmin();
       allow create, update: if isSignedIn()
                     && request.resource.data.name is string
                     && request.resource.data.name.size() > 1 && request.resource.data.name.size() <= 80;
       allow delete: if isSuperAdmin();
     }
-    // One review per validator per scenario: {validatorId}_{grade}_{idx}, 0–5 stars + comment.
-    match /validationReviews/{reviewId} {
-      allow read: if isSignedIn();
+    // Part A, one per validator per item: {validatorId}_{grade}_{idx}, relevance 4–1 + comment.
+    // rating stays null between executing an item and rating it.
+    match /validationItems/{itemId} {
+      allow get: if isSignedIn();
+      allow list: if isSuperAdmin();
       allow create, update: if isSignedIn()
                     && request.resource.data.validatorId is string
-                    && exists(/databases/$(database)/documents/validators/$(request.resource.data.validatorId))
+                    && validatorExists(request.resource.data.validatorId)
+                    && !validationLocked(request.resource.data.validatorId)
                     && isValidGrade(request.resource.data.grade)
-                    && request.resource.data.idx is int && request.resource.data.idx >= 0 && request.resource.data.idx < 20
-                    && reviewId == request.resource.data.validatorId + '_' + string(request.resource.data.grade) + '_' + string(request.resource.data.idx)
-                    && request.resource.data.rating is int && request.resource.data.rating >= 0 && request.resource.data.rating <= 5
+                    && request.resource.data.idx is int && request.resource.data.idx >= 0 && request.resource.data.idx <= 5
+                    && itemId == request.resource.data.validatorId + '_' + string(request.resource.data.grade) + '_' + string(request.resource.data.idx)
+                    && (request.resource.data.rating == null
+                        || (request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 4))
                     && request.resource.data.comment is string && request.resource.data.comment.size() <= 2000;
       allow delete: if isSuperAdmin();
+    }
+    // Part B and the learner-view check, one per validator per grade: {validatorId}_{grade}.
+    match /validationGrades/{gradeId} {
+      allow get: if isSignedIn();
+      allow list: if isSuperAdmin();
+      allow create, update: if isSignedIn()
+                    && request.resource.data.validatorId is string
+                    && validatorExists(request.resource.data.validatorId)
+                    && !validationLocked(request.resource.data.validatorId)
+                    && isValidGrade(request.resource.data.grade)
+                    && gradeId == request.resource.data.validatorId + '_' + string(request.resource.data.grade)
+                    && request.resource.data.ratings is map && request.resource.data.ratings.size() <= 11
+                    && request.resource.data.general is string && request.resource.data.general.size() <= 4000;
+      allow delete: if isSuperAdmin();
+    }
+    // Part C, recommendation, signature, and the Acceptability Evaluation Tool. After the form
+    // is submitted only the acceptability evaluation can still change, until it too is
+    // submitted; the super admin may reopen a form by updating it.
+    match /validationForms/{validatorId} {
+      allow get: if isSignedIn();
+      allow list: if isSuperAdmin();
+      allow create: if isSignedIn()
+                    && request.resource.data.validatorId == validatorId
+                    && validatorExists(validatorId);
+      allow update: if isSuperAdmin()
+                    || (isSignedIn()
+                        && request.resource.data.validatorId == validatorId
+                        && request.resource.data.get('signature', '').size() < 300000
+                        && (resource.data.get('submitted', false) != true
+                            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['acceptability', 'updatedAt', 'validatorName'])
+                                && resource.data.get(['acceptability', 'submitted'], false) != true)));
+      allow delete: if isSuperAdmin();
+    }
+    // The earlier 0–5 star ratings, kept read-only for the super admin.
+    match /validationReviews/{reviewId} {
+      allow read, delete: if isSuperAdmin();
+      allow create, update: if false;
     }
 
     match /scenarioResults/{resultId} {

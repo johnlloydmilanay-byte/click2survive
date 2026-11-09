@@ -147,7 +147,7 @@ function attemptScore(base){
 }
 
 function recordResult(entry){
-  if(GS.tutorial || GS.validator) return;          // practice round / validation play: never scored or saved
+  if(GS.tutorial || (GS.validator && !GS.check)) return;   // practice round / answer-key play: never scored (the learner check keeps them in memory only)
   resultsLog.push(Object.assign({
     scenarioIndex: GS.idx,
     melc: GS.gd.melc || '',
@@ -249,7 +249,7 @@ function enterSession(){
 // opts.tutorial runs the unscored practice round (opts.gd = its one practice scenario).
 function startGrade(g, sessionId, sessionLabel, opts){
   opts = opts || {};
-  GS = { grade:g, idx:0, scores:[], gd:opts.gd || GRADES[g], answered:false, attempts:0, t0:Date.now(), pred:'', sessionId, sessionLabel, tutorial:!!opts.tutorial, validator:!!opts.validator };
+  GS = { grade:g, idx:0, scores:[], gd:opts.gd || GRADES[g], answered:false, attempts:0, t0:Date.now(), pred:'', sessionId, sessionLabel, tutorial:!!opts.tutorial, validator:!!opts.validator, check:!!opts.check };
   resultsLog = [];
   // music: upbeat loop for the practice round; real scenarios get their own scene score (see loadScenario)
   if(typeof AudioSys!=='undefined'){ AudioSys.init(); if(GS.tutorial) AudioSys.startMusic('bright'); }
@@ -522,7 +522,7 @@ function loadScenario(idx){
     });
   }
   document.getElementById('val-rate-now').hidden = true;
-  if(GS.validator && !scen.lab && typeof valMarkAnswer === 'function') valMarkAnswer(scen);   // validator: answer key shown
+  if(GS.validator && !GS.check && !scen.lab) valMarkAnswer(scen);   // validator: answer key shown
   updateParams(scen);
   updatePAGASA(scen);
   const g = GS.grade;
@@ -661,7 +661,7 @@ function handleChoice(i){
   narrStop();
   if(typeof tutAllows==='function' && !tutAllows('answer')) return;
   const scen = GS.gd.scenarios[GS.idx];
-  if(GS.validator && i !== scen.ci) return;       // validator: only the answer key is playable
+  if(GS.validator && !GS.check && i !== scen.ci) return;       // validator: only the answer key is playable
   GS.answered = true;
   const ok = i === scen.ci;
   GS.attempts = 1;
@@ -817,7 +817,7 @@ function showFeedback(ok, scen){
   if(typeof renderExplainVisual === 'function') renderExplainVisual(scen, { grade: GS.grade });
   const last = GS.idx === GS.gd.scenarios.length-1;
   const nb = document.getElementById('next-btn');
-  if(ok || GS.tutorial){
+  if((ok && !GS.check) || GS.tutorial){       // the validators' learner check is about the answers, so no Take Control
     nb.textContent = ok ? '🎮 Take Control — Execute Your Decision' : '🎮 Practice walking the safe path';
     nb.onclick = startControl;
   } else {
@@ -919,6 +919,14 @@ function showResults(){
     <div class="rbd"><div class="rbd-n" style="color:#4ade80">${(proc*100).toFixed(0)}%</div><div class="rbd-l">Score</div></div>
     <div class="rbd"><div class="rbd-n">${solved}</div><div class="rbd-l">Correct</div></div>
     <div class="rbd"><div class="rbd-n">${t-solved}</div><div class="rbd-l">Missed</div></div>`;
+  const check = GS.validator && GS.check;
+  document.getElementById('res-btns-val').style.display = check ? '' : 'none';
+  document.getElementById('res-btns-main').style.display = check ? 'none' : '';
+  if(check){
+    valCheckResults();
+    document.getElementById('submit-status').textContent = 'Validator check: not saved to student records.';
+    return;
+  }
   submitResults();
 }
 function replayGrade(){ requestFullscreenIfMobile(); transitionTo(()=>startGrade(GS.grade, GS.sessionId, GS.sessionLabel)); }
@@ -931,8 +939,7 @@ function goMenu(){
   resetCenterQ();
   AudioSysSafe('click');
   if(typeof AudioSys!=='undefined') AudioSys.setAmbience(null);
-  document.getElementById('val-rate-now').hidden = true;
-  if(VALIDATOR){ transitionTo(()=>{ buildMenuBackground(); valShowHub(GS && GS.validator ? GS.grade : null); }); return; }
+  if(VALIDATOR){ valReturn(); return; }
   transitionTo(()=>{ buildMenuBackground(); showScreen('s-menu'); renderStartCard(); loadHistory(); });
 }
 function showScreen(id){

@@ -11,7 +11,10 @@ let attemptsCache = [];   // all completed runs, live
 let resultsCache = [];    // all per-item results, live (if the rules allow it)
 let sessionsCache = [];   // all sessions (falls back to active-only if the rules only allow that)
 let validatorsCache = []; // content validators (name-only accounts), live
-let valReviewsCache = []; // their per-scenario ratings + feedback, live
+let vItemsCache = [];     // Expert Validation Form, Part A: one per validator per item, live
+let vGradesCache = [];    // Part B + learner-view check: one per validator per grade, live
+let vFormsCache = [];     // Part C, recommendation, signature, acceptability: one per validator, live
+let valReviewsCache = []; // the earlier 0–5 star ratings, kept for reference
 let assignTeacherId = null;
 let goTab = () => {};
 const GRADE_LIST = GRADE_LEVELS;   // from game-data.js: Junior High 7–10, Senior High 11–12
@@ -317,122 +320,221 @@ function renderSessionModal(){
 }
 
 // ═══ VALIDATION ═══
-// Validators rate every scenario 0–5 ★ with feedback (game.html in validator mode).
-const VA_TOTAL = () => GRADE_LIST.reduce((n, g) => n + GRADES[g].scenarios.length, 0);
-function vaStars(n){
-  if (n == null) return '<span class="dim">–</span>';
-  const r = Math.round(n);
-  return `<span class="va-stars" role="img" aria-label="${(+n).toFixed(1)} of 5 stars">${'★'.repeat(r)}<span class="off">${'★'.repeat(5-r)}</span></span>`;
+// The Expert Validation Form and Acceptability Evaluation Tool (js/validation-form.js),
+// filled in by validators in game.html. f = frequency of each rating, WM = weighted mean.
+const VA_SCOPE = () => document.getElementById('va-scope').value;
+function vaFormOf(id){ return vFormsCache.find(f => f.id === id) || {}; }
+function vaInScope(validatorId){ return VA_SCOPE() === 'all' || !!vaFormOf(validatorId).submitted; }
+function vaItems(g, i){ return vItemsCache.filter(r => r.grade === g && r.idx === i && r.rating && vaInScope(r.validatorId)); }
+function vaGrades(g){ return vGradesCache.filter(r => r.grade === g && vaInScope(r.validatorId)); }
+function vaForms(){ return vFormsCache.filter(f => vaInScope(f.id)); }
+function vaAccepts(){ return vFormsCache.filter(f => f.acceptability && (VA_SCOPE() === 'all' || f.acceptability.submitted)); }
+function vaName(id){ const v = validatorsCache.find(x => x.id === id); return v ? v.name : id; }
+function vaProgress(id){
+  const items = vItemsCache.filter(r => r.validatorId === id && r.rating).length;
+  const grades = vGradesCache.filter(r => r.validatorId === id);
+  const partB = grades.filter(r => VF_PART_B_IDS.every(k => (r.ratings||{})[k])).length;
+  const checks = grades.filter(r => r.check).length, f = vaFormOf(id);
+  const partC = VF.partC.items.filter(([k]) => ((f.partC||{}).ratings||{})[k]).length;
+  return { items, partB, checks, partC, submitted: !!f.submitted, accept: !!(f.acceptability||{}).submitted, form:f };
 }
-function vaScenTitle(g, i){ const s = GRADES[g] && GRADES[g].scenarios[i]; return s ? (s.phy_title || s.concept || `Scenario ${i+1}`) : `Scenario ${i+1}`; }
-function vaReviewsOf(validatorId){ return valReviewsCache.filter(r => r.validatorId === validatorId); }
-function vaScenarioRows(){
-  const rows = [];
-  GRADE_LIST.forEach(g => GRADES[g].scenarios.forEach((s, i) => {
-    const rs = valReviewsCache.filter(r => r.grade === g && r.idx === i);
-    const ratings = rs.map(r => r.rating);
-    rows.push({ g, i, title: vaScenTitle(g, i), rs, avg: mean(ratings), min: ratings.length ? Math.min(...ratings) : null, max: ratings.length ? Math.max(...ratings) : null,
-      comments: rs.filter(r => r.comment).length, unfinished: rs.filter(r => r.completed === false).length });
-  }));
-  return rows;
+function vaRow(label, top, values, scale, extra, cls){
+  const q = vfFreq(values, top), ks = []; for (let k = top; k >= 1; k--) ks.push(k);
+  return `<tr${cls ? ` class="${cls}"` : ''}>${label}${ks.map(k => `<td class="num">${q.n ? q.f[k] : '–'}</td>`).join('')}<td class="num"><b>${q.wm == null ? '–' : q.wm.toFixed(2)}</b></td><td>${q.wm == null ? '<span class="dim">No ratings</span>' : esc(vfInterp(q.wm, scale))}</td>${extra == null ? '' : `<td>${extra}</td>`}</tr>`;
+}
+function vaCmBtn(n, call){ return n ? `<button class="btn secondary sm" onclick="${call}">${ico('chat-left-text')}${n}</button>` : '<span class="dim">–</span>'; }
+const vaHead = (top, first, cm) => { const ks = []; for (let k = top; k >= 1; k--) ks.push(k); return `<thead><tr>${first}${ks.map(k => `<th scope="col" class="num">${k}</th>`).join('')}<th scope="col" class="num">WM</th><th scope="col">Interpretation</th>${cm ? '<th scope="col">Comments</th>' : ''}</tr></thead>`; };
+const vaAll = (list, get) => list.reduce((a, x) => a.concat(get(x)), []);
+
+function vaPartATable(g, plain){
+  const rows = VF.items[g].map((foc, i) => {
+    const rs = vaItems(g, i), notes = rs.filter(r => r.noConcept).length, cm = rs.filter(r => r.comment || r.noConcept).length;
+    const flag = notes ? `<div class="va-flag">${notes} noted: correct answer possible without the concept</div>` : '';
+    return vaRow(`<td class="num">${i+1}</td><td>${esc(foc)}${flag}</td>`, 4, rs.map(r => r.rating), VF.partA.scale, plain ? null : vaCmBtn(cm, `vaShowComments('a',${g},${i})`));
+  }).join('');
+  const all = VF.items[g].reduce((a, _, i) => a.concat(vaItems(g, i).map(r => r.rating)), []);
+  return `<table><caption class="sr-only">Grade ${g} item relevance</caption>${vaHead(4, '<th scope="col" class="num">Item</th><th scope="col">Item Focus</th>', !plain)}<tbody>${rows}${vaRow('<td colspan="2"><b>Grade ' + g + ' items overall</b></td>', 4, all, VF.partA.scale, plain ? null : '', 'va-total')}</tbody></table>`;
+}
+function vaPartBTable(g, plain){
+  const gs = vaGrades(g), val = id => gs.map(r => (r.ratings||{})[id]);
+  const body = VF.partB.groups.map(gr => {
+    const head = vaRow(`<td><b>${esc(gr.name)}</b></td>`, 4, vaAll(gr.items, ([id]) => val(id)), VF.criterion, plain ? null : '', 'va-group');
+    return head + gr.items.map(([id, t]) => vaRow(`<td>${vfNumber(id)}. ${esc(t)}</td>`, 4, val(id), VF.criterion, plain ? null : vaCmBtn(gs.filter(r => (r.comments||{})[id]).length, `vaShowComments('b',${g},'${id}')`))).join('');
+  }).join('');
+  const gen = gs.filter(r => r.general).length;
+  return `<table><caption class="sr-only">Grade ${g} set evaluation</caption>${vaHead(4, '<th scope="col">Validation Indicator</th>', !plain)}<tbody>${body}${vaRow(`<td><b>Grade ${g} set overall</b></td>`, 4, vaAll(VF_PART_B_IDS, val), VF.criterion, plain ? null : (gen ? vaCmBtn(gen, `vaShowComments('bg',${g})`) + ' <span class="dim">general</span>' : ''), 'va-total')}</tbody></table>`;
+}
+function vaPartCTable(plain){
+  const fs = vaForms(), val = id => fs.map(f => ((f.partC||{}).ratings||{})[id]);
+  const gen = fs.filter(f => (f.partC||{}).general).length;
+  return `<table><caption class="sr-only">Simulation evaluation</caption>${vaHead(4, `<th scope="col">${esc(VF.partC.head)}</th>`, !plain)}<tbody>${VF.partC.items.map(([id, t]) => vaRow(`<td>${vfNumber(id)}. ${esc(t)}</td>`, 4, val(id), VF.criterion, plain ? null : vaCmBtn(fs.filter(f => ((f.partC||{}).comments||{})[id]).length, `vaShowComments('c','${id}')`))).join('')}${vaRow('<td><b>Part C overall</b></td>', 4, vaAll(VF.partC.items, ([id]) => val(id)), VF.criterion, plain ? null : (gen ? vaCmBtn(gen, `vaShowComments('cg')`) + ' <span class="dim">general</span>' : ''), 'va-total')}</tbody></table>`;
+}
+function vaAccTable(plain){
+  const A = VF.acceptability, as = vaAccepts().map(f => f.acceptability), val = id => as.map(a => (a.ratings||{})[id]);
+  const ov = as.filter(a => a.overall).length;
+  return `<table><caption class="sr-only">Acceptability</caption>${vaHead(5, '<th scope="col">Indicator</th>', !plain)}<tbody>${A.items.map(([id, n, t]) => vaRow(`<td><b>${esc(n)}.</b> ${esc(t)}</td>`, 5, val(id), A.scale, plain ? null : vaCmBtn(as.filter(a => (a.comments||{})[id]).length, `vaShowComments('e','${id}')`))).join('')}${vaRow('<td><b>Overall acceptability</b></td>', 5, vaAll(A.items, ([id]) => val(id)), A.scale, plain ? null : (ov ? vaCmBtn(ov, `vaShowComments('eg')`) + ' <span class="dim">overall</span>' : ''), 'va-total')}</tbody></table>`;
+}
+function vaRecHTML(){
+  const fs = vaForms().filter(f => f.recommendation), n = fs.length;
+  if (!n) return emptyHTML('No recommendations yet.', 'award');
+  return `<ul class="va-recs">${VF.recommendations.map(t => { const c = fs.filter(f => f.recommendation === t).length; return `<li><span>${esc(t)}</span><b>${c}</b><span class="dim">${Math.round(c/n*100)}%</span></li>`; }).join('')}</ul>`;
+}
+function vaChecksHTML(){
+  const gs = vGradesCache.filter(r => r.check && vaInScope(r.validatorId));
+  if (!gs.length) return emptyHTML('No learner-view checks yet.', 'ui-checks');
+  return `<ul class="va-recs">${VF.checks.map(([k, t]) => { const yes = gs.filter(r => r.check[k] === true).length; return `<li><span>The set ${esc(t)}</span><b>${yes}</b><span class="dim">of ${gs.length} checks</span></li>`; }).join('')}</ul>${gs.some(r => VF.checks.some(([k]) => r.check[k] === false)) ? `<button class="btn secondary sm" onclick="vaShowComments('chk')">${ico('exclamation-triangle')}See checks answered No</button>` : ''}`;
 }
 function renderValidation(){
-  const total = VA_TOTAL(), rows = vaScenarioRows();
-  const all = valReviewsCache.map(r => r.rating), avg = mean(all);
-  const doneAll = validatorsCache.filter(v => vaReviewsOf(v.id).length >= total).length;
-  const low = rows.filter(r => r.avg != null && r.avg < 3).length;
-  const covered = rows.filter(r => r.rs.length).length;
+  if (!document.getElementById('va-grade-a')) return;
+  const scope = VA_SCOPE();
+  const allA = VF_GRADES.reduce((a, g) => a.concat(...VF.items[g].map((_, i) => vaItems(g, i).map(r => r.rating))), []);
+  const allB = VF_GRADES.reduce((a, g) => a.concat(...VF_PART_B_IDS.map(id => vaGrades(g).map(r => (r.ratings||{})[id]))), []);
+  const allC = vaAll(VF.partC.items, ([id]) => vaForms().map(f => ((f.partC||{}).ratings||{})[id]));
+  const allE = vaAll(VF.acceptability.items, ([id]) => vaAccepts().map(f => (f.acceptability.ratings||{})[id]));
+  const st = (label, icon, vals, top, scale) => { const q = vfFreq(vals, top); return statHTML({ label, icon, value: q.wm == null ? '–' : `${q.wm.toFixed(2)}<small> / ${top}</small>`, sub: q.wm == null ? 'No ratings yet' : esc(vfInterp(q.wm, scale)) }); };
+  const submitted = vFormsCache.filter(f => f.submitted).length;
   document.getElementById('va-stats').innerHTML =
-      statHTML({ label:'Validators', icon:'people', value: validatorsCache.length, sub: `${doneAll} finished all ${total}` })
-    + statHTML({ label:'Ratings submitted', icon:'star', value: valReviewsCache.length, sub: `${covered} / ${total} scenarios rated at least once` })
-    + statHTML({ label:'Overall average', icon:'stars', tone: avg == null ? '' : avg >= 4 ? 'good' : avg >= 3 ? '' : 'warn', value: avg == null ? '–' : `${avg.toFixed(2)}<small> / 5</small>`, sub: avg == null ? '' : vaStars(avg) })
-    + statHTML({ label:'Below 3 ★', icon:'exclamation-triangle', tone: low ? 'warn' : 'good', value: low, sub: 'scenarios needing revision' });
-  // validators
-  const vb = document.getElementById('va-validators');
+      statHTML({ label:'Validators', icon:'people', value: validatorsCache.length, sub: `${submitted} submitted the signed form` })
+    + st('Part A · item relevance', 'list-check', allA, 4, VF.partA.scale)
+    + st('Part B · item sets', 'clipboard-check', allB, 4, VF.criterion)
+    + st('Part C · simulation', 'window-sidebar', allC, 4, VF.criterion)
+    + st('Acceptability', 'hand-thumbs-up', allE, 5, VF.acceptability.scale);
   const vs = validatorsCache.slice().sort((a,b) => toMillis(b.lastActiveAt) - toMillis(a.lastActiveAt));
-  vb.innerHTML = vs.length ? vs.map(v => {
-    const rs = vaReviewsOf(v.id), n = rs.length, a = mean(rs.map(r => r.rating)), unf = rs.filter(r => r.completed === false).length;
+  document.getElementById('va-validators').innerHTML = vs.length ? vs.map(v => {
+    const p = vaProgress(v.id), f = p.form;
+    const status = p.submitted ? `<span class="badge good">${ico('check-circle-fill')}Submitted</span>` : (p.items || p.partB || p.checks || p.partC) ? `<span class="badge warn">${ico('hourglass-split')}In progress</span>` : `<span class="badge none">${ico('circle')}Not started</span>`;
     return `<tr class="clickable" onclick="rowClick(event,this)">
-      <td><button class="name-btn" data-primary data-vid="${esc(v.id)}" onclick="openValidator(this.dataset.vid)"><span class="avatar" style="width:28px;height:28px;font-size:.68rem" aria-hidden="true">${esc(initials(v.name))}</span><span class="nm">${esc(v.name)}</span></button></td>
-      <td>${barHTML(n / total * 100, { tip: `${n} of ${total} scenarios` })}<div class="dim">${n} / ${total} scenarios</div></td>
-      <td>${a == null ? '<span class="dim">No ratings yet</span>' : `${vaStars(a)} <b>${a.toFixed(2)}</b>`}</td>
-      <td class="num">${unf || '<span class="dim">0</span>'}</td>
-      <td class="nowrap dim">${fmtAgo(v.lastActiveAt)}</td>
-      <td>${n >= total ? `<span class="badge good">${ico('check-circle-fill')}Completed</span>` : n ? `<span class="badge warn">${ico('hourglass-split')}In progress</span>` : `<span class="badge none">${ico('circle')}Not started</span>`}</td></tr>`;
-  }).join('') : `<tr><td colspan="6">${emptyHTML('No validators yet. Validators log in from the login page → Validator, with just their name.', 'patch-check')}</td></tr>`;
-  // per scenario
-  const g = Number(document.getElementById('va-grade').value) || null, sort = document.getElementById('va-sort').value;
-  let list = rows.filter(r => !g || r.g === g);
-  if (sort === 'low') list.sort((a,b) => (a.avg ?? 9) - (b.avg ?? 9));
-  if (sort === 'high') list.sort((a,b) => (b.avg ?? -1) - (a.avg ?? -1));
-  document.getElementById('va-scenarios').innerHTML = list.map(r => `<tr class="clickable" onclick="rowClick(event,this)">
-      <td>${r.g}</td><td class="num">${r.i+1}</td>
-      <td><button class="name-btn" data-primary onclick="openValScenario(${r.g},${r.i})"><span class="nm">${esc(r.title)}</span></button>${r.unfinished ? `<div class="dim">${r.unfinished} rated before finishing</div>` : ''}</td>
-      <td class="nowrap">${r.avg == null ? '<span class="dim">Not rated</span>' : `${vaStars(r.avg)} <b>${r.avg.toFixed(2)}</b>`}</td>
-      <td class="num">${r.rs.length}</td>
-      <td class="nowrap">${r.min == null ? '–' : r.min === r.max ? r.min + ' ★' : `${r.min}–${r.max} ★`}</td>
-      <td>${r.comments ? `<button class="btn secondary sm" onclick="openValScenario(${r.g},${r.i})">${ico('chat-left-text')}${r.comments} comment${r.comments === 1 ? '' : 's'}</button>` : '<span class="dim">–</span>'}</td></tr>`).join('');
+      <td><button class="name-btn" data-primary data-vid="${esc(v.id)}" onclick="openValidator(this.dataset.vid)"><span class="avatar" style="width:28px;height:28px;font-size:.68rem" aria-hidden="true">${esc(initials(v.name))}</span><span class="nm">${esc(v.name)}</span></button>${f.position || f.school ? `<div class="dim">${esc([f.position, f.school].filter(Boolean).join(' · '))}</div>` : ''}</td>
+      <td>${barHTML(p.items / VF_ITEM_TOTAL * 100, { tip:`${p.items} of ${VF_ITEM_TOTAL} items rated` })}<div class="dim">${p.items} / ${VF_ITEM_TOTAL}</div></td>
+      <td class="num">${p.partB} / 6</td><td class="num">${p.checks} / 6</td><td class="num">${p.partC} / ${VF.partC.items.length}</td>
+      <td>${f.recommendation ? esc(f.recommendation) : '<span class="dim">–</span>'}</td>
+      <td>${p.accept ? `<span class="badge good">${ico('check-circle-fill')}Submitted</span>` : '<span class="dim">–</span>'}</td><td>${status}</td></tr>`;
+  }).join('') : `<tr><td colspan="8">${emptyHTML('No validators yet. Validators log in from the login page → Validator, with just their name.', 'patch-check')}</td></tr>`;
+  document.getElementById('va-a').innerHTML = vaPartATable(Number(document.getElementById('va-grade-a').value));
+  document.getElementById('va-b').innerHTML = vaPartBTable(Number(document.getElementById('va-grade-b').value));
+  document.getElementById('va-c').innerHTML = vaPartCTable();
+  document.getElementById('va-rec').innerHTML = vaRecHTML();
+  document.getElementById('va-checks').innerHTML = vaChecksHTML();
+  document.getElementById('va-acc').innerHTML = vaAccTable();
+  document.getElementById('va-how').textContent = `Weighted mean = Σ(f × rating) ÷ N, from ${scope === 'all' ? 'all responses, including forms still in progress' : 'submitted forms only'}. Means are read on equal intervals of each scale: ${vfIntervals(VF.criterion)} (Part A uses the same bands with its own labels). Acceptability: ${vfIntervals(VF.acceptability.scale)}.`;
+  document.getElementById('va-legacy').innerHTML = valReviewsCache.length ? `<div class="notice">${ico('info-circle')}<span>${valReviewsCache.length} earlier 0–5 star rating${valReviewsCache.length === 1 ? '' : 's'}, from before the formal form, are kept separately and not counted above.</span><button class="btn secondary sm" onclick="exportValidationLegacy()">${ico('filetype-csv')}CSV</button></div>` : '';
 }
 let vaOpen = null;
-function vaFeedHTML(list, by){
-  if (!list.length) return emptyHTML('No ratings yet.', 'star');
-  return list.map(r => `<article class="va-item">
-      <div class="va-item-h"><div><b>${by === 'scenario' ? esc(r.validatorName || r.validatorId) : `Grade ${r.grade} · #${r.idx+1} · ${esc(vaScenTitle(r.grade, r.idx))}`}</b>
-        ${r.completed === false ? `<span class="badge warn">${ico('exclamation-triangle')}Rated before finishing</span>` : ''}</div>
-        <div class="nowrap">${vaStars(r.rating)} <b>${r.rating}</b><span class="dim"> / 5</span></div></div>
-      <div class="va-item-c">${r.comment ? esc(r.comment) : '<span class="dim">No comment</span>'}</div>
-      <div class="dim">${r.playCount > 1 ? `Played ${r.playCount}× · ` : ''}updated ${fmtWhen(r.updatedAt, true)}</div></article>`).join('');
+function vaFeed(list){
+  if (!list.length) return emptyHTML('No comments.', 'chat-left-text');
+  return list.map(c => `<article class="va-item"><div class="va-item-h"><b>${esc(c.who)}</b>${c.rating != null ? `<span>Rating <b>${c.rating}</b></span>` : ''}</div>${c.flag ? `<div class="va-flag">${esc(c.flag)}</div>` : ''}${c.text ? `<div class="va-item-c">${esc(c.text)}</div>` : ''}</article>`).join('');
+}
+function vaShowComments(kind, a, b){
+  vaOpen = { render(){
+    let title = '', sub = '', list = [];
+    if (kind === 'a'){ title = `Grade ${a} · Item ${b+1}`; sub = VF.items[a][b];
+      list = vaItems(a, b).filter(r => r.comment || r.noConcept).map(r => ({ who:vaName(r.validatorId), rating:r.rating, text:r.comment, flag:r.noConcept ? 'Noted: learners can choose the correct answer without applying the concept.' : '' })); }
+    if (kind === 'b'){ const t = VF.partB.groups.reduce((x, g) => x.concat(g.items), []).find(x => x[0] === b); title = `Grade ${a} · Part B indicator ${vfNumber(b)}`; sub = t[1];
+      list = vaGrades(a).filter(r => (r.comments||{})[b]).map(r => ({ who:vaName(r.validatorId), rating:(r.ratings||{})[b], text:r.comments[b] })); }
+    if (kind === 'bg'){ title = `Grade ${a} · Part B general comments`; list = vaGrades(a).filter(r => r.general).map(r => ({ who:vaName(r.validatorId), text:r.general })); }
+    if (kind === 'c'){ const t = VF.partC.items.find(x => x[0] === a); title = `Part C indicator ${vfNumber(a)}`; sub = t[1];
+      list = vaForms().filter(f => ((f.partC||{}).comments||{})[a]).map(f => ({ who:vaName(f.id), rating:f.partC.ratings[a], text:f.partC.comments[a] })); }
+    if (kind === 'cg'){ title = 'Part C general comments'; list = vaForms().filter(f => (f.partC||{}).general).map(f => ({ who:vaName(f.id), text:f.partC.general })); }
+    if (kind === 'e'){ const t = VF.acceptability.items.find(x => x[0] === a); title = `Acceptability · ${t[1]}`; sub = t[2];
+      list = vaAccepts().filter(f => (f.acceptability.comments||{})[a]).map(f => ({ who:f.acceptability.code || 'Evaluator', rating:(f.acceptability.ratings||{})[a], text:f.acceptability.comments[a] })); }
+    if (kind === 'eg'){ title = 'Acceptability · overall comments'; list = vaAccepts().filter(f => f.acceptability.overall).map(f => ({ who:f.acceptability.code || 'Evaluator', text:f.acceptability.overall })); }
+    if (kind === 'chk'){ title = 'Learner-view checks answered No';
+      list = vGradesCache.filter(r => r.check && vaInScope(r.validatorId) && VF.checks.some(([k]) => r.check[k] === false)).map(r => ({ who:`${vaName(r.validatorId)} · Grade ${r.grade}`, flag:'No: ' + VF.checks.filter(([k]) => r.check[k] === false).map(c => c[1]).join(', '), text:r.check.note })); }
+    document.getElementById('vam-title').textContent = title;
+    document.getElementById('vam-sub').textContent = sub;
+    document.getElementById('vam-stats').innerHTML = '';
+    document.getElementById('vam-actions').innerHTML = '';
+    document.getElementById('vam-body').innerHTML = vaFeed(list);
+  }};
+  vaOpen.render(); openModal('va-modal');
+}
+function vaFormCopy(id){
+  const v = validatorsCache.find(x => x.id === id);
+  return vfFormHTML({ name:v ? v.name : id, form:vaFormOf(id),
+    itemOf:(g, i) => vItemsCache.find(r => r.validatorId === id && r.grade === g && r.idx === i),
+    gradeOf:g => vGradesCache.find(r => r.validatorId === id && r.grade === g) });
 }
 function openValidator(id){
+  vfEnsureStyles();
   vaOpen = { render(){
     const v = validatorsCache.find(x => x.id === id); if (!v) return closeModal('va-modal');
-    const rs = vaReviewsOf(id).sort((a,b) => a.grade - b.grade || a.idx - b.idx), a = mean(rs.map(r => r.rating)), total = VA_TOTAL();
+    const p = vaProgress(id), f = p.form;
     document.getElementById('vam-title').textContent = v.name;
-    document.getElementById('vam-sub').textContent = `Validator · joined ${fmtWhen(v.createdAt, true)} · last active ${fmtAgo(v.lastActiveAt)}`;
+    document.getElementById('vam-sub').textContent = [f.position, f.school, f.submittedAt ? `submitted ${fmtWhen(f.submittedAt, true)}` : `last active ${fmtAgo(v.lastActiveAt)}`].filter(Boolean).join(' · ');
     document.getElementById('vam-stats').innerHTML =
-        statHTML({ label:'Progress', icon:'check2-square', value:`${rs.length}<small> / ${total}</small>`, sub: rs.length >= total ? 'Completed' : 'In progress' })
-      + statHTML({ label:'Average rating', icon:'star', value: a == null ? '–' : a.toFixed(2), sub: a == null ? '' : vaStars(a) })
-      + statHTML({ label:'Comments', icon:'chat-left-text', value: rs.filter(r => r.comment).length })
-      + statHTML({ label:'Not finished', icon:'exclamation-triangle', tone: rs.some(r => r.completed === false) ? 'warn' : '', value: rs.filter(r => r.completed === false).length });
-    document.getElementById('vam-body').innerHTML = vaFeedHTML(rs, 'validator');
-    const del = document.getElementById('vam-del'); del.style.display = ''; del.onclick = () => removeValidator(id);
+        statHTML({ label:'Part A items', icon:'list-check', value:`${p.items}<small> / ${VF_ITEM_TOTAL}</small>` })
+      + statHTML({ label:'Part B sets', icon:'clipboard-check', value:`${p.partB}<small> / 6</small>` })
+      + statHTML({ label:'Learner checks', icon:'ui-checks', value:`${p.checks}<small> / 6</small>` })
+      + statHTML({ label:'Part C', icon:'window-sidebar', value:`${p.partC}<small> / ${VF.partC.items.length}</small>` });
+    document.getElementById('vam-actions').innerHTML = `<button class="btn secondary" data-vid="${esc(id)}" onclick="printValidator(this.dataset.vid)">${ico('printer')}Print</button>${f.submitted ? `<button class="btn secondary" data-vid="${esc(id)}" onclick="reopenValidator(this.dataset.vid)">${ico('unlock')}Reopen</button>` : ''}<button class="btn danger" data-vid="${esc(id)}" onclick="removeValidator(this.dataset.vid)">${ico('trash')}Remove</button>`;
+    document.getElementById('vam-body').innerHTML = vaFormCopy(id) + (f.acceptability ? '<div style="height:12px"></div>' + vfAcceptHTML(f.acceptability) : '');
   }};
   vaOpen.render(); openModal('va-modal');
 }
-function openValScenario(g, i){
-  vaOpen = { render(){
-    const rs = valReviewsCache.filter(r => r.grade === g && r.idx === i).sort((a,b) => a.rating - b.rating), a = mean(rs.map(r => r.rating));
-    const sc = GRADES[g].scenarios[i];
-    document.getElementById('vam-title').textContent = `Grade ${g} · Scenario ${i+1}: ${vaScenTitle(g, i)}`;
-    document.getElementById('vam-sub').textContent = `${sc.hazard === 'flood' ? 'Flood' : 'Typhoon'} · Answer key ${'ABCDE'[sc.ci]}. ${sc.opts[sc.ci]}`;
-    document.getElementById('vam-stats').innerHTML =
-        statHTML({ label:'Average rating', icon:'star', value: a == null ? '–' : a.toFixed(2), sub: a == null ? '' : vaStars(a) })
-      + statHTML({ label:'Ratings', icon:'people', value: rs.length })
-      + statHTML({ label:'Lowest / highest', icon:'arrow-down-up', value: rs.length ? `${Math.min(...rs.map(r=>r.rating))} / ${Math.max(...rs.map(r=>r.rating))}` : '–' })
-      + statHTML({ label:'Not finished', icon:'exclamation-triangle', tone: rs.some(r => r.completed === false) ? 'warn' : '', value: rs.filter(r => r.completed === false).length });
-    document.getElementById('vam-body').innerHTML = vaFeedHTML(rs, 'scenario');
-    document.getElementById('vam-del').style.display = 'none';
-  }};
-  vaOpen.render(); openModal('va-modal');
+function printValidator(id){
+  const f = vaFormOf(id);
+  vfPrint(`Expert Validation Form - ${vaName(id)}`, vaFormCopy(id) + (f.acceptability ? '<div class="vfp pg-break" style="page-break-before:always"></div>' + vfAcceptHTML(f.acceptability) : ''));
+}
+async function reopenValidator(id){
+  if (!confirm(`Reopen ${vaName(id)}'s form? They can change their answers again and will have to sign it again.`)) return;
+  try{
+    await db.collection('validationForms').doc(id).update({ submitted:false, signature:'', reopenedAt:new Date().toISOString() });
+    toast('Form reopened.', 'ok');
+  }catch(e){ toast('Could not reopen: ' + e.message, 'err'); }
 }
 async function removeValidator(id){
-  const v = validatorsCache.find(x => x.id === id); if (!v) return;
-  if (!confirm(`Remove validator "${v.name}" and all ${vaReviewsOf(id).length} of their ratings? This cannot be undone.`)) return;
+  const name = vaName(id);
+  if (!confirm(`Remove validator "${name}" and their whole form? This cannot be undone.`)) return;
   try{
     const batch = db.batch();
-    vaReviewsOf(id).forEach(r => batch.delete(db.collection('validationReviews').doc(r.id)));
+    vItemsCache.filter(r => r.validatorId === id).forEach(r => batch.delete(db.collection('validationItems').doc(r.id)));
+    vGradesCache.filter(r => r.validatorId === id).forEach(r => batch.delete(db.collection('validationGrades').doc(r.id)));
+    valReviewsCache.filter(r => r.validatorId === id).forEach(r => batch.delete(db.collection('validationReviews').doc(r.id)));
+    batch.delete(db.collection('validationForms').doc(id));
     batch.delete(db.collection('validators').doc(id));
     await batch.commit();
-    closeModal('va-modal'); toast(`Removed ${v.name}.`, 'ok');
+    closeModal('va-modal'); toast(`Removed ${name}.`, 'ok');
   }catch(e){ toast('Could not remove: ' + e.message, 'err'); }
 }
+function printValidationSummary(){
+  const scope = VA_SCOPE() === 'all' ? 'all responses, including forms still in progress' : 'submitted forms only';
+  const n = VA_SCOPE() === 'all' ? validatorsCache.length : vFormsCache.filter(f => f.submitted).length;
+  vfPrint('Expert validation summary', `<div class="vfp"><h1>${esc(VF.formTitle)}<br>SUMMARY OF RATINGS</h1><p><b>Title of the Study:</b> ${esc(VF.study)}</p><p>Validators included: <b>${n}</b> (${scope}). Weighted mean = Σ(f × rating) ÷ N.</p>
+    <h2>${esc(VF.partA.title)}</h2>${VF_GRADES.map(g => `<h3>${esc(vfPartALabel(g))}</h3>${vaPartATable(g, true)}`).join('')}
+    <h2 style="page-break-before:always">${esc(VF.partB.title)}</h2>${VF_GRADES.map(g => `<h3>Grade ${g}</h3>${vaPartBTable(g, true)}`).join('')}
+    <h2 style="page-break-before:always">${esc(VF.partC.title)}</h2>${vaPartCTable(true)}
+    <h2>Overall Recommendation</h2><table><tr><th>Recommendation</th><th>f</th></tr>${VF.recommendations.map(t => `<tr><td>${esc(t)}</td><td>${vaForms().filter(f => f.recommendation === t).length}</td></tr>`).join('')}</table>
+    <h2>${esc(VF.acceptability.title)}</h2>${vaAccTable(true)}
+    <p style="font-size:11.5px">Interpretation (equal intervals): ${esc(vfIntervals(VF.criterion))}. Part A uses the same bands: ${esc(vfIntervals(VF.partA.scale))}. Acceptability: ${esc(vfIntervals(VF.acceptability.scale))}.</p></div>`,
+    '.vfp .sr-only{display:none}.vfp .num{text-align:center}.vfp .va-flag{font-size:11px}');
+}
 function exportValidation(){
-  const rows = [['Validator','Grade','Scenario #','Scenario','Rating (0-5)','Comment','Finished scenario','Times played','Updated']];
-  valReviewsCache.slice().sort((a,b) => String(a.validatorName).localeCompare(b.validatorName) || a.grade - b.grade || a.idx - b.idx)
-    .forEach(r => rows.push([r.validatorName || r.validatorId, r.grade, r.idx+1, vaScenTitle(r.grade, r.idx), r.rating, r.comment || '', r.completed === false ? 'No' : 'Yes', r.playCount || 1, r.updatedAt || '']));
-  rows.push([]); rows.push(['Per scenario','Grade','Scenario #','Scenario','Average','Ratings','Min','Max']);
-  vaScenarioRows().forEach(r => rows.push(['', r.g, r.i+1, r.title, r.avg == null ? '' : r.avg.toFixed(2), r.rs.length, r.min ?? '', r.max ?? '']));
-  downloadCSV('scenario-validation.csv', rows);
+  const rows = [['Part','Grade','Item / Indicator','Text','Validator','Position','School','Rating','Comment','Note']];
+  const who = id => { const f = vaFormOf(id); return [vaName(id), f.position || '', f.school || '']; };
+  VF_GRADES.forEach(g => VF.items[g].forEach((foc, i) => vaItems(g, i).forEach(r => rows.push(['A', g, i+1, foc, ...who(r.validatorId), r.rating, r.comment || '', [r.noConcept ? 'Correct answer possible without the concept' : '', r.completed === false ? 'Simulation not executed to the end' : ''].filter(Boolean).join('; ')]))));
+  VF_GRADES.forEach(g => vaGrades(g).forEach(r => {
+    VF.partB.groups.forEach(gr => gr.items.forEach(([id, t]) => { if ((r.ratings||{})[id]) rows.push(['B', g, vfNumber(id), t, ...who(r.validatorId), r.ratings[id], (r.comments||{})[id] || '', '']); }));
+    if (r.general) rows.push(['B general', g, '', 'General Comments and Suggestions', ...who(r.validatorId), '', r.general, '']);
+    if (r.check) rows.push(['Learner check', g, '', VF.checks.map(([k, t]) => `${t}: ${r.check[k] ? 'Yes' : 'No'}`).join('; '), ...who(r.validatorId), '', r.check.note || '', `Score shown ${r.check.solved}/${r.check.total}`]);
+  }));
+  vaForms().forEach(f => {
+    VF.partC.items.forEach(([id, t]) => { if (((f.partC||{}).ratings||{})[id]) rows.push(['C', '', vfNumber(id), t, ...who(f.id), f.partC.ratings[id], (f.partC.comments||{})[id] || '', '']); });
+    if ((f.partC||{}).general) rows.push(['C general', '', '', 'General Comments and Suggestions', ...who(f.id), '', f.partC.general, '']);
+    if (f.recommendation) rows.push(['Recommendation', '', '', f.recommendation, ...who(f.id), '', '', f.date || '']);
+  });
+  vaAccepts().forEach(f => { const a = f.acceptability; VF.acceptability.items.forEach(([id, n]) => { if ((a.ratings||{})[id]) rows.push(['Acceptability', '', n, '', a.code || '', '', a.subject || '', a.ratings[id], (a.comments||{})[id] || '', '']); }); if (a.overall) rows.push(['Acceptability overall', '', '', '', a.code || '', '', a.subject || '', '', a.overall, '']); });
+  rows.push([]); rows.push(['Summary','Grade','Item / Indicator','Text','f4 (or f5 first)','','','N','WM','Interpretation']);
+  const sum = (part, g, n, t, vals, top, scale) => { const q = vfFreq(vals, top); const ks = []; for (let k = top; k >= 1; k--) ks.push(q.f[k]); rows.push([part, g, n, t, ks.join(' / '), '', '', q.n, q.wm == null ? '' : q.wm.toFixed(2), vfInterp(q.wm, scale)]); };
+  VF_GRADES.forEach(g => VF.items[g].forEach((foc, i) => sum('A', g, i+1, foc, vaItems(g, i).map(r => r.rating), 4, VF.partA.scale)));
+  VF_GRADES.forEach(g => VF.partB.groups.forEach(gr => gr.items.forEach(([id, t]) => sum('B', g, vfNumber(id), t, vaGrades(g).map(r => (r.ratings||{})[id]), 4, VF.criterion))));
+  VF.partC.items.forEach(([id, t]) => sum('C', '', vfNumber(id), t, vaForms().map(f => ((f.partC||{}).ratings||{})[id]), 4, VF.criterion));
+  VF.acceptability.items.forEach(([id, n]) => sum('Acceptability', '', n, '', vaAccepts().map(f => (f.acceptability.ratings||{})[id]), 5, VF.acceptability.scale));
+  downloadCSV('expert-validation.csv', rows);
+}
+function exportValidationLegacy(){
+  const rows = [['Validator','Grade','Scenario #','Rating (0-5)','Comment','Updated']];
+  valReviewsCache.forEach(r => rows.push([r.validatorName || r.validatorId, r.grade, r.idx+1, r.rating, r.comment || '', r.updatedAt || '']));
+  downloadCSV('earlier-star-ratings.csv', rows);
 }
 
 // ═══ ITEM ANALYSIS ═══
@@ -536,9 +638,11 @@ function watchAll(){
   db.collection('validators').onSnapshot(snap => {
     validatorsCache = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderAll();
   }, fail('validators (update firestore.rules)', 'va-notice'));
-  db.collection('validationReviews').onSnapshot(snap => {
-    valReviewsCache = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderAll();
-  }, fail('validation reviews (update firestore.rules)', 'va-notice'));
+  const vWatch = (col, set) => db.collection(col).onSnapshot(snap => { set(snap.docs.map(d => ({ id: d.id, ...d.data() }))); renderAll(); }, fail(`${col} (update firestore.rules)`, 'va-notice'));
+  vWatch('validationItems', v => { vItemsCache = v; });
+  vWatch('validationGrades', v => { vGradesCache = v; });
+  vWatch('validationForms', v => { vFormsCache = v; });
+  vWatch('validationReviews', v => { valReviewsCache = v; });
   // Older rules may only let the admin list *active* sessions; fall back to that.
   const setSessions = snap => {
     sessionsCache = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => toMillis(b.createdAt) - toMillis(a.createdAt));

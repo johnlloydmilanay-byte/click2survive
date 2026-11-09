@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/dashboard.css?v=20261108val">
+<link rel="stylesheet" href="css/dashboard.css?v=20261109form">
 </head>
 <body data-app="Click to Survive Admin">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -193,32 +193,43 @@
 
       <!-- ══ VALIDATION ══ -->
       <section class="view" data-view="validation" aria-labelledby="va-h">
-        <div class="page-head"><div><h2 id="va-h">Scenario validation</h2><p>Results from content validators. Each validator logs in with their name, plays every scenario with the answer key shown, then rates it 0–5 stars and writes feedback.</p></div>
-          <div class="row"><button class="btn secondary" onclick="exportValidation()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>CSV of all feedback</button></div></div>
+        <div class="page-head"><div><h2 id="va-h">Expert validation</h2><p>Results of the Expert Validation Form and the Acceptability Evaluation Tool. Ratings are summarized using weighted mean.</p></div>
+          <div class="row"><button class="btn secondary" onclick="exportValidation()"><i class="bi bi-filetype-csv" aria-hidden="true"></i>CSV</button><button class="btn primary" onclick="printValidationSummary()"><i class="bi bi-printer" aria-hidden="true"></i>Print summary</button></div></div>
         <div class="notice warn" id="va-notice" role="alert" style="display:none"></div>
+        <div class="toolbar"><div class="field"><label for="va-scope">Include</label><select id="va-scope" onchange="renderValidation()"><option value="submitted">Submitted forms only</option><option value="all">All responses, including in progress</option></select></div></div>
         <div class="stat-row" id="va-stats"></div>
         <section class="panel flush" aria-labelledby="va-v-h">
           <div class="panel-h"><h3 id="va-v-h"><i class="bi bi-people" aria-hidden="true"></i>Validators</h3></div>
-          <div class="table-wrap">
-            <table>
-              <caption class="sr-only">Validators</caption>
-              <thead><tr><th scope="col">Validator</th><th scope="col" style="min-width:170px">Progress</th><th scope="col">Average rating</th><th scope="col" class="num">Not finished</th><th scope="col">Last active</th><th scope="col">Status</th></tr></thead>
-              <tbody id="va-validators"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
-            </table>
-          </div>
+          <div class="table-wrap"><table>
+            <caption class="sr-only">Validators and their progress</caption>
+            <thead><tr><th scope="col">Validator</th><th scope="col" style="min-width:130px">Part A items</th><th scope="col" class="num">Part B sets</th><th scope="col" class="num">Learner checks</th><th scope="col" class="num">Part C</th><th scope="col">Recommendation</th><th scope="col">Acceptability</th><th scope="col">Status</th></tr></thead>
+            <tbody id="va-validators"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
+          </table></div>
         </section>
-        <section class="panel flush" aria-labelledby="va-s-h">
-          <div class="panel-h"><h3 id="va-s-h"><i class="bi bi-list-stars" aria-hidden="true"></i>Results per scenario</h3>
-            <div class="toolbar" style="margin:0"><div class="field"><label for="va-grade">Grade</label><select id="va-grade" data-grade-select onchange="renderValidation()"><option value="">All grades</option><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div>
-            <div class="field"><label for="va-sort">Sort</label><select id="va-sort" onchange="renderValidation()"><option value="order">Grade &amp; number</option><option value="low">Lowest rated first</option><option value="high">Highest rated first</option></select></div></div></div>
-          <div class="table-wrap">
-            <table>
-              <caption class="sr-only">Validation results per scenario</caption>
-              <thead><tr><th scope="col">Grade</th><th scope="col" class="num">#</th><th scope="col">Scenario</th><th scope="col">Average</th><th scope="col" class="num">Ratings</th><th scope="col">Range</th><th scope="col">Feedback</th></tr></thead>
-              <tbody id="va-scenarios"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
-            </table>
-          </div>
+        <section class="panel flush" aria-labelledby="va-a-h">
+          <div class="panel-h"><h3 id="va-a-h"><i class="bi bi-list-check" aria-hidden="true"></i>Part A · Item relevance</h3>
+            <div class="toolbar" style="margin:0"><div class="field"><label for="va-grade-a">Grade</label><select id="va-grade-a" onchange="renderValidation()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div></div></div>
+          <div class="table-wrap" id="va-a"></div>
         </section>
+        <section class="panel flush" aria-labelledby="va-b-h">
+          <div class="panel-h"><h3 id="va-b-h"><i class="bi bi-clipboard-check" aria-hidden="true"></i>Part B · Grade-level item set</h3>
+            <div class="toolbar" style="margin:0"><div class="field"><label for="va-grade-b">Grade</label><select id="va-grade-b" onchange="renderValidation()"><optgroup label="Junior High School"><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option><option value="10">Grade 10</option></optgroup><optgroup label="Senior High School"><option value="11">Grade 11</option><option value="12">Grade 12</option></optgroup></select></div></div></div>
+          <div class="table-wrap" id="va-b"></div>
+        </section>
+        <section class="panel flush" aria-labelledby="va-c-h">
+          <div class="panel-h"><h3 id="va-c-h"><i class="bi bi-window-sidebar" aria-hidden="true"></i>Part C · Web-based simulation</h3></div>
+          <div class="table-wrap" id="va-c"></div>
+        </section>
+        <div class="grid g-2">
+          <section class="panel" aria-labelledby="va-r-h"><div class="panel-h"><h3 id="va-r-h"><i class="bi bi-award" aria-hidden="true"></i>Overall recommendation</h3></div><div id="va-rec"></div></section>
+          <section class="panel" aria-labelledby="va-ch-h"><div class="panel-h"><h3 id="va-ch-h"><i class="bi bi-ui-checks" aria-hidden="true"></i>Learner-view checks</h3></div><div id="va-checks"></div></section>
+        </div>
+        <section class="panel flush" aria-labelledby="va-e-h">
+          <div class="panel-h"><h3 id="va-e-h"><i class="bi bi-hand-thumbs-up" aria-hidden="true"></i>Acceptability Evaluation Tool</h3></div>
+          <div class="table-wrap" id="va-acc"></div>
+        </section>
+        <p class="dim" id="va-how"></p>
+        <div id="va-legacy"></div>
       </section>
 
       <!-- ══ ITEM ANALYSIS ══ -->
@@ -336,13 +347,13 @@
   </div>
 </div>
 
-<!-- Validation: one validator's ratings, or every rating of one scenario -->
+<!-- Validation: one validator's signed form, or the comments on one row -->
 <div class="modal-overlay" id="va-modal" style="display:none">
   <div class="modal-card wide" role="dialog" aria-modal="true" aria-labelledby="vam-title" tabindex="-1">
     <div class="modal-head">
       <div><h2 id="vam-title">Validation</h2><div class="modal-sub" id="vam-sub"></div></div>
       <div class="row">
-        <button class="btn danger" id="vam-del" style="display:none"><i class="bi bi-trash" aria-hidden="true"></i>Remove validator</button>
+        <span class="row" id="vam-actions"></span>
         <button class="icon-btn" onclick="closeModal('va-modal')" aria-label="Close dialog"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -383,10 +394,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js"></script>
-<script src="js/session.js?v=20261108val"></script>
-<script src="js/game-data.js?v=20261108val"></script>
+<script src="js/session.js?v=20261109form"></script>
+<script src="js/game-data.js?v=20261109form"></script>
 <script src="js/dash-common.js?v=20261108shs"></script>
 <script src="js/report-pdf.js?v=20261020rep3"></script>
-<script src="js/superadmin.js?v=20261108val"></script>
+<script src="js/validation-form.js?v=20261109form"></script>
+<script src="js/superadmin.js?v=20261109form"></script>
 </body>
 </html>
