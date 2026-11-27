@@ -511,7 +511,7 @@ function printValidationSummary(){
 function exportValidation(){
   const rows = [['Part','Grade','Item / Indicator','Text','Validator','Position','School','Rating','Comment','Note']];
   const who = id => { const f = vaFormOf(id); return [vaName(id), f.position || '', f.school || '']; };
-  VF_GRADES.forEach(g => VF.items[g].forEach((foc, i) => vaItems(g, i).forEach(r => rows.push(['A', g, i+1, foc, ...who(r.validatorId), r.rating, r.comment || '', [r.noConcept ? 'Correct answer possible without the concept' : '', r.completed === false ? 'Simulation not executed to the end' : ''].filter(Boolean).join('; ')]))));
+  VF_GRADES.forEach(g => VF.items[g].forEach((foc, i) => vaItems(g, i).forEach(r => rows.push(['A', g, i+1, foc, ...who(r.validatorId), r.rating, r.comment || '', r.noConcept ? 'Correct answer possible without the concept' : '']))));
   VF_GRADES.forEach(g => vaGrades(g).forEach(r => {
     VF.partB.groups.forEach(gr => gr.items.forEach(([id, t]) => { if ((r.ratings||{})[id]) rows.push(['B', g, vfNumber(id), t, ...who(r.validatorId), r.ratings[id], (r.comments||{})[id] || '', '']); }));
     if (r.general) rows.push(['B general', g, '', 'General Comments and Suggestions', ...who(r.validatorId), '', r.general, '']);

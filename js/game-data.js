@@ -172,13 +172,13 @@ const GRADES = {
                 "Nag-aantos an laagan, ini boot-sabihon na naghihiro nin marikas an tubig; kaipong rumayo kan estudyante sa kali.",
                 "Mas nagigin hababaw an tubig kaya puwede ining agihan kan mga estudyante.",
                 "Pinundo kan hayakpit na parte kan kali an paghiro nin tubig-baha."],
-       fb:"The increasing speed of the container indicates acceleration and faster-moving floodwater. The learner should stay away from the narrow drainage channel.",
-       fb_bi:"An nagdadakulang rikas kan lalagan nagpapahiling nin pagparikas asin mas marikas na paghiro kan tubig baha. An estudyante dapat na magrayo sa hayakpit na agihan nin kanal.",
+       fb:"The increasing speed of the container indicates acceleration and faster-moving floodwater. The learner should stay away from the narrow drainage channel because the fast-moving water can push the learner off balance, sweep the learner into the channel, and carry debris that may hit the learner.",
+       fb_bi:"An nagdadakulang rikas kan lalagan nagpapahiling nin pagparikas asin mas marikas na paghiro kan tubig baha. An estudyante dapat na magrayo sa hayakpit na agihan nin kanal huli ta an marikas na tubig puwedeng makapatumba sa estudyante, maanod siya pasiring sa kanal, asin puwede siyang matamaan kan mga inaanod na bagay.",
        // Physics explanation: the consolidated version with Bikol (Physics_Explanations.docx)
        phy_title:"Acceleration of a Floating Container",
-       phy:"Acceleration is the change in velocity per unit time, a = Δv/Δt. As the container's speed rises in the narrow channel, it has nonzero acceleration. Its motion suggests a faster local current; the learner should keep away from the channel.",
-       phy_html:"Acceleration is the change in velocity per unit time, a = Δv/Δt. As the container's speed rises in the narrow channel, it has nonzero acceleration. Its motion suggests a faster local current; the learner should keep away from the channel.",
-       phy_bi_html:"An acceleration iyo an pagbabago kan velocity kada oras, a = Δv/Δt. Kun nagririkas an laagan sa hayakpit na kali, may acceleration ini. Nagpapahiling ini nin mas marikas na bulos; dapat magrayo sa kali.",
+       phy:"Acceleration is the change in velocity per unit time, a = Δv/Δt. As the container's speed rises in the narrow channel, it has nonzero acceleration. Its motion suggests a faster local current; the learner should keep away from the channel because fast-moving water can knock a person off balance and sweep them in.",
+       phy_html:"Acceleration is the change in velocity per unit time, a = Δv/Δt. As the container's speed rises in the narrow channel, it has nonzero acceleration. Its motion suggests a faster local current; the learner should keep away from the channel because fast-moving water can knock a person off balance and sweep them in.",
+       phy_bi_html:"An acceleration iyo an pagbabago kan velocity kada oras, a = Δv/Δt. Kun nagririkas an laagan sa hayakpit na kali, may acceleration ini. Nagpapahiling ini nin mas marikas na bulos; dapat magrayo sa kali huli ta an marikas na tubig puwedeng makapatumba asin makaanod sa tawo.",
        live:[{l:"Channel",v:"Narrowing",s:"risky"},{l:"Container speed",v:"Increasing",s:"unsafe"},{l:"Floodwater",v:"Moving faster",s:"unsafe"}],
        mission:"Stay away from the drainage channel — walk to the safe spot"},
 

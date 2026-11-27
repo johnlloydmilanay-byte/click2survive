@@ -168,16 +168,24 @@ function jFlowerpot(scen){
   const hLine = new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,1,6), new THREE.MeshBasicMaterial({color:0xfacc15, toneMapped:false})); scene.add(hLine);
   const lh = g7Label('h', {size:.65, fg:'#fde047'}); scene.add(lh);
   const lu = g7Label('High up: PE = mgh (large h)', {size:.66, fg:'#fde047', border:'#facc15'}); scene.add(lu);
+  // Red arrow pointing down at the pot so its place on the ledge is easy to spot.
+  const potArrow = g7Arrow(0xdc2626, .6, .11); potArrow.rotation.z = -Math.PI/2; scene.add(potArrow);
+  const potTag = g7Label('FLOWERPOT', {size:.5, fg:'#fff', bg:'rgba(185,28,28,.95)', border:'#ef4444'}); scene.add(potTag);
   // The learner lifts the pot down and sets it on the low crate (Take Control steps below);
   // until then it rocks on the ledge in the gusts.
-  let state = 'ledge';
+  let state = 'ledge', inControl = false;
   const p = new THREE.Vector3();
   animCallbacks.push((t)=>{
     if(state === 'ledge') pot.rotation.set(0, 0, -(Math.sin(t*2.6)*.09 + Math.max(0, Math.sin(t*1.3))*.08));
     pot.getWorldPosition(p);
     hLine.position.set(p.x+.5, p.y/2, p.z); hLine.scale.y = Math.max(.01, p.y);
-    lh.position.set(p.x+.8, p.y/2, p.z); lu.position.set(p.x, p.y+1.5, p.z);
-    zone.visible = zoneTag.visible = state === 'ledge';
+    lh.position.set(p.x+.8, p.y/2, p.z);
+    const onLedge = state === 'ledge', bob = Math.abs(Math.sin(t*3))*.18;
+    potArrow.visible = potTag.visible = onLedge && !inControl;   // in Take Control the yellow task marker points at it
+    potArrow.position.set(p.x, p.y + 2.15 + bob, p.z);     // tip (1.14 below) just above the leaves
+    potTag.position.set(p.x, p.y + 2.5 + bob, p.z);
+    lu.position.set(p.x, p.y + (onLedge && !inControl ? 3.05 : 1.5), p.z);
+    zone.visible = zoneTag.visible = onLedge;
   });
   g7SafePad(-17,-5.5,'SAFE SPOT');
   g7Human(-9,-3.5, 0x1e3a8a); humanGroup.rotation.y = -Math.PI/2;
@@ -187,7 +195,7 @@ function jFlowerpot(scen){
   G7 = { bounds:[-19,-6.4,-9,9], camOff:[-6,5,-3],
     hazards:[{test:(x,z)=> Math.hypot(x-(WX+1.2), z-(WZ-1.4)) < 2.6 || (Math.abs(x-WX) < 2 && Math.abs(z-WZ-.6) < 1), msg:'⚠ Don’t stand under the ledge — the pot could fall here!'}],
     // The decision is something to DO: take the pot down before the wind gets stronger.
-    onControl(){ G7.hazards = [wallBody, crateBody]; },
+    onControl(){ G7.hazards = [wallBody, crateBody]; inControl = true; },
     tasks:[
       {at:[WX+1.2, WZ-.96], face:[WX+1.2, WZ-.15], act:'✋ Lift the pot down', obj:pot, short:'Lift the flowerpot down from the ledge', text:'Stand in front of the ledge and lift the flowerpot down',
        done:'Pot lifted down — carry it with both hands',

@@ -584,7 +584,7 @@ const XV = (()=>{
       S(.6, 'Floodwater carries the container along the drainage channel.'),
       S(3, 'Where the channel narrows, the same water squeezes through a smaller gap, so it flows faster.'),
       S(4.8, 'The container’s speed keeps increasing — it is accelerating (a = Δv/Δt > 0).'),
-      S(5.6, 'Faster water pushes harder: stay away from the channel.')] };
+      S(5.6, 'Stay away from the channel, because the faster water pushes harder and can sweep a person in.')] };
   }
 
   // Motion map of an object speeding up on land (G8 #2 roofing sheet).

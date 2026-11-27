@@ -148,8 +148,7 @@ function vfFormHTML(d){
     h += `<h3>${vfEsc(vfPartALabel(g))}</h3><table><tr><th class="c">Item</th><th>Item Focus</th>${head4}<th>Comments or Required Revision</th></tr>` +
       VF.items[g].map((foc,i)=>{ const r = d.itemOf(g,i) || {};
         const note = r.noConcept ? '<div class="warn">Noted: learners can choose the correct answer without applying the concept.</div>' : '';
-        const stop = r.played && r.completed === false ? '<div class="warn">Simulation not executed to the end.</div>' : '';
-        return `<tr><td class="c">${i+1}</td><td>${vfEsc(foc)}</td>${[4,3,2,1].map(k=>`<td class="c">${vfBox(r.rating,k)}</td>`).join('')}<td>${vfEsc(r.comment||'')}${note}${stop}</td></tr>`; }).join('') + '</table>';
+        return `<tr><td class="c">${i+1}</td><td>${vfEsc(foc)}</td>${[4,3,2,1].map(k=>`<td class="c">${vfBox(r.rating,k)}</td>`).join('')}<td>${vfEsc(r.comment||'')}${note}</td></tr>`; }).join('') + '</table>';
   });
   h += `<h2 class="pg">${vfEsc(VF.partB.title)}</h2><p><b>Directions:</b> ${vfEsc(VF.partB.directions)}</p>${scale(VF.criterion)}`;
   VF_GRADES.forEach(g => {
