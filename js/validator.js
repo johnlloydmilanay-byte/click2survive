@@ -30,10 +30,21 @@ const vPartBCount = g => VF_PART_B_IDS.filter(id => (vGrade(g).ratings || {})[id
 const vPartBDone = g => vPartBCount(g) >= VF_PART_B_TOTAL;
 const vCheckDone = g => !!vGrade(g).check;
 const vGradeDone = g => vPartADone(g) && vPartBDone(g) && vCheckDone(g);
-const vChecksAll = () => VAL_GRADES.every(vCheckDone);
 const vPartCCount = () => VF.partC.items.filter(([id]) => ((VAL.form.partC || {}).ratings || {})[id]).length;
 const vPartCDone = () => vPartCCount() >= VF.partC.items.length;
-const vReadyToSign = () => VAL_GRADES.every(vGradeDone) && vPartCDone();
+const vAllGradesDone = () => VAL_GRADES.every(vGradeDone);
+// Part C is open to every validator (some evaluate only the simulation); the form can be
+// signed once Part C is rated, and the sign page lists any grade-level parts left empty.
+const vReadyToSign = () => vPartCDone();
+function vMissingParts(){
+  const out = [];
+  VAL_GRADES.forEach(g => { const m = [];
+    if(!vPartADone(g)) m.push(`Part A ${vRated(g)}/6`);
+    if(!vPartBDone(g)) m.push(`Part B ${vPartBCount(g)}/${VF_PART_B_TOTAL}`);
+    if(!vCheckDone(g)) m.push('learner check');
+    if(m.length) out.push(`Grade ${g}: ${m.join(', ')}`); });
+  return out;
+}
 const vAcceptDone = () => !!(VAL.form.acceptability || {}).submitted;
 
 async function valLoad(){
@@ -98,7 +109,7 @@ function valShowHub(grade){
 function vHome(){
   const started = Object.keys(VAL.items).length > 0;
   const done = VAL_GRADES.filter(vGradeDone).length, rated = VAL_GRADES.reduce((n, g) => n + vRated(g), 0);
-  const stepC = vChecksAll(), stepSign = vReadyToSign();
+  const checks = VAL_GRADES.filter(vCheckDone).length, stepSign = vReadyToSign();
   const pct = (rated + VAL_GRADES.filter(vPartBDone).length + VAL_GRADES.filter(vCheckDone).length + (vPartCDone() ? 1 : 0) + (vLocked() ? 1 : 0)) / (VF_ITEM_TOTAL + 14) * 100;
   return `<div class="val-top"><div>
       <div class="menu-eyebrow">Expert validation · All grade levels</div>
@@ -120,11 +131,11 @@ function vHome(){
         <div class="vg-parts">${vTick(vPartADone(g), `Part A ${vRated(g)}/6`)}${vTick(vPartBDone(g), `Part B ${vPartBCount(g)}/${VF_PART_B_TOTAL}`)}${vTick(vCheckDone(g), 'Check')}</div>
         <div class="vg-bar"><i style="width:${(vRated(g) + vPartBCount(g) + (vCheckDone(g) ? 1 : 0)) / (6 + VF_PART_B_TOTAL + 1) * 100}%"></i></div></button>`; }).join('')}</div>
     <h2 class="vf-step"><span>2</span>${vfEsc(VF.partC.title)} <small>completed once</small></h2>
-    <button class="vf-card ${vPartCDone() ? 'full' : ''}" ${stepC ? '' : 'disabled'} onclick="valGo('partc')"><b>${vPartCDone() ? '✓ Part C rated' : stepC ? `Rate the simulation (${vPartCCount()}/${VF.partC.items.length})` : '🔒 Part C'}</b>
-      <span>${stepC ? vfEsc(VF.partC.note) : `Unlocks after the learner check of all six grade levels (${VAL_GRADES.filter(vCheckDone).length}/6 done).`}</span></button>
+    <button class="vf-card ${vPartCDone() ? 'full' : ''}" onclick="valGo('partc')"><b>${vPartCDone() ? '✓ Part C rated' : `Rate the simulation (${vPartCCount()}/${VF.partC.items.length})`}</b>
+      <span>${vfEsc(VF.partC.note)}${checks < 6 ? ` Open to every validator; if you are also checking the grade sets, their learner checks help here (${checks}/6 done).` : ''}</span></button>
     <h2 class="vf-step"><span>3</span>Overall recommendation and signature</h2>
     <button class="vf-card ${vLocked() ? 'full' : ''}" ${stepSign || vLocked() ? '' : 'disabled'} onclick="valGo('${vLocked() ? 'review' : 'sign'}')"><b>${vLocked() ? '✓ Form submitted' : stepSign ? 'Review, sign and submit your form' : '🔒 Sign and submit'}</b>
-      <span>${vLocked() ? `Signed ${vfEsc(VAL.form.date || '')}. View or print your copy.` : stepSign ? 'Your ratings and comments can still be changed until you submit.' : 'Unlocks after Parts A, B and C are complete.'}</span></button>
+      <span>${vLocked() ? `Signed ${vfEsc(VAL.form.date || '')}. View or print your copy.` : stepSign ? (vAllGradesDone() ? 'Your ratings and comments can still be changed until you submit.' : 'Part C is complete. Any grade-level parts you leave empty stay blank on your form.') : 'Unlocks once Part C is rated.'}</span></button>
     <h2 class="vf-step"><span>4</span>${vfEsc(VF.acceptability.title)}</h2>
     <button class="vf-card ${vAcceptDone() ? 'full' : ''}" ${vLocked() ? '' : 'disabled'} onclick="valGo('accept')"><b>${vAcceptDone() ? '✓ Acceptability evaluation submitted' : vLocked() ? 'Evaluate the acceptability of the simulation' : '🔒 Acceptability evaluation'}</b>
       <span>${vLocked() ? 'Your evaluation after using the web-based simulation.' : 'Opens after you submit the validation form.'}</span></button>`;
@@ -326,6 +337,7 @@ function vSignPage(){
   const F = VAL.form;
   return `${vHeadRow('Review, sign and submit', 'Check your whole form below. Your answers can still be changed until you submit.', vBack('Validation form', "valGo('home')"))}
     <section class="vf-sec"><h3>Change an answer</h3><div class="vf-chips">${VAL_GRADES.map(g => `<button class="vl-back" onclick="valGo('grade',${g})">Grade ${g}</button>`).join('')}<button class="vl-back" onclick="valGo('partc')">Part C</button></div></section>
+    ${vMissingParts().length ? `<section class="vf-sec"><div class="vf-alert warn">Not filled in yet — these stay blank on your signed form:<br>${vMissingParts().map(vfEsc).join('<br>')}</div><p class="vf-dir">If you are evaluating only the simulation (Part C), you can still submit.</p></section>` : ''}
     <section class="vf-sec"><h3>Your form</h3><div class="vf-copy">${vFormCopy()}</div></section>
     <section class="vf-sec"><h3>Overall Recommendation</h3><div class="vf-recs">${VF.recommendations.map((t, i) => `<label class="vf-rec"><input type="radio" name="rec" value="${i}"${F.recommendation === t ? ' checked' : ''} onchange="valField('recommendation',VF.recommendations[this.value])"><span>${vfEsc(t)}</span></label>`).join('')}</div>
       <div class="vf-grid2"><div><label class="vf-lab">Validator’s Name</label><input class="vf-in" type="text" value="${vfEsc(VALIDATOR.name)}" disabled></div>
@@ -344,7 +356,9 @@ async function valSubmitForm(){
   if(!String(F.school || '').trim()) return fail('Enter your school.');
   if(!date) return fail('Enter the date.');
   if(!VAL.sig || VAL.sig.empty()) return fail('Please sign the form.');
-  if(!confirm('Submit your signed validation form? Your ratings will be locked. Only the Super Admin can reopen it.')) return;
+  if(!vPartCDone()) return fail('Rate all Part C indicators first.');
+  const left = vMissingParts().length ? ' Parts you have not filled in will stay blank.' : '';
+  if(!confirm('Submit your signed validation form? Your ratings will be locked. Only the Super Admin can reopen it.' + left)) return;
   document.getElementById('s-btn').disabled = true; msg.className = 'vr-msg'; msg.textContent = 'Submitting…';
   try{
     await vFlush();
