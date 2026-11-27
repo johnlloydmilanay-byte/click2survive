@@ -366,7 +366,8 @@ async function valSubmitForm(){
     await vSaveForm(fields);
     Object.assign(VAL.form, fields);
     AudioSysSafe('fanfare');
-    valGo('accept');
+    vSuccess('Validation form submitted', 'Thank you! Your signed Expert Validation Form was submitted successfully. You can view or print your copy from the homepage.',
+      'Next: the Acceptability Evaluation Tool is now open on the homepage.');
   }catch(e){ fail('Could not submit: ' + e.message); document.getElementById('s-btn').disabled = false; }
 }
 function vReviewPage(){
@@ -412,8 +413,27 @@ async function valSubmitAccept(){
     await vSaveForm({ acceptability:done });
     VAL.form.acceptability = done;
     AudioSysSafe('fanfare');
-    valGo('home');
+    vSuccess('Acceptability evaluation submitted', 'Thank you! Your Acceptability Evaluation was submitted successfully.', 'Your validation is complete.');
   }catch(e){ fail('Could not submit: ' + e.message); document.getElementById('a-btn').disabled = false; }
+}
+
+// Success message after a submit; its button (or Esc / tapping outside) goes to the homepage.
+function vSuccess(title, text, next){
+  const old = document.getElementById('val-ok'); if(old) old.remove();
+  const m = document.createElement('div');
+  m.id = 'val-ok'; m.className = 'val-ok';
+  m.innerHTML = `<div class="val-ok-card" role="alertdialog" aria-modal="true" aria-labelledby="val-ok-t" aria-describedby="val-ok-d">
+      <div class="val-ok-ico" aria-hidden="true">✓</div>
+      <h2 id="val-ok-t">${vfEsc(title)}</h2>
+      <p id="val-ok-d">${vfEsc(text)}</p>${next ? `<p class="val-ok-next">${vfEsc(next)}</p>` : ''}
+      <button type="button" class="vr-btn primary" id="val-ok-btn">Go to homepage</button></div>`;
+  const close = () => { document.removeEventListener('keydown', onKey); m.remove(); valGo('home'); };
+  const onKey = e => { if(e.key === 'Escape' || e.key === 'Enter'){ e.preventDefault(); close(); } };
+  m.addEventListener('click', e => { if(e.target === m) close(); });
+  m.querySelector('#val-ok-btn').onclick = close;
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(m);
+  m.querySelector('#val-ok-btn').focus();
 }
 
 // ── Signature pad ──
